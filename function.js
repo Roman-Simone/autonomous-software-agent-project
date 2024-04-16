@@ -1,10 +1,43 @@
 
+function printMap(width, height, map){
+    console.log("map:");
+    for (let j = height - 1; j >= 0; j--) {
+        let row = "";
+        for (let i = 0; i < width; i++) {
+            row += map[i][j] + " ";
+        }
+        console.log(row);
+    }
+}
+
+export function from_json_to_matrix(width, height, tiles, map){
+    var map = [];
+    for (let i = 0; i < width; i++) {
+        map[i] = [];
+        for (let j = 0; j < height; j++) {
+            map[i][j] = 0;                                       // '0' are blocked tiles (empty or not_tile)
+            for(let k=0; k<tiles.length; k++){
+                if(tiles[k].x == i && tiles[k].y == j){
+                    map[i][j] = 3;                               // '3' are walkable non-spawning tiles 
+                    if (tiles[k].parcelSpawner) map[i][j] = 1;   // '1' are walkable spawning tiles  
+                    if (tiles[k].delivery) map[i][j] = 2;        // '2' are delivery tiles
+                }
+            }
+        }
+    }
+
+    printMap(width, height, map);
+    return map;
+}
+
+
+
 function manhattan(me_x1, me_y1, target_x2, target_y2) {
     return Math.abs(me_x1 - target_x2) + Math.abs(me_y1 - target_y2);
 }
 
 
-function analize_cell(me_x, me_y, map){
+export function find_nearest(me_x, me_y, map){
 
     let dist_0 = 1000000;
     let dist_1 = 1000000;
@@ -57,33 +90,3 @@ function analize_cell(me_x, me_y, map){
 }
 
 
-
-async function agentLoop () {
-
-
-    // '0' are blocked tiles (empty or not_tile)
-    // '1' are walkable spawning tiles
-    // '2' are delivery tiles
-    // '3' are walkable non-spawning tiles
-
-    const matrix = [
-        [0, 3, 0, 2, 3, 3, 1, 1],
-        [0, 3, 0, 2, 3, 3, 1, 1],
-        [0, 3, 0, 2, 3, 3, 1, 1],
-        [2, 3, 2, 2, 1, 3, 2, 3],
-        [0, 3, 0, 2, 3, 3, 1, 1],
-        [1, 3, 1, 3, 2, 1, 3, 1]
-    ];
-
-    var me_x = 0;
-    var me_y = 0;
-
-
-
-    var cordinates = analize_cell(me_x, me_y, matrix)
-
-    console.log(cordinates);
-    
-}
-
-agentLoop()

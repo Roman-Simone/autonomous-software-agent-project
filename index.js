@@ -1,61 +1,37 @@
 import { default as config } from "./config.js";
 import { DeliverooApi, timer } from "@unitn-asa/deliveroo-js-client";
+import { from_json_to_matrix } from "./function.js";
+import { find_nearest } from "./function.js";
 
 const client = new DeliverooApi( config.host, config.token )
 client.onConnect( () => console.log( "socket", client.socket.id ) );
 client.onDisconnect( () => console.log( "disconnected", client.socket.id ) );
+var map = [];
 
-client.onTile( (x, y, delivery) => {
-    console.log(x, y, delivery)
+
+await client.onMap( (width, height, tiles) => {
+    console.log('map', width, height, tiles);
+    map = from_json_to_matrix(width, height, tiles, map);
 });
-
-
-client.onMap( (width, height, tiles) => {
-    console.log( 'map', width, height, tiles );
-});
-
 
 async function agentLoop () {
 
-    var previous = 'right'
+    var me_x = 0;
+    var me_y = 0;
 
-    while ( true ) {
+    client.onYou( async ({x, y}) => {
+        console.log('you', x, y);
+        me_x = x;
+        me_y = y;
+        console.log('me_x', me_x, 'me_y', me_y);
+        var try1 = find_nearest(me_x, me_y, map);
 
-        await client.putdown();
-
-        await client.pickup();
-
-        let tried = [];
-
-        while ( tried.length < 4 ) {
-            
-            let current = { up: 'down', right: 'left', down: 'up', left: 'right' }[previous] // backward
-
-            if ( tried.length < 3 ) { // try haed or turn (before going backward)
-                current = [ 'up', 'right', 'down', 'left' ].filter( d => d != current )[ Math.floor(Math.random()*3) ];
-            }
-            
-            if ( ! tried.includes(current) ) {
-                
-                if ( await client.move( current ) ) {
-                    console.log( 'moved', current );
-                    previous = current;
-                    break; // moved, continue
-                }
-                
-                tried.push( current );
-                
-            }
-            
-        }
-
-        if ( tried.length == 4 ) {
-            console.log( 'stucked' );
-            await client.timer(1000); // stucked, wait 1 sec and retry
-        }
+        console.log('try', try1);
+    });
 
 
-    }
+    
+
 }
 
 agentLoop()
