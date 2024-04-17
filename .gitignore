@@ -2,22 +2,22 @@
 node_modules/
 config.js/
 
-# IDE
-.vscode
+# # IDE
+# .vscode
 
-# private folder
-private
+# # private folder
+# private
 
-# Temp
-tmp
-*.tmp
+# # Temp
+# tmp
+# *.tmp
 
-# Logs
-logs
-*.log
+# # Logs
+# logs
+# *.log
 
-# dotenv environment variables file
-.env
+# # dotenv environment variables file
+# .env
 
-# binaries
-bin
+# # binaries
+# bin
