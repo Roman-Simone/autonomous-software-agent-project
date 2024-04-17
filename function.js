@@ -1,3 +1,4 @@
+import PriorityQueue from 'js-priority-queue';
 
 function printMap(width, height, map){
     console.log("map:");
@@ -46,7 +47,7 @@ export function find_nearest(me_x, me_y, map){
 
     let coordinates = [];
     for (var i = 0; i < 4; i++) {
-        coordinates.push([-1, -1]);
+        coordinates.push({ x: -1, y: -1, type: -1});
     }
 
     for (var i = 0; i < map.length; i++) {
@@ -58,25 +59,25 @@ export function find_nearest(me_x, me_y, map){
                 case 0:
                     if(manhattan(me_x, me_y, i, j) < dist_0){
                         dist_0 = manhattan(me_x, me_y, i, j);
-                        coordinates[0] = [i, j];
+                        coordinates[0] = { x: i, y: j, type: 0};
                     }
                     break;
                 case 1:
                     if(manhattan(me_x, me_y, i, j) < dist_1){
                         dist_1 = manhattan(me_x, me_y, i, j);
-                        coordinates[1] = [i, j];
+                        coordinates[1] = { x: i, y: j, type: 1};
                     }
                     break;
                 case 2:
                     if(manhattan(me_x, me_y, i, j) < dist_2){
                         dist_2 = manhattan(me_x, me_y, i, j);
-                        coordinates[2] = [i, j];
+                        coordinates[2] = { x: i, y: j, type: 2};
                     }
                     break;
                 case 3:
                     if(manhattan(me_x, me_y, i, j) < dist_3){
                         dist_3 = manhattan(me_x, me_y, i, j);
-                        coordinates[3] = [i, j];
+                        coordinates[3] = { x: i, y: j, type: 3};
                     }
                     break;
                 default:
@@ -89,4 +90,61 @@ export function find_nearest(me_x, me_y, map){
     return coordinates;
 }
 
+export function findPath_BFS(startX, startY, endX, endY, map) {
+    const visited = new Set();
+    const queue = [];
+    const path = [];
 
+    queue.push({ x: startX, y: startY, pathSoFar: [] });
+    visited.add(`${startX},${startY}`);
+
+    while (queue.length > 0) {
+        const { x, y, pathSoFar } = queue.shift();
+
+        if (x === endX && y === endY) {
+            // Found the end point, return the path
+            return [...pathSoFar, { x: endX, y: endY }]; // Include the end point in the path
+        }
+
+        const neighbors = getNeighbors(x, y, map);
+        for (const neighbor of neighbors) {
+            const { x: neighborX, y: neighborY } = neighbor;
+
+            if (!visited.has(`${neighborX},${neighborY}`)) {
+                visited.add(`${neighborX},${neighborY}`);
+                queue.push({ x: neighborX, y: neighborY, pathSoFar: [...pathSoFar, { x, y }] });
+            }
+        }
+    }
+
+    // If no path is found, return an empty array
+    return [];
+}
+
+function getNeighbors(x, y, map) {
+    const neighbors = [];
+    const directions = [
+        { dx: -1, dy: 0 },  // left
+        { dx: 1, dy: 0 },   // right
+        { dx: 0, dy: -1 },  // down
+        { dx: 0, dy: 1 }    // up
+    ];
+
+    for (const direction of directions) {
+        const neighborX = x + direction.dx;
+        const neighborY = y + direction.dy;
+
+        if (isValidPosition(neighborX, neighborY, map)) {
+            neighbors.push({ x: neighborX, y: neighborY });
+        }
+    }
+
+    return neighbors;
+}
+
+function isValidPosition(x, y, map) {
+    const width = map.length;
+    const height = map[0].length;
+
+    return x >= 0 && x < width && y >= 0 && y < height && map[x][y] !== 0;
+}
