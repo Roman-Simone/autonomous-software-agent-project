@@ -28,8 +28,9 @@ async function agentLoop () {
         });
     });
 
-    var try1 = find_nearest(me.x, me.y, map);
-    console.log('try', try1);
+    var try1 = find_nearest(me.x, me.y, map);       // this return a json object with the nearest coordinates and type of tile
+    
+    
 
 }
 

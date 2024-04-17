@@ -46,7 +46,7 @@ export function find_nearest(me_x, me_y, map){
 
     let coordinates = [];
     for (var i = 0; i < 4; i++) {
-        coordinates.push([-1, -1]);
+        coordinates.push({ x: -1, y: -1, type: -1});
     }
 
     for (var i = 0; i < map.length; i++) {
@@ -58,25 +58,25 @@ export function find_nearest(me_x, me_y, map){
                 case 0:
                     if(manhattan(me_x, me_y, i, j) < dist_0){
                         dist_0 = manhattan(me_x, me_y, i, j);
-                        coordinates[0] = [i, j];
+                        coordinates[0] = { x: i, y: j, type: 0};
                     }
                     break;
                 case 1:
                     if(manhattan(me_x, me_y, i, j) < dist_1){
                         dist_1 = manhattan(me_x, me_y, i, j);
-                        coordinates[1] = [i, j];
+                        coordinates[1] = { x: i, y: j, type: 1};
                     }
                     break;
                 case 2:
                     if(manhattan(me_x, me_y, i, j) < dist_2){
                         dist_2 = manhattan(me_x, me_y, i, j);
-                        coordinates[2] = [i, j];
+                        coordinates[2] = { x: i, y: j, type: 2};
                     }
                     break;
                 case 3:
                     if(manhattan(me_x, me_y, i, j) < dist_3){
                         dist_3 = manhattan(me_x, me_y, i, j);
-                        coordinates[3] = [i, j];
+                        coordinates[3] = { x: i, y: j, type: 3};
                     }
                     break;
                 default:
