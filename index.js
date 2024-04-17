@@ -19,18 +19,17 @@ async function agentLoop () {
     var me_x = 0;
     var me_y = 0;
 
-    client.onYou( async ({x, y}) => {
-        console.log('you', x, y);
-        me_x = x;
-        me_y = y;
-        console.log('me_x', me_x, 'me_y', me_y);
-        var try1 = find_nearest(me_x, me_y, map);
-
-        console.log('try', try1);
+    var me = await new Promise(resolve => {
+        client.onYou(({x, y}) => {
+            console.log('you', x, y);
+            me_x = x;
+            me_y = y;
+            resolve({x, y});
+        });
     });
 
-
-    
+    var try1 = find_nearest(me.x, me.y, map);
+    console.log('try', try1);
 
 }
 
