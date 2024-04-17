@@ -11,13 +11,14 @@ const client = new DeliverooApi( config.host, config.token )
 client.onConnect( () => console.log( "socket", client.socket.id ) );
 client.onDisconnect( () => console.log( "disconnected", client.socket.id ) );
 var map = [];
-var nearest_delivery_x = null; 
-var nearest_delivery_y = null; 
+var deliveryCoordinates = [];
 
 
 await client.onMap( (width, height, tiles) => {
     console.log('map', width, height, tiles);
     map = from_json_to_matrix(width, height, tiles, map);
+    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({x: t.x, y: t.y}));
+    console.log("deliveryCoordinates: ", deliveryCoordinates);
 });
 
 async function agentLoop () {
@@ -35,16 +36,6 @@ async function agentLoop () {
         });
     });
 
-    // var try1 = find_nearest(me_x, me_y, map);       // this return a json object with the nearest coordinates and type of tile
-    
-    // console.log("try1: ", try1)
-
-    // nearest_delivery_x = try1[2].x;
-    // nearest_delivery_y = try1[2].y;
-
-    // Calculate the path from current position to nearest delivery position
-    
-    // var path = findPath_BFS(me_x, me_y, nearest_delivery_x, nearest_delivery_y, map);
 
     while(1){
         let scores = [];
@@ -52,6 +43,7 @@ async function agentLoop () {
 
         const start = Date.now();
         const beliefset = new Map();
+        
         var AOD   //MANHATTAN distance
         client.onConfig( config => AOD = client.config.AGENTS_OBSERVATION_DISTANCE)
         var me;
@@ -87,14 +79,36 @@ async function agentLoop () {
         } )
 
         const dist = (a1,a2) => Math.abs(a1.x-a2.x) + Math.abs(a1.y-a2.y)
+        var min_score_parcel_agent = 1000000;
+        var score_parcel_agent = 0;
+
+        const _parcels = new Map();
+
+
         var sensing = await new Promise(resolve => {
             client.onParcelsSensing((parcels) => {
                 console.log('parcels', parcels);
                 for (var i = 0; i < parcels.length; i++) {
-        
+                    if(!_parcels.has(parcels[i].id)){
+                        _parcels.set(parcels[i].id, parcels[i]);
+                    } else {
+                        _parcels.set(parcels[i].id, parcels[i]);
+                    }
+                    for ( let a of beliefset.values() ) {
+                        score_parcel_agent = manhattan(a.x, a.y, parcels[i].x, parcels[i].y)
+                        if (score_parcel_agent < min_score_parcel_agent) {
+                            min_score_parcel_agent = score_parcel_agent;
+                        }
+                    }
+
+                    var intrinsic_score = parcels[i].reward - manhattan(me_x, me_y, parcels[i].x, parcels[i].y) - manhattan(parcels[i].x, parcels[i].y, find_nearest(parcels[i].x, parcels[i].y, map)[2].x, find_nearest(parcels[i].x, parcels[i].y, map)[2].x, find_nearest(parcels[i].x, parcels[i].y, map)[2].y)
+
+                    if(intrinsic_score < 0) continue;
+
+
                     score = {
                         // reward of the parcel - distance from me to the parcel - distance from the parcel to the nearest delivery point
-                        score: parcels[i].reward - manhattan(me_x, me_y, parcels[i].x, parcels[i].y) - manhattan(parcels[i].x, parcels[i].y, find_nearest(parcels[i].x, parcels[i].y, map)[2].x, find_nearest(parcels[i].x, parcels[i].y, map)[2].x, find_nearest(parcels[i].x, parcels[i].y, map)[2].y), 
+                        score: intrinsic_score + min_score_parcel_agent, 
                         x: parcels[i].x, 
                         y: parcels[i].y,
                         x_del: find_nearest(parcels[i].x, parcels[i].y, map)[2].x,
@@ -108,7 +122,7 @@ async function agentLoop () {
                 resolve(parcels);
             });  
         });
-        
+
         console.log("Sono Uscito dal sensing");
         
         if (scores.length > 0){
@@ -127,15 +141,54 @@ async function agentLoop () {
             for (var i = 0; i < path.length; i++) {
                 var next_x = path[i].x;
                 var next_y = path[i].y;
-                
                 if (next_x == me_x + 1) {
                     await client.move('right');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_x == me_x - 1) {
                     await client.move('left');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_y == me_y + 1) {
                     await client.move('up');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_y == me_y - 1) {
                     await client.move('down');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 }
                 me_x = next_x;
                 me_y = next_y;
@@ -150,20 +203,59 @@ async function agentLoop () {
             for (var i = 0; i < path.length; i++) {
                 var next_x = path[i].x;
                 var next_y = path[i].y;
-                
                 if (next_x == me_x + 1) {
                     await client.move('right');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_x == me_x - 1) {
                     await client.move('left');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_y == me_y + 1) {
                     await client.move('up');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_y == me_y - 1) {
                     await client.move('down');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 }
                 me_x = next_x;
                 me_y = next_y;
             }
-            
+
             await client.putdown();
         }else{
             // vado nella delivery più vicina
@@ -171,15 +263,54 @@ async function agentLoop () {
             for (var i = 0; i < path.length; i++) {
                 var next_x = path[i].x;
                 var next_y = path[i].y;
-                
                 if (next_x == me_x + 1) {
                     await client.move('right');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_x == me_x - 1) {
                     await client.move('left');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_y == me_y + 1) {
                     await client.move('up');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 } else if (next_y == me_y - 1) {
                     await client.move('down');
+                    for (let [key, parcel] of _parcels) {
+                        if (parcel.x == next_x && parcel.y == next_y) {
+                            await client.pickup();
+                        }
+                    }
+                    for(let d of deliveryCoordinates){
+                        if(d.x == next_x && d.y == next_y){
+                            await client.putdown();
+                        }
+                    }
                 }
                 me_x = next_x;
                 me_y = next_y;
