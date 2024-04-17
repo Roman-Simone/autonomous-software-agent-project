@@ -1,4 +1,24 @@
+import { default as config } from "./config.js";
 import PriorityQueue from 'js-priority-queue';
+import { DeliverooApi, timer } from "@unitn-asa/deliveroo-js-client";
+const client = new DeliverooApi( config.host, config.token )
+
+
+// export async function best_option(me_x, me_y, map){
+    
+
+//     scores.sort((a, b) => b[0] - a[0]); // Sort scores array in descending order
+//     const best_score = scores[0]; // Assign the first element as the best_score
+//     console.log("best_score: ", best_score);
+
+//     // argmax
+//     return findPath_BFS(me_x, me_y, best_score.x, best_score.y, map);
+// }
+
+export async function move(me_x, me_y, path){
+    
+    return;
+}
 
 function printMap(width, height, map){
     console.log("map:");
@@ -31,9 +51,7 @@ export function from_json_to_matrix(width, height, tiles, map){
     return map;
 }
 
-
-
-function manhattan(me_x1, me_y1, target_x2, target_y2) {
+export function manhattan(me_x1, me_y1, target_x2, target_y2) {
     return Math.abs(me_x1 - target_x2) + Math.abs(me_y1 - target_y2);
 }
 
@@ -88,6 +106,53 @@ export function find_nearest(me_x, me_y, map){
     }
 
     return coordinates;
+}
+
+export function findPath_Astar(startX, startY, endX, endY, map) {
+    const openSet = new PriorityQueue({ comparator: (a, b) => a.f - b.f });
+    const cameFrom = new Map();
+    const gScore = new Map();
+    const fScore = new Map();
+    const path = [];
+
+    openSet.enqueue({ x: startX, y: startY, f: 0 });
+    gScore.set(`${startX},${startY}`, 0);
+    fScore.set(`${startX},${startY}`, manhattan(startX, startY, endX, endY));
+
+    while (!openSet.isEmpty()) {
+        const current = openSet.dequeue();
+        const { x, y } = current;
+
+        if (x === endX && y === endY) {
+            // Reconstruct the path
+            path.push({ x, y });
+            let node = current;
+            while (cameFrom.has(`${node.x},${node.y}`)) {
+                node = cameFrom.get(`${node.x},${node.y}`);
+                path.unshift({ x: node.x, y: node.y });
+            }
+            return path;
+        }
+
+        const neighbors = getNeighbors(x, y, map);
+        for (const neighbor of neighbors) {
+            const { x: neighborX, y: neighborY } = neighbor;
+            const tentativeGScore = gScore.get(`${x},${y}`) + 1;
+
+            if (tentativeGScore < gScore.get(`${neighborX},${neighborY}`) || !gScore.has(`${neighborX},${neighborY}`)) {
+                cameFrom.set(`${neighborX},${neighborY}`, { x, y });
+                gScore.set(`${neighborX},${neighborY}`, tentativeGScore);
+                fScore.set(`${neighborX},${neighborY}`, tentativeGScore + manhattan(neighborX, neighborY, endX, endY));
+
+                if (!openSet.has({ x: neighborX, y: neighborY })) {
+                    openSet.enqueue({ x: neighborX, y: neighborY, f: fScore.get(`${neighborX},${neighborY}`) });
+                }
+            }
+        }
+    }
+
+    // If no path is found, return an empty array
+    return [];
 }
 
 export function findPath_BFS(startX, startY, endX, endY, map) {
@@ -148,3 +213,5 @@ function isValidPosition(x, y, map) {
 
     return x >= 0 && x < width && y >= 0 && y < height && map[x][y] !== 0;
 }
+
+
