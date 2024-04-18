@@ -1,5 +1,7 @@
 # Autonomous Software Agents
 
+This project is based on [Deliveroo.js](https://deliveroojs.onrender.com/) which is a minimalistic parcels delivering web-based game developed specifically for this course and for educational purposes. 
+
 <p align="center">
   <img src="deliveroo.png" alt="Alt text" style="display: block; margin: 0 auto;">
 </p>
