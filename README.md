@@ -1,6 +1,9 @@
 # Autonomous Software Agents
 
-![deliveroo](image_url)
+<center>
+  ![deliveroo](deliveroo.png)  
+</center>
+
 
 The objective of the project is to develop an autonomous software that will play on your behalf, the main goal of the game is earning points by collecting as many parcels as possible and delivering them in the delivery zone.
 
