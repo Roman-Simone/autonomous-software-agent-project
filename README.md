@@ -34,7 +34,6 @@ The project is divided into two main parts.
 </ul>
 
 ## Second Part
-<h2>Second Part</h2>
 <ul>
     <li>Extend the software to include a second autonomous software agent.</li>
     <li>Enable communication between the two agents.</li>
