@@ -1,13 +1,10 @@
-
 import { Agent } from "./agent.js";
 import { client, parcels, distance, me } from "./utils.js";
-
 
 
 /**
  * Beliefset revision loop
  */
-
 function agentLoop() {
     // belief_revision_function()
     // const options = options() // desire pick up parcel p1 or p2
@@ -47,10 +44,9 @@ function agentLoop() {
     }
 }
 client.onParcelsSensing( agentLoop )
-client.onAgentsSensing( agentLoop )
-client.onYou( agentLoop )
+// client.onAgentsSensing( agentLoop )
+// client.onYou( agentLoop )
 
 
 const myAgent = new Agent()
 myAgent.intentionLoop()
-

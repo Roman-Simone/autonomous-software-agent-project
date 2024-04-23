@@ -1,7 +1,7 @@
 import { Intention } from './intention.js';
-
-
 export { Agent };
+
+
 /**
  * Intention execution loop
  */

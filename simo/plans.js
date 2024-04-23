@@ -1,9 +1,9 @@
 
 import { Intention } from './intention.js';
-// import { client } from './index.js';
 import { me, client } from './utils.js';
-
 export { plans};
+
+
 /**
  * Plan library
  */
