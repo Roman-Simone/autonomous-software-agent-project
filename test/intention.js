@@ -1,10 +1,9 @@
-
+import { plans } from './plans.js';
+export { Intention };
 /**
  * Intention
  */
-
-
-export class Intention extends Promise {
+class Intention extends Promise {
 
     #current_plan;
     stop () {
@@ -18,7 +17,6 @@ export class Intention extends Promise {
     #resolve;
     #reject;
 
-
     constructor ( desire, ...args ) {
         var resolve, reject;
         super( async (res, rej) => {
@@ -28,7 +26,6 @@ export class Intention extends Promise {
         this.#reject = reject
         this.#desire = desire;
         this.#args = args;
-        
     }
 
     #started = false;

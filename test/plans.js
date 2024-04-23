@@ -1,6 +1,13 @@
+
+import { Intention } from './intention.js';
+// import { client } from './index.js';
+import { me, client } from './utils.js';
+
+export { plans};
 /**
  * Plan library
  */
+const plans = [];
 
 class Plan {
 
@@ -21,7 +28,7 @@ class Plan {
 
 }
 
-export class GoPickUp extends Plan {
+class GoPickUp extends Plan {
 
     isApplicableTo ( desire ) {
         return desire == 'go_pick_up';
@@ -34,7 +41,7 @@ export class GoPickUp extends Plan {
 
 }
 
-export class BlindMove extends Plan {
+class BlindMove extends Plan {
 
     isApplicableTo ( desire ) {
         return desire == 'go_to';
@@ -83,3 +90,8 @@ export class BlindMove extends Plan {
 
     }
 }
+
+
+
+plans.push( new GoPickUp() )
+plans.push( new BlindMove() )

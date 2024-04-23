@@ -1,9 +1,11 @@
+import { Intention } from './intention.js';
+
+
+export { Agent };
 /**
  * Intention execution loop
  */
-import { Intention } from './intention.js';
-
-export class Agent {
+class Agent {
 
     intention_queue = new Array();
 
