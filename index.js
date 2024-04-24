@@ -37,6 +37,8 @@ async function agentLoop () {
     });
 
 
+    
+
     while(1){
         let scores = [];
         let score = 0;
@@ -79,11 +81,10 @@ async function agentLoop () {
         } )
 
         const dist = (a1,a2) => Math.abs(a1.x-a2.x) + Math.abs(a1.y-a2.y)
-        var min_score_parcel_agent = 1000000;
+        var min_score_parcel_agent = 0;
         var score_parcel_agent = 0;
 
         const _parcels = new Map();
-
 
         var sensing = await new Promise(resolve => {
             client.onParcelsSensing((parcels) => {
@@ -94,6 +95,7 @@ async function agentLoop () {
                     } else {
                         _parcels.set(parcels[i].id, parcels[i]);
                     }
+                    
                     for ( let a of beliefset.values() ) {
                         score_parcel_agent = manhattan(a.x, a.y, parcels[i].x, parcels[i].y)
                         if (score_parcel_agent < min_score_parcel_agent) {
@@ -114,6 +116,7 @@ async function agentLoop () {
                         x_del: find_nearest(parcels[i].x, parcels[i].y, map)[2].x,
                         y_del: find_nearest(parcels[i].x, parcels[i].y, map)[2].y
                     };
+                    
                     
                     console.log("score: ", score);
                     scores.push(score);            
@@ -143,11 +146,7 @@ async function agentLoop () {
                 var next_y = path[i].y;
                 if (next_x == me_x + 1) {
                     await client.move('right');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -155,11 +154,7 @@ async function agentLoop () {
                     }
                 } else if (next_x == me_x - 1) {
                     await client.move('left');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -167,11 +162,7 @@ async function agentLoop () {
                     }
                 } else if (next_y == me_y + 1) {
                     await client.move('up');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -179,11 +170,7 @@ async function agentLoop () {
                     }
                 } else if (next_y == me_y - 1) {
                     await client.move('down');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -205,11 +192,7 @@ async function agentLoop () {
                 var next_y = path[i].y;
                 if (next_x == me_x + 1) {
                     await client.move('right');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -217,11 +200,7 @@ async function agentLoop () {
                     }
                 } else if (next_x == me_x - 1) {
                     await client.move('left');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -229,11 +208,7 @@ async function agentLoop () {
                     }
                 } else if (next_y == me_y + 1) {
                     await client.move('up');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -241,11 +216,7 @@ async function agentLoop () {
                     }
                 } else if (next_y == me_y - 1) {
                     await client.move('down');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -265,11 +236,7 @@ async function agentLoop () {
                 var next_y = path[i].y;
                 if (next_x == me_x + 1) {
                     await client.move('right');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -277,11 +244,7 @@ async function agentLoop () {
                     }
                 } else if (next_x == me_x - 1) {
                     await client.move('left');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -289,11 +252,7 @@ async function agentLoop () {
                     }
                 } else if (next_y == me_y + 1) {
                     await client.move('up');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
@@ -301,11 +260,7 @@ async function agentLoop () {
                     }
                 } else if (next_y == me_y - 1) {
                     await client.move('down');
-                    for (let [key, parcel] of _parcels) {
-                        if (parcel.x == next_x && parcel.y == next_y) {
-                            await client.pickup();
-                        }
-                    }
+                    await client.pickup();
                     for(let d of deliveryCoordinates){
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
