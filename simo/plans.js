@@ -36,7 +36,7 @@ class GoPickUp extends Plan {
     async execute ( {x, y} ) {
         await this.subIntention( 'go_to_BFS', {x, y} );
         await client.pickup()
-        // await this.subIntention( 'go_put_down');
+        //await this.subIntention( 'go_put_down');
     }
 }
 
@@ -47,9 +47,18 @@ class GoPutDown extends Plan {
         }
     
         async execute ( ) {
+            console.log('\n******go_put_down***********\n')
             let nearest_delivery = {x: -1, y: -1};
+            var x = -1;
+            var y = -1;
             nearest_delivery = find_nearest_delivery();
-            await this.subIntention( 'go_to_BFS', {nearest_delivery} );
+            console.log('me', me)
+            
+            // var n_x = nearest_delivery.x;
+            // var n_y = nearest_delivery.y;
+            x = nearest_delivery.x;
+            y = nearest_delivery.y;
+            await this.subIntention( 'go_to_BFS', {x, y} );
             await client.putdown()
         }
     
@@ -113,8 +122,10 @@ class BFS extends Plan {
 
     async execute ( {x, y}) {
         var path = findPath_BFS(x, y);
-
+        // console.log('path', path)
+        
         for (var i = 0; i < path.length; i++) {
+            console.log("son qua")
             var next_x = path[i].x;
             var next_y = path[i].y;
             if (next_x == me.x + 1) {

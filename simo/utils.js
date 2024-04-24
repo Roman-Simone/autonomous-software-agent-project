@@ -4,7 +4,7 @@ export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery}
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk1NzEyOTQyOWM1IiwibmFtZSI6InNpbW8iLCJpYXQiOjE3MTM5NTk4NzF9.GPzudOb7enjtWvmtxF8cR9kPMlScRBjWGbnNQi2tcRc'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMxNmU5MWIyNTAxIiwibmFtZSI6InNpdW0iLCJpYXQiOjE3MTM5NjczNTR9.BkcwiZt0KzFLdUhOziXiduoXOEoosxT6_w8K1N7Q0Z0'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
@@ -32,6 +32,7 @@ function from_json_to_matrix(width, height, tiles, map){
 
 const me = {};
 await client.onYou( ( {id, name, x, y, score} ) => {
+    // console.log('me', {id, name, x, y, score})
     me.id = id
     me.name = name
     me.x = x
@@ -85,7 +86,7 @@ function find_nearest_delivery(){
             nearest_delivery = deliveryCoordinates[i];
         }
     }
-    return nearest_delivery
+    return nearest_delivery;
 }
 
 //* BFS
@@ -120,9 +121,10 @@ function isValidPosition(x, y, map) {
 function findPath_BFS(endX, endY) {
     const visited = new Set();
     const queue = [];
-    const path = [];
 
-
+    // console.log("******* BFSSSSS *********")
+    // console.log('me', me)
+    // console.log('end', endX, endY)
     var startX = me.x;
     var startY = me.y;
 
