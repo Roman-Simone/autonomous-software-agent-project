@@ -36,9 +36,6 @@ async function agentLoop () {
         });
     });
 
-
-    
-
     while(1){
         let scores = [];
         let score = 0;
@@ -265,7 +262,8 @@ async function agentLoop () {
                         if(d.x == next_x && d.y == next_y){
                             await client.putdown();
                         }
-                    }
+                    }const start = Date.now();
+
                 }
                 me_x = next_x;
                 me_y = next_y;
