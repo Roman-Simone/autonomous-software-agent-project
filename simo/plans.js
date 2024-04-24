@@ -1,13 +1,12 @@
 
 import { Intention } from './intention.js';
-import { me, client } from './utils.js';
-export { plans};
+import { me, client, findPath_BFS } from './utils.js';
+export { plans };
 
 
 /**
  * Plan library
  */
-const plans = [];
 
 class Plan {
 
@@ -35,7 +34,7 @@ class GoPickUp extends Plan {
     }
 
     async execute ( {x, y} ) {
-        await this.subIntention( 'go_to', {x, y} );
+        await this.subIntention( 'go_to_BFS', {x, y} );
         await client.pickup()
     }
 
@@ -91,7 +90,32 @@ class BlindMove extends Plan {
     }
 }
 
+class BFS extends Plan {
+    isApplicableTo ( desire ) {
+        return desire == 'go_to_BFS';
+    }
 
+    async execute ( {x, y}) {
+        var path = findPath_BFS(x, y);
+
+        for (var i = 0; i < path.length; i++) {
+            var next_x = path[i].x;
+            var next_y = path[i].y;
+            if (next_x == me.x + 1) {
+                await client.move('right');
+            } else if (next_x == me.x - 1) {
+                await client.move('left');
+            } else if (next_y == me.y + 1) {
+                await client.move('up');
+            } else if (next_y == me.y - 1) {
+                await client.move('down');
+            }
+        }
+    }
+}
+
+const plans = [];
 
 plans.push( new GoPickUp() )
 plans.push( new BlindMove() )
+plans.push( new BFS() )

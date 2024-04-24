@@ -10,6 +10,7 @@ function agentLoop() {
     // const options = options() // desire pick up parcel p1 or p2
     // const selected = select(options) // p1 is closer!
     // intention_queue.push( [ selected.intention, selected.args ] );
+    
     const options = [];
     for (const [id, parcell] of parcels.entries()) {
         if (!parcell.carriedBy) {
@@ -23,6 +24,7 @@ function agentLoop() {
     /**
      * Select best intention
      */
+    
     let best_option;
     let nearest_distance = Number.MAX_VALUE;
     for (const option of options) {
