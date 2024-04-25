@@ -57,7 +57,7 @@ class Intention extends Promise {
         }
 
         this.#reject();
-        console.log('no plan satisfied thedesire ', this.desire, ...this.args);
+        // console.log('no plan satisfied thedesire ', this.desire, ...this.args);
         throw 'no plan satisfied thedesire ' + this.desire;
     }
 

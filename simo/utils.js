@@ -1,10 +1,10 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery}
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos}
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMxNmU5MWIyNTAxIiwibmFtZSI6InNpdW0iLCJpYXQiOjE3MTM5NjczNTR9.BkcwiZt0KzFLdUhOziXiduoXOEoosxT6_w8K1N7Q0Z0'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxOWMxNjM2MmViIiwibmFtZSI6ImZyYXRtcyIsImlhdCI6MTcxNDA3OTAwMX0.GXZD9WWWPH6BRE3zD2ildiJ2DUuAnviNHQYQ5ARJZKI'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
@@ -30,7 +30,7 @@ function from_json_to_matrix(width, height, tiles, map){
     return map;
 }
 
-const me = {};
+var me = {};
 await client.onYou( ( {id, name, x, y, score} ) => {
     // console.log('me', {id, name, x, y, score})
     me.id = id
@@ -39,9 +39,18 @@ await client.onYou( ( {id, name, x, y, score} ) => {
     me.y = y
     me.score = score
 } )
+async function mypos(){
+    let myPromise = new Promise(function(resolve) {
+        client.onYou(({x, y}) => {
+            resolve({x, y});
+        });
+    });
+
+    return await myPromise;
+}
 
 
-const parcels = new Map()
+var parcels = new Map()
 client.onParcelsSensing( async ( perceived_parcels ) => {
     for (const p of perceived_parcels) {
         parcels.set( p.id, p)
@@ -103,7 +112,7 @@ function getNeighbors(x, y) {
         const neighborX = x + direction.dx;
         const neighborY = y + direction.dy;
 
-        if (isValidPosition(neighborX, neighborY, map)) {
+        if (isValidPosition(neighborX, neighborY)) {
             neighbors.push({ x: neighborX, y: neighborY });
         }
     }
@@ -111,7 +120,7 @@ function getNeighbors(x, y) {
     return neighbors;
 }
 
-function isValidPosition(x, y, map) {
+function isValidPosition(x, y) {
     const width = map.length;
     const height = map[0].length;
 
@@ -119,12 +128,11 @@ function isValidPosition(x, y, map) {
 }
 
 function findPath_BFS(endX, endY) {
+
     const visited = new Set();
     const queue = [];
 
-    // console.log("******* BFSSSSS *********")
-    // console.log('me', me)
-    // console.log('end', endX, endY)
+
     var startX = me.x;
     var startY = me.y;
 

@@ -12,7 +12,6 @@ function agentLoop() {
     // const selected = select(options) // p1 is closer!
     // intention_queue.push( [ selected.intention, selected.args ] );
 
-    console.log("parcels", parcels.entries())
 
     
     const options = [];
@@ -35,7 +34,6 @@ function agentLoop() {
         
         let parcel = option.args[0];
         let score = option.args[0].reward;
-        console.log("parcel", option)
         
         const dist = distance(me, parcel);
         if (dist < nearest_distance && score > 2) {
@@ -49,20 +47,13 @@ function agentLoop() {
      */
     if (best_option) {
 
-        if (!(best_option.args[0].x == me.x && best_option.args[0].y == me.y)) {
-            console.log("\n****** NEW OPTION ******")
-            console.log('best_option', best_option)
-            
+        
 
+        myAgent.push(best_option.desire, ...best_option.args); 
+        myAgent.push('go_put_down', [])
 
-            myAgent.push(best_option.desire, ...best_option.args);
-
-            // myAgent.push('go_put_down', [])
-
-
-            console.log("queue", myAgent.intention_queue)
-            console.log("***********************\n")
-        }
+        // console.log("queue", myAgent.intention_queue)
+        
         
     }
 }
@@ -73,3 +64,9 @@ client.onParcelsSensing( agentLoop )
 
 const myAgent = new Agent()
 myAgent.intentionLoop()
+// setTimeout(() => {
+//     // Code to be executed after 2 seconds
+//     myAgent.push('go_pick_up', {x:2, y:2})
+// }, 2000);
+
+
