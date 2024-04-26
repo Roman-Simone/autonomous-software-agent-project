@@ -1,10 +1,10 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos}
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery}
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxOWMxNjM2MmViIiwibmFtZSI6ImZyYXRtcyIsImlhdCI6MTcxNDA3OTAwMX0.GXZD9WWWPH6BRE3zD2ildiJ2DUuAnviNHQYQ5ARJZKI'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk1NzEyOTQyOWM1IiwibmFtZSI6InNpbW8iLCJpYXQiOjE3MTM5NTk4NzF9.GPzudOb7enjtWvmtxF8cR9kPMlScRBjWGbnNQi2tcRc'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
@@ -30,27 +30,17 @@ function from_json_to_matrix(width, height, tiles, map){
     return map;
 }
 
-var me = {};
+const me = {};
 await client.onYou( ( {id, name, x, y, score} ) => {
-    // console.log('me', {id, name, x, y, score})
     me.id = id
     me.name = name
     me.x = x
     me.y = y
     me.score = score
 } )
-async function mypos(){
-    let myPromise = new Promise(function(resolve) {
-        client.onYou(({x, y}) => {
-            resolve({x, y});
-        });
-    });
-
-    return await myPromise;
-}
 
 
-var parcels = new Map()
+const parcels = new Map()
 client.onParcelsSensing( async ( perceived_parcels ) => {
     for (const p of perceived_parcels) {
         parcels.set( p.id, p)
@@ -95,7 +85,7 @@ function find_nearest_delivery(){
             nearest_delivery = deliveryCoordinates[i];
         }
     }
-    return nearest_delivery;
+    return nearest_delivery
 }
 
 //* BFS
@@ -112,7 +102,7 @@ function getNeighbors(x, y) {
         const neighborX = x + direction.dx;
         const neighborY = y + direction.dy;
 
-        if (isValidPosition(neighborX, neighborY)) {
+        if (isValidPosition(neighborX, neighborY, map)) {
             neighbors.push({ x: neighborX, y: neighborY });
         }
     }
@@ -120,7 +110,7 @@ function getNeighbors(x, y) {
     return neighbors;
 }
 
-function isValidPosition(x, y) {
+function isValidPosition(x, y, map) {
     const width = map.length;
     const height = map[0].length;
 
@@ -128,9 +118,9 @@ function isValidPosition(x, y) {
 }
 
 function findPath_BFS(endX, endY) {
-
     const visited = new Set();
     const queue = [];
+    const path = [];
 
 
     var startX = me.x;

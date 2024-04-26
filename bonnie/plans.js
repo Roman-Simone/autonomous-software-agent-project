@@ -1,6 +1,6 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, find_nearest_delivery, mypos } from './utils.js';
+import { me, client, findPath_BFS, find_nearest_delivery } from './utils.js';
 export { plans };
 
 
@@ -48,15 +48,9 @@ class GoPutDown extends Plan {
     
         async execute ( ) {
             let nearest_delivery = {x: -1, y: -1};
-            var x = -1;
-            var y = -1;
             nearest_delivery = find_nearest_delivery();
-            x = nearest_delivery.x;
-            y = nearest_delivery.y;
-
-            await this.subIntention( 'go_to_BFS', {x, y} );
+            await this.subIntention( 'go_to_BFS', {nearest_delivery} );
             await client.putdown()
-            
         }
     
     
@@ -117,37 +111,26 @@ class BFS extends Plan {
         return desire == 'go_to_BFS';
     }
 
-    async execute ( {x, y} ) {
+    async execute ( {x, y}) {
         var path = findPath_BFS(x, y);
-        console.log('path', path);
-        console.log(path.length)
-
 
         for (var i = 0; i < path.length; i++) {
-            console.log("move")
             var next_x = path[i].x;
             var next_y = path[i].y;
-            
-
             if (next_x == me.x + 1) {
                 await client.move('right');
-            } 
-            else if (next_x == me.x - 1) {
+            } else if (next_x == me.x - 1) {
                 await client.move('left');
-            } 
-            else if (next_y == me.y + 1) {
+            } else if (next_y == me.y + 1) {
                 await client.move('up');
-            } 
-            else if (next_y == me.y - 1) {
+            } else if (next_y == me.y - 1) {
                 await client.move('down');
             }
-
-            
-            me.x = next_x;
-            me.y = next_y;
         }
     }
 }
+
+
 
 const plans = [];
 
