@@ -45,40 +45,39 @@ function agentLoop() {
             var intrinsic_score = 0;
             intrinsic_score = score - distance(parcell, me) - distance(parcell, find_nearest(parcell.x, parcell.y, map)[2]);          // reward - distance from me to the parcel - distance from the parcel to the nearest delivery point
 
-            if(intrinsic_score < 0)             //se l'intrinsic score è < 0 ignoro la parcella
-                continue;
+            if(intrinsic_score > 0){
+                var util = intrinsic_score;
 
-            var util = intrinsic_score;
+                if(beliefset.size > 0){
 
+                    // console.log("\n\n-----> BELIEFSET SIZE: ", beliefset.size)
+                    // console.log("-----> BELIEFSET: ", beliefset, "\n\n")
+                    var min_score_parcel_agent = Number.MAX_VALUE;
 
-            if(beliefset.size > 0){
-
-                // console.log("\n\n-----> BELIEFSET SIZE: ", beliefset.size)
-                // console.log("-----> BELIEFSET: ", beliefset, "\n\n")
-                var min_score_parcel_agent = Number.MAX_VALUE;
-
-                for(let a of beliefset.values()){
-                    // console.log("\n\n-----> AGENT: ", a, "\n\n")
-                    // console.log("\n\n-----> a.x: ", a.x, ", a.y: ", a.y, "\n\n")
-                    var score_parcel_agent = distance(a, parcell);
-                    if (score_parcel_agent < min_score_parcel_agent) {
-                        min_score_parcel_agent = score_parcel_agent;
+                    for(let a of beliefset.values()){
+                        // console.log("\n\n-----> AGENT: ", a, "\n\n")
+                        // console.log("\n\n-----> a.x: ", a.x, ", a.y: ", a.y, "\n\n")
+                        var score_parcel_agent = distance(a, parcell);
+                        if (score_parcel_agent < min_score_parcel_agent) {
+                            min_score_parcel_agent = score_parcel_agent;
+                        }
                     }
+
+                    // console.log("\n\n-----> min_score_parcel_agent: ", min_score_parcel_agent, "\n\n")
+                    util += min_score_parcel_agent;
                 }
 
-                // console.log("\n\n-----> min_score_parcel_agent: ", min_score_parcel_agent, "\n\n")
-                util += min_score_parcel_agent;
-            }
+                // console.log("\n\nUTILITY: ", utility, "\n\n")
 
-            // console.log("\n\nUTILITY: ", utility, "\n\n")
+                options.push({
+                    desire: 'go_pick_up',
+                    args: [parcell],
+                    utility: util
+                })
 
-            options.push({
-                desire: 'go_pick_up',
-                args: [parcell],
-                utility: util
-            })
-
-            console.log("parcel args:", parcell)
+                console.log("parcel args:", parcell)
+            }             //se l'intrinsic score è < 0 ignoro la parcella
+            
         }
     }
 
