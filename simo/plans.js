@@ -1,6 +1,6 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe } from './utils.js';
+import { me, client, findPath_BFS, find_nearest_delivery } from './utils.js';
 export { plans };
 
 
@@ -133,12 +133,8 @@ class BFS extends Plan {
 
     async execute ( {x, y} ) {
         var path = findPath_BFS(x, y);
-        console.log('path', path);
-        console.log(path.length)
-
 
         for (var i = 0; i < path.length; i++) {
-            console.log("move")
             var next_x = path[i].x;
             var next_y = path[i].y;
             let status_x = undefined;
@@ -157,8 +153,6 @@ class BFS extends Plan {
             else if (next_y == me.y - 1) {
                 await client.move('down');
             }
-           
-                
             await client.onYou(({ id, name, x_me, y_me, score }) => {
                 // console.log('me', {id, name, x, y, score})
                 me.id = id;
@@ -174,20 +168,12 @@ class BFS extends Plan {
                 me.score = score;
             });
             
-            // await updateMe();
-            // new Promise((resolve) => {
-            //     client.onYou( ( {id, name, x, y, score} ) => {
-            //         // console.log('me', {id, name, x, y, score})
-            //         me.id = id
-            //         me.name = name
-            //         me.x = x
-            //         me.y = y
-            //         me.score = score
-            //     } );
-            // });
-            // await updateMe();
-            // me.x = next_x;
-            // me.y = next_y;
+        }
+        if (me.x == x && me.y == y) {
+            console.log("[INFO] target reached with go_to_BFS")
+        }
+        else{
+            console.log("[ERROR] target not reached with go_to_BFS")
         }
     }
 }

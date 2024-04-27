@@ -2,6 +2,25 @@ import { Agent } from "./agent.js";
 import { client, parcels, distance, me } from "./utils.js";
 
 
+
+// function parcellExists(desire, ...args) {
+
+//     let ret = false;
+//     if ( desire == 'go_pick_up' ) {
+
+//         let p = parcels.get(id)
+//         if ( p && p.carriedBy ) {
+//             ret = true;
+//         }
+        
+//         // if ( p && p.reward < 2 ) { 
+//         //     // console.log( 'Skipping intention because no reward', intention.args)
+//         //     this.intention_queue.shift();
+//         //     continue;
+//         // }
+//     }
+// }
+
 /**
  * Beliefset revision loop
  */
@@ -64,9 +83,6 @@ client.onParcelsSensing( agentLoop )
 
 const myAgent = new Agent()
 myAgent.intentionLoop()
-// setTimeout(() => {
-//     // Code to be executed after 2 seconds
-//     myAgent.push('go_pick_up', {x:2, y:2})
-// }, 2000);
+
 
 
