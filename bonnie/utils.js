@@ -1,10 +1,10 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery}
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe}
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk1NzEyOTQyOWM1IiwibmFtZSI6InNpbW8iLCJpYXQiOjE3MTM5NTk4NzF9.GPzudOb7enjtWvmtxF8cR9kPMlScRBjWGbnNQi2tcRc'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY0OWIzNDI1ZDdlIiwibmFtZSI6ImdvZCIsImlhdCI6MTcxMTQ1MzMxN30.oixFXuclRDvyfEU7-vugB9uG2wsddGDWFa-_gzzd8-o'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
@@ -12,7 +12,8 @@ function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
     const dy = Math.abs( Math.round(y1) - Math.round(y2) )
     return dx + dy;
 }
-function from_json_to_matrix(width, height, tiles, map){
+
+export function from_json_to_matrix(width, height, tiles, map){
     var map = [];
     for (let i = 0; i < width; i++) {
         map[i] = [];
@@ -30,8 +31,9 @@ function from_json_to_matrix(width, height, tiles, map){
     return map;
 }
 
-const me = {};
+var me = {};
 await client.onYou( ( {id, name, x, y, score} ) => {
+    // console.log('me', {id, name, x, y, score})
     me.id = id
     me.name = name
     me.x = x
@@ -39,8 +41,31 @@ await client.onYou( ( {id, name, x, y, score} ) => {
     me.score = score
 } )
 
+async function updateMe() {
+    return new Promise(function(resolve) {
+        client.onYou( ( {id, name, x, y, score} ) => {
+            // console.log('me', {id, name, x, y, score})
+            me.id = id
+            me.name = name
+            me.x = x
+            me.y = y
+            me.score = score
+        } );
+    });
+}
+async function mypos(){
+    let myPromise = new Promise(function(resolve) {
+        client.onYou(({x, y}) => {
+            resolve({x, y});
+        });
+    });
 
-const parcels = new Map()
+    return await myPromise;
+}
+
+
+
+var parcels = new Map()
 client.onParcelsSensing( async ( perceived_parcels ) => {
     for (const p of perceived_parcels) {
         parcels.set( p.id, p)
@@ -72,6 +97,61 @@ function select (options) {
 }
 
 
+export function find_nearest(me, map){
+
+    let dist_0 = Number.MAX_VALUE;
+    let dist_1 = Number.MAX_VALUE;
+    let dist_2 = Number.MAX_VALUE;
+    let dist_3 = Number.MAX_VALUE;
+
+    let coordinates = [];
+    for (var i = 0; i < 4; i++) {
+        coordinates.push({ x: -1, y: -1, type: -1});
+    }
+
+    for (var i = 0; i < map.length; i++) {
+        for (var j = 0; j < map[i].length; j++) {
+            if(i == me.x && j == me.y){
+                continue;
+            }
+
+            b = {i, j}
+
+            switch (map[i][j]) {
+                case 0:
+                    if(dist(me, b) < dist_0){
+                        dist_0 = dist(me, b);
+                        coordinates[0] = { x: i, y: j, type: 0};
+                    }
+                    break;
+                case 1:
+                    if(dist(me, b) < dist_1){
+                        dist_1 = dist(me, b);
+                        coordinates[1] = { x: i, y: j, type: 1};
+                    }
+                    break;
+                case 2:
+                    if(dist(me, b) < dist_2){
+                        dist_2 = dist(me, b);
+                        coordinates[2] = { x: i, y: j, type: 2};
+                    }
+                    break;
+                case 3:
+                    if(dist(me, b) < dist_3){
+                        dist_3 = dist(me, b);
+                        coordinates[3] = { x: i, y: j, type: 3};
+                    }
+                    break;
+                default:
+                    // Handle other cases if needed
+                    break;
+            }
+        }
+    }
+
+    return coordinates;
+}
+
 
 //* Find nearest delivery 
 function find_nearest_delivery(){
@@ -85,7 +165,7 @@ function find_nearest_delivery(){
             nearest_delivery = deliveryCoordinates[i];
         }
     }
-    return nearest_delivery
+    return nearest_delivery;
 }
 
 //* BFS
@@ -102,7 +182,7 @@ function getNeighbors(x, y) {
         const neighborX = x + direction.dx;
         const neighborY = y + direction.dy;
 
-        if (isValidPosition(neighborX, neighborY, map)) {
+        if (isValidPosition(neighborX, neighborY)) {
             neighbors.push({ x: neighborX, y: neighborY });
         }
     }
@@ -110,7 +190,7 @@ function getNeighbors(x, y) {
     return neighbors;
 }
 
-function isValidPosition(x, y, map) {
+function isValidPosition(x, y) {
     const width = map.length;
     const height = map[0].length;
 
@@ -118,9 +198,9 @@ function isValidPosition(x, y, map) {
 }
 
 function findPath_BFS(endX, endY) {
+
     const visited = new Set();
     const queue = [];
-    const path = [];
 
 
     var startX = me.x;

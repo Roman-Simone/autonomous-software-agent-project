@@ -3,7 +3,6 @@ import PriorityQueue from 'js-priority-queue';
 import { DeliverooApi, timer } from "@unitn-asa/deliveroo-js-client";
 const client = new DeliverooApi( config.host, config.token )
 
-
 // export async function best_option(me_x, me_y, map){
     
 
@@ -15,8 +14,47 @@ const client = new DeliverooApi( config.host, config.token )
 //     return findPath_BFS(me_x, me_y, best_score.x, best_score.y, map);
 // }
 
-export async function move(me_x, me_y, path){
-    
+export async function move(me_x, me_y, path, deliveryCoordinates, beliefset){
+    for (var i = 0; i < path.length; i++) {
+        var next_x = path[i].x;
+        var next_y = path[i].y;
+        if (next_x == me_x + 1) {
+            await client.move('right');
+            await client.pickup();
+            for(let d of deliveryCoordinates){
+                if(d.x == next_x && d.y == next_y){
+                    await client.putdown();
+                }
+            }
+        } else if (next_x == me_x - 1) {
+            await client.move('left');
+            await client.pickup();
+            for(let d of deliveryCoordinates){
+                if(d.x == next_x && d.y == next_y){
+                    await client.putdown();
+                }
+            }
+        } else if (next_y == me_y + 1) {
+            await client.move('up');
+            await client.pickup();
+            for(let d of deliveryCoordinates){
+                if(d.x == next_x && d.y == next_y){
+                    await client.putdown();
+                }
+            }
+        } else if (next_y == me_y - 1) {
+            await client.move('down');
+            await client.pickup();
+            for(let d of deliveryCoordinates){
+                if(d.x == next_x && d.y == next_y){
+                    await client.putdown();
+                }
+            }
+        }
+        me_x = next_x;
+        me_y = next_y;
+    }
+
     return;
 }
 
@@ -199,7 +237,7 @@ function getNeighbors(x, y, map) {
         const neighborX = x + direction.dx;
         const neighborY = y + direction.dy;
 
-        if (isValidPosition(neighborX, neighborY, map)) {
+        if (isValidPosition(neighborX, neighborY, map[0].length, map.length, map)) {
             neighbors.push({ x: neighborX, y: neighborY });
         }
     }
@@ -207,11 +245,12 @@ function getNeighbors(x, y, map) {
     return neighbors;
 }
 
-function isValidPosition(x, y, map) {
-    const width = map.length;
-    const height = map[0].length;
-
-    return x >= 0 && x < width && y >= 0 && y < height && map[x][y] !== 0;
+function isValidPosition(x, y, width, height, map) {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return false;
+    }
+    if (map[x] === undefined || map[x][y] === undefined) {
+        return false;
+    }
+    return map[x][y] !== 0;
 }
-
-
