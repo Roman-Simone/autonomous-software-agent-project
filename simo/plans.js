@@ -1,6 +1,6 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, find_nearest_delivery, mypos } from './utils.js';
+import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe } from './utils.js';
 export { plans };
 
 
@@ -112,6 +112,20 @@ class BlindMove extends Plan {
     }
 }
 
+
+function isInt(x, y){
+    
+    const decimalPartX = x % 1;
+    const decimalPartY = y % 1;
+    
+    if (decimalPartX > 0 || decimalPartY > 0) {
+        return false;
+    } else {
+        return true;
+    }
+
+}
+
 class BFS extends Plan {
     isApplicableTo ( desire ) {
         return desire == 'go_to_BFS';
@@ -127,6 +141,8 @@ class BFS extends Plan {
             console.log("move")
             var next_x = path[i].x;
             var next_y = path[i].y;
+            let status_x = undefined;
+
             
 
             if (next_x == me.x + 1) {
@@ -141,10 +157,37 @@ class BFS extends Plan {
             else if (next_y == me.y - 1) {
                 await client.move('down');
             }
-
+           
+                
+            await client.onYou(({ id, name, x_me, y_me, score }) => {
+                // console.log('me', {id, name, x, y, score})
+                me.id = id;
+                me.name = name;
+                if (x_me * 10 != me.x * 10)
+                    me.x = next_x;
+                else
+                    me.x = x_me;
+                if (y_me * 10 != me.y * 10)
+                    me.y = next_y;
+                else
+                    me.y = y_me;
+                me.score = score;
+            });
             
-            me.x = next_x;
-            me.y = next_y;
+            // await updateMe();
+            // new Promise((resolve) => {
+            //     client.onYou( ( {id, name, x, y, score} ) => {
+            //         // console.log('me', {id, name, x, y, score})
+            //         me.id = id
+            //         me.name = name
+            //         me.x = x
+            //         me.y = y
+            //         me.score = score
+            //     } );
+            // });
+            // await updateMe();
+            // me.x = next_x;
+            // me.y = next_y;
         }
     }
 }

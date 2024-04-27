@@ -1,10 +1,10 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos}
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe}
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxOWMxNjM2MmViIiwibmFtZSI6ImZyYXRtcyIsImlhdCI6MTcxNDA3OTAwMX0.GXZD9WWWPH6BRE3zD2ildiJ2DUuAnviNHQYQ5ARJZKI'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJiNDYwZGQ2OGE0IiwibmFtZSI6Imdpb3JnaW8iLCJpYXQiOjE3MTQxMTg4NTJ9.q6klLL69EsA3pvA7aOEiCS6YffUFAoroSmFwkV3b5Hc'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
@@ -39,6 +39,19 @@ await client.onYou( ( {id, name, x, y, score} ) => {
     me.y = y
     me.score = score
 } )
+
+async function updateMe() {
+    return new Promise(function(resolve) {
+        client.onYou( ( {id, name, x, y, score} ) => {
+            // console.log('me', {id, name, x, y, score})
+            me.id = id
+            me.name = name
+            me.x = x
+            me.y = y
+            me.score = score
+        } );
+    });
+}
 async function mypos(){
     let myPromise = new Promise(function(resolve) {
         client.onYou(({x, y}) => {
@@ -48,6 +61,7 @@ async function mypos(){
 
     return await myPromise;
 }
+
 
 
 var parcels = new Map()
