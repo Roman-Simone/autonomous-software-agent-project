@@ -17,24 +17,7 @@ class Agent {
             if ( this.intention_queue.length > 0 ) {
                 // Current intention
                 const intention = this.intention_queue[0];
-            
-                //[INFO]  control if the parcel is still available
-                if ( intention.desire == 'go_pick_up' ) {
-                    var id = intention.args[0].id
 
-                    let p = parcels.get(id)
-                    if ( p && p.carriedBy ) {
-                        // console.log( 'Skipping intention because no more valid', intention.args)
-                        this.intention_queue.shift();
-                        continue;
-                    }
-                    
-                    if ( p && p.reward < 2 ) { 
-                        // console.log( 'Skipping intention because no reward', intention.args)
-                        this.intention_queue.shift();
-                        continue;
-                    }
-                }
                 // Start achieving intention
                 await intention.achieve();
 
@@ -46,29 +29,25 @@ class Agent {
     }
 
     async push ( desire, ...args ) {
-        const last = this.intention_queue.at( this.intention_queue.length - 1 );
-        
-        if ( last && last.desire == desire ) {
-            return; // intention is already being achieved
+       
+        //Check if the intention is already in the queue and in case upadate it
+        for (let i = 0; i < this.intention_queue.length; i++) {
+            
+            if (this.intention_queue[i].desire == "go_pick_up" && args[0].id == this.intention_queue[i].args[0].id){
+                this.intention_queue.splice(i, 1);
+            }
+            
+            if (this.intention_queue[i].desire == "go_put_down" && desire == "go_put_down"){
+                this.intention_queue.splice(i, 1);
+            }
         }
         
         const current = new Intention( desire, ...args )
-        
-        for (const intention of this.intention_queue) {
-            if ( intention.desire == current.desire ) {
-                // console.log('pushing go_put_down')
-                return;
-            }
-        }
-        // for (const intention of this.intention_queue) {
-        //     if ( intention.desire == 'go_pick_up' ) {
-        //         // console.log('pushing go_put_down')
-        //         return;
-        //     }
-        // }
-
-        
         this.intention_queue.push( current );
+
+        this.sortQueue();
+
+        this.printQueue("push");
     }
 
     async stop ( ) {
@@ -76,5 +55,17 @@ class Agent {
         for (const intention of this.intention_queue) {
             intention.stop();
         }
+    }
+
+    sortQueue () {
+        this.intention_queue.sort((a, b) => a.args[1].utility - b.args[1].utility);
+    }
+
+    printQueue (zone = "") {
+        console.log('\n[START QUEUE] called from ' + zone);
+        for (let i = 0; i < this.intention_queue.length; i++) {
+            console.log("\t[ELEMENT " + i + "]: " + this.intention_queue[i].desire + " PARCELL->" + this.intention_queue[i].args[0] + " UTILITY->" + this.intention_queue[i].args[1]);
+        }
+        console.log('[END QUEUE]\n')
     }
 }

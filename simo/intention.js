@@ -44,14 +44,14 @@ class Intention extends Promise {
         for (const plan of plans) {
             if ( plan.isApplicableTo( this.desire ) ) {
                 this.#current_plan = plan;
-                console.log('\nachievingdesire', this.desire, ...this.args, 'with plan', plan);
+                // console.log('\nachievingdesire', this.desire, ...this.args, 'with plan', plan);
                 try {
                     const plan_res = await plan.execute( ...this.args );
                     this.#resolve( plan_res );
-                    console.log( 'plan', plan, 'succesfully achieved intention', this.desire, ...this.args, 'with result', plan_res ,'\n');
+                    // console.log( 'plan', plan, 'succesfully achieved intention', this.desire, ...this.args, 'with result', plan_res ,'\n');
                     return plan_res
                 } catch (error) {
-                    console.log( 'plan', plan, 'failed while trying to achieve intention', this.desire, ...this.args, 'with error', error );
+                    // console.log( 'plan', plan, 'failed while trying to achieve intention', this.desire, ...this.args, 'with error', error );
                 }
             }
         }
