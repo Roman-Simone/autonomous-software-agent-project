@@ -77,7 +77,7 @@ function agentLoop() {
         let util = option.utility;
         const dist = distance(me, parcel);
         // Select option with nearest distance and a reward score greater than 2
-        if (dist < nearest_distance && util > 2 && util > highest_utility) {
+        if (util > 2 && util > highest_utility) {
             highest_utility = util;
             best_option = option;
         }
