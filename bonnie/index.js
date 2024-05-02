@@ -71,14 +71,14 @@ function agentLoop() {
      * Select best intention from available options
      */
     let best_option = null;
-    let nearest_distance = Number.MAX_VALUE;
+    let highest_utility = Number.MIN_VALUE;
     for (const option of options) {
         let parcel = option.args[0];
         let util = option.utility;
         const dist = distance(me, parcel);
         // Select option with nearest distance and a reward score greater than 2
-        if (dist < nearest_distance && util > 2) {
-            nearest_distance = dist;
+        if (dist < nearest_distance && util > 2 && util > highest_utility) {
+            highest_utility = util;
             best_option = option;
         }
     }
