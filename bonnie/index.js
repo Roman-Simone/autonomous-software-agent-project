@@ -2,29 +2,34 @@ import { Agent } from "./agent.js";
 import { distance, from_json_to_matrix, find_nearest, client, parcels, me } from "./utils.js";
 
 // Define global variables
-const map = [];
-const deliveryCoordinates = [];
+var map = [];
+var deliveryCoordinates = [];
 const beliefset = new Map();
 
 // Function to handle map initialization
 await client.onMap((width, height, tiles) => {
     // Convert JSON data to a matrix representation
     map = from_json_to_matrix(width, height, tiles, map);
+
+    console.log("Map initialized: ", map);
+
     // Extract delivery coordinates from tiles
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({x: t.x, y: t.y}));
+
+    console.log("Delivery coordinates: ", deliveryCoordinates);
 });
 
 // Function to update beliefset when agents are sensed
 client.onAgentsSensing(agents => {
     // Update beliefset with new agent information
     for (let a of agents) {
+        console.log("New agent sensed: ", a.id, a.x, a.y, a.score)
         beliefset.set(a.id, a);
     }
 });
 
-/**
- * Function to revise agent intentions based on beliefset
- */
+
+
 function agentLoop() {
     // Array to store potential intention options
     const options = [];
@@ -50,6 +55,8 @@ function agentLoop() {
                     }
                     util += min_score_parcel_agent;
                 }
+
+                console.log("Parcel: ", parcel, " - utility: ", util);
                 // Add option to options array
                 options.push({
                     desire: 'go_pick_up',
@@ -67,10 +74,10 @@ function agentLoop() {
     let nearest_distance = Number.MAX_VALUE;
     for (const option of options) {
         let parcel = option.args[0];
-        let score = option.args[0].reward;
+        let util = option.utility;
         const dist = distance(me, parcel);
         // Select option with nearest distance and a reward score greater than 2
-        if (dist < nearest_distance && score > 2) {
+        if (dist < nearest_distance && util > 2) {
             nearest_distance = dist;
             best_option = option;
         }
@@ -80,13 +87,15 @@ function agentLoop() {
      * Revise/queue intention if a best option is found
      */
     if (best_option) {
+        console.log("Pushing best option: ", best_option);
+
         // Push best option to agent intention queue
         myAgent.push(best_option.desire, ...best_option.args, best_option.utility); 
         myAgent.push('go_put_down', []);
     }
 }
 
-// Function to trigger agent loop when parcels are sensed
+// Function to trigger agentLoop when parcels are sensed
 client.onParcelsSensing(agentLoop);
 
 // Create an instance of Agent
