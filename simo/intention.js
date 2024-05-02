@@ -8,8 +8,8 @@ export { Intention };
 class Intention extends Promise {
 
     #current_plan;
-    stop() {
-        console.log('stop intention and current plan');
+    stop () {
+        console.log( 'stop intention and current plan');
         this.#current_plan.stop();
     }
 
@@ -19,39 +19,39 @@ class Intention extends Promise {
     #resolve;
     #reject;
 
-    constructor(desire, ...args) {
+    constructor (desire, ...args ) {
         var resolve, reject;
-        super(async (res, rej) => {
+        super( async (res, rej) => {
             resolve = res; reject = rej;
-        })
+        } )
         this.#resolve = resolve
         this.#reject = reject
         this.desire = desire;
         this.args = args;
     }
 
-    async getArgs() {
+    async getArgs () {
         return this.args;
     }
 
     #started = false;
-    async achieve() {
-        if (this.#started)
+    async achieve () {
+        if ( this.#started)
             return this;
         else
             this.#started = true;
 
         for (const plan of plans) {
-            if (plan.isApplicableTo(this.desire)) {
+            if ( plan.isApplicableTo( this.desire ) ) {
                 this.#current_plan = plan;
-                console.log('[START DESIRE] -> ', this.desire, ...this.args, 'with plan ->', plan);
+                // console.log('\nachievingdesire', this.desire, ...this.args, 'with plan', plan);
                 try {
-                    const plan_res = await plan.execute(...this.args);
-                    this.#resolve(plan_res);
-                    console.log('[FINISH DESIRE] success -> ', this.desire, 'with plan -> ', plan, this.desire, ...this.args, 'with result', plan_res, '\n');
+                    const plan_res = await plan.execute( ...this.args );
+                    this.#resolve( plan_res );
+                    // console.log( 'plan', plan, 'succesfully achieved intention', this.desire, ...this.args, 'with result', plan_res ,'\n');
                     return plan_res
                 } catch (error) {
-                    console.log('[FINISH DESIRE] failure -> ', this.desire, 'failed with plan ->', plan, ...this.args, 'with error', error);
+                    // console.log( 'plan', plan, 'failed while trying to achieve intention', this.desire, ...this.args, 'with error', error );
                 }
             }
         }

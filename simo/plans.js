@@ -1,6 +1,7 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, find_nearest_delivery } from './utils.js';
+import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe } from './utils.js';
+// import { intention_queue } from './agent.js';
 export { plans };
 
 
@@ -30,11 +31,18 @@ class Plan {
 class GoPickUp extends Plan {
 
     isApplicableTo ( desire ) {
+     
         return desire == 'go_pick_up';
     }
 
-    async execute ( {x, y} ) {
-        await this.subIntention( 'go_to_BFS', {x, y} );
+    // async execute ( {x, y} ) {
+    //     await this.subIntention( 'go_to_BFS', {x, y} );
+    //     await client.pickup()
+    //     // await this.subIntention( 'go_put_down');
+    // }
+    async execute ( ...args) {
+      
+        await this.subIntention( 'go_to_BFS', ...args);
         await client.pickup()
         // await this.subIntention( 'go_put_down');
     }
@@ -113,33 +121,21 @@ class BlindMove extends Plan {
 }
 
 
-function isInt(x, y){
-    
-    const decimalPartX = x % 1;
-    const decimalPartY = y % 1;
-    
-    if (decimalPartX > 0 || decimalPartY > 0) {
-        return false;
-    } else {
-        return true;
-    }
-
-}
 
 class BFS extends Plan {
     isApplicableTo ( desire ) {
         return desire == 'go_to_BFS';
     }
 
-    async execute ( {x, y} ) {
+    async execute ( ...args ) {
+        var x = args[0].x;
+        var y = args[0].y;
         var path = findPath_BFS(x, y);
+
 
         for (var i = 0; i < path.length; i++) {
             var next_x = path[i].x;
             var next_y = path[i].y;
-            let status_x = undefined;
-
-            
 
             if (next_x == me.x + 1) {
                 await client.move('right');
@@ -153,6 +149,7 @@ class BFS extends Plan {
             else if (next_y == me.y - 1) {
                 await client.move('down');
             }
+            
             await client.onYou(({ id, name, x_me, y_me, score }) => {
                 // console.log('me', {id, name, x, y, score})
                 me.id = id;
@@ -167,13 +164,7 @@ class BFS extends Plan {
                     me.y = y_me;
                 me.score = score;
             });
-            
-        }
-        if (me.x == x && me.y == y) {
-            console.log("[INFO] target reached with go_to_BFS")
-        }
-        else{
-            console.log("[ERROR] target not reached with go_to_BFS")
+
         }
     }
 }

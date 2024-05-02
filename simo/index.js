@@ -1,62 +1,69 @@
 import { Agent } from "./agent.js";
-import { client, parcels, distance, me } from "./utils.js";
+import { distance, from_json_to_matrix, find_nearest, client, parcels, me } from "./utils.js";
 
+var map = [];
 
+var deliveryCoordinates = [];
+await client.onMap((width, height, tiles) => {
+    map = from_json_to_matrix(width, height, tiles, map);
+    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
+});
 
-// function parcellExists(desire, ...args) {
+// const beliefset = new Map();
 
-//     let ret = false;
-//     if ( desire == 'go_pick_up' ) {
+// client.onAgentsSensing((agents) => {
 
-//         let p = parcels.get(id)
-//         if ( p && p.carriedBy ) {
-//             ret = true;
-//         }
-        
-//         // if ( p && p.reward < 2 ) { 
-//         //     // console.log( 'Skipping intention because no reward', intention.args)
-//         //     this.intention_queue.shift();
-//         //     continue;
-//         // }
+//     for (let a of agents) {
+//         beliefset.set(a.id, a);
 //     }
-// }
+ 
+//     let array = Array.from(beliefset.values()).map(({ id, name, x, y, score }) => {
+//         return `${name} (${id} - ${score}): ${x},${y}`;
+//     }).join(' ')
+
+// })
 
 /**
  * Beliefset revision loop
  */
 function agentLoop() {
 
-    // belief_revision_function()
-    // const options = options() // desire pick up parcel p1 or p2
-    // const selected = select(options) // p1 is closer!
-    // intention_queue.push( [ selected.intention, selected.args ] );
 
-
-    
     const options = [];
     for (const [id, parcell] of parcels.entries()) {
         if (!parcell.carriedBy) {
-            options.push({
-                desire: 'go_pick_up',
-                args: [parcell]
-            })
+
+            let score = parcell.reward;
+            var intrinsic_score = 0;
+
+            intrinsic_score = score;
+
+            if (intrinsic_score > 2) {
+
+                options.push({
+                    desire: 'go_pick_up',
+                    args: [parcell],
+                    utility: intrinsic_score
+                })
+
+            }
+
         }
     }
+
 
     /**
      * Select best intention
      */
-    
+
     let best_option = null;
-    let nearest_distance = Number.MAX_VALUE;
+    let best_utility = Number.MIN_VALUE;
     for (const option of options) {
-        
-        let parcel = option.args[0];
-        let score = option.args[0].reward;
-        
-        const dist = distance(me, parcel);
-        if (dist < nearest_distance && score > 2) {
-            nearest_distance = dist;
+
+        let score = option.utility;
+
+        if (best_utility < score && score > 2) {
+            best_utility = score;
             best_option = option;
         }
     }
@@ -66,23 +73,16 @@ function agentLoop() {
      */
     if (best_option) {
 
+        myAgent.push(best_option.desire, ...best_option.args, best_option.utility);
         
+        myAgent.push('go_put_down', [], 15)
 
-        myAgent.push(best_option.desire, ...best_option.args); 
-        myAgent.push('go_put_down', [])
-
-        // console.log("queue", myAgent.intention_queue)
-        
-        
     }
 }
-client.onParcelsSensing( agentLoop )
+client.onParcelsSensing(agentLoop)
 // client.onAgentsSensing( agentLoop )
 // client.onYou( agentLoop )
 
 
 const myAgent = new Agent()
 myAgent.intentionLoop()
-
-
-

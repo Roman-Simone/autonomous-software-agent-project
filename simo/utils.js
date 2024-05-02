@@ -1,10 +1,10 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery}
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe}
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA0ZTBlZjgxYTcxIiwibmFtZSI6InNpbW9zIiwiaWF0IjoxNzE0MTQxNjkwfQ.JAW9_Y8df4IXjoOJZYsFGurHi1eN39V5h0CSI7xykNI'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM4OWZiOTRlNjJmIiwibmFtZSI6ImVyaWthIiwiaWF0IjoxNzE0NTkxNDUwfQ.Cd8gO1STiOT4pUjkkglXlzytotjv8ytWaUlLlMaearE'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
@@ -12,7 +12,8 @@ function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
     const dy = Math.abs( Math.round(y1) - Math.round(y2) )
     return dx + dy;
 }
-function from_json_to_matrix(width, height, tiles, map){
+
+export function from_json_to_matrix(width, height, tiles, map){
     var map = [];
     for (let i = 0; i < width; i++) {
         map[i] = [];
@@ -40,7 +41,27 @@ await client.onYou( ( {id, name, x, y, score} ) => {
     me.score = score
 } )
 
+async function updateMe() {
+    return new Promise(function(resolve) {
+        client.onYou( ( {id, name, x, y, score} ) => {
+            // console.log('me', {id, name, x, y, score})
+            me.id = id
+            me.name = name
+            me.x = x
+            me.y = y
+            me.score = score
+        } );
+    });
+}
+async function mypos(){
+    let myPromise = new Promise(function(resolve) {
+        client.onYou(({x, y}) => {
+            resolve({x, y});
+        });
+    });
 
+    return await myPromise;
+}
 
 
 
@@ -75,6 +96,61 @@ function select (options) {
     }
 }
 
+
+export function find_nearest(me, map){
+
+    let dist_0 = Number.MAX_VALUE;
+    let dist_1 = Number.MAX_VALUE;
+    let dist_2 = Number.MAX_VALUE;
+    let dist_3 = Number.MAX_VALUE;
+
+    let coordinates = [];
+    for (var i = 0; i < 4; i++) {
+        coordinates.push({ x: -1, y: -1, type: -1});
+    }
+
+    for (var i = 0; i < map.length; i++) {
+        for (var j = 0; j < map[i].length; j++) {
+            if(i == me.x && j == me.y){
+                continue;
+            }
+
+            b = {i, j}
+
+            switch (map[i][j]) {
+                case 0:
+                    if(dist(me, b) < dist_0){
+                        dist_0 = dist(me, b);
+                        coordinates[0] = { x: i, y: j, type: 0};
+                    }
+                    break;
+                case 1:
+                    if(dist(me, b) < dist_1){
+                        dist_1 = dist(me, b);
+                        coordinates[1] = { x: i, y: j, type: 1};
+                    }
+                    break;
+                case 2:
+                    if(dist(me, b) < dist_2){
+                        dist_2 = dist(me, b);
+                        coordinates[2] = { x: i, y: j, type: 2};
+                    }
+                    break;
+                case 3:
+                    if(dist(me, b) < dist_3){
+                        dist_3 = dist(me, b);
+                        coordinates[3] = { x: i, y: j, type: 3};
+                    }
+                    break;
+                default:
+                    // Handle other cases if needed
+                    break;
+            }
+        }
+    }
+
+    return coordinates;
+}
 
 
 //* Find nearest delivery 
