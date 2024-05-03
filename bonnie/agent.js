@@ -11,70 +11,118 @@ class Agent {
 
     intention_queue = new Array();
 
-    async intentionLoop ( ) {
+    async intentionLoop() {
+        
         while ( true ) {
             // Consumes intention_queue if not empty
             if ( this.intention_queue.length > 0 ) {
                 // Current intention
                 const intention = this.intention_queue[0];
-            
-                //[INFO]  control if the parcel is still available
-                if ( intention.desire == 'go_pick_up' ) {
-                    var id = intention.args[0].id
 
-                    let p = parcels.get(id)
-                    if ( p && p.carriedBy ) {
-                        // console.log( 'Skipping intention because no more valid', intention.args)
-                        this.intention_queue.shift();
-                        continue;
-                    }
-                    
-                    if ( p && p.reward < 2 ) { 
-                        // console.log( 'Skipping intention because no reward', intention.args)
-                        this.intention_queue.shift();
-                        continue;
-                    }
-                }
                 // Start achieving intention
-                await intention.achieve();
+                await intention.achieve()
+                // Catch eventual error and continue
+                .catch( error => {
+                    // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                } );
 
                 // Remove from the queue
                 this.intention_queue.shift();
             }
+            // Postpone next iteration at setImmediate
             await new Promise( res => setImmediate( res ) );
         }
     }
 
-    async push ( desire, ...args ) {
-        const last = this.intention_queue.at( this.intention_queue.length - 1 );
-        
-        if ( last && last.desire == desire ) {
-            return; // intention is already being achieved
-        }
-        
-        const current = new Intention( desire, ...args )
-        
-        for (const intention of this.intention_queue) {
-            if ( intention.desire == current.desire ) {
-                // console.log('pushing go_put_down')
-                return;
-            }
-        }
-        // for (const intention of this.intention_queue) {
-        //     if ( intention.desire == 'go_pick_up' ) {
-        //         // console.log('pushing go_put_down')
-        //         return;
-        //     }
-        // }
 
-        
-        this.intention_queue.push( current );
+    createString(predicate) {
+        if (predicate[0] == "go_pick_up") {
+            return predicate[0] + predicate[3];
+        }
+        else if (predicate[0] == "go_put_down") {
+            return predicate[0];
+        }
+        return "undefined";
     }
 
-    async stop ( ) {
+    checkSwitch(last) {
+
+        let ret = false
+        console.log("last --> " + last);
+
+        if (last) {
+            if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {
+                ret = true;
+            }
+        }
+        return ret;
+    }
+
+    async push(predicate) {
+
+        const last = this.intention_queue[0];
+
+        let update = false;
+        //Check if the intention is already in the queue and in case upadate it
+        for (let i = 0; i < this.intention_queue.length; i++) {
+            // console.log("comparing " + this.createString(predicate) + " with " + this.createString(this.intention_queue[i].predicate));
+            if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
+                this.intention_queue[i].predicate[4] = predicate[4];
+                update = true;
+            }
+        }
+
+        if (!update) {
+            const current = new Intention(this, predicate)
+            this.intention_queue.push(current);
+        }
+
+
+
+
+        this.intention_queue = this.bubbleSort(this.intention_queue);
+
+        this.printQueue("push");
+
+        // console.log(this.createString(current) + " pushed");
+
+        if (this.checkSwitch(last)) {
+            console.log("switching intention");
+            last.stop();
+        }
+    }
+
+    async stop() {
         // console.log( 'stop agent queued intentions');
         for (const intention of this.intention_queue) {
             intention.stop();
         }
+    }
+
+    bubbleSort(arr) {
+        const n = arr.length;
+        let swapped;
+
+        do {
+            swapped = false;
+            for (let i = 0; i < n - 1; i++) {
+                if (arr[i].predicate[4] < arr[i + 1].predicate[4]) {  //switch < > to change sorting order
+                    const temp = arr[i];
+                    arr[i] = arr[i + 1];
+                    arr[i + 1] = temp;
+                    swapped = true;
+                }
+            }
+        } while (swapped);
+
+        return arr;
+    }
+
+    printQueue(zone = "") {
+        console.log('\n[START QUEUE] called from ' + zone);
+        for (let i = 0; i < this.intention_queue.length; i++) {
+            console.log("\t[ELEMENT " + i + "]: " + this.intention_queue[i].predicate[0] + " PARCELL->" + this.intention_queue[i].predicate[3] + " UTILITY->" + this.intention_queue[i].predicate[4]);
+        }
+        console.log('[END QUEUE]\n')
     }
 }

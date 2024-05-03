@@ -115,30 +115,30 @@ export function find_nearest(me, map){
                 continue;
             }
 
-            b = {i, j}
+            var b = {i, j}
 
             switch (map[i][j]) {
                 case 0:
-                    if(dist(me, b) < dist_0){
-                        dist_0 = dist(me, b);
+                    if(distance(me, b) < dist_0){
+                        dist_0 = distance(me, b);
                         coordinates[0] = { x: i, y: j, type: 0};
                     }
                     break;
                 case 1:
-                    if(dist(me, b) < dist_1){
-                        dist_1 = dist(me, b);
+                    if(distance(me, b) < dist_1){
+                        dist_1 = distance(me, b);
                         coordinates[1] = { x: i, y: j, type: 1};
                     }
                     break;
                 case 2:
-                    if(dist(me, b) < dist_2){
-                        dist_2 = dist(me, b);
+                    if(distance(me, b) < dist_2){
+                        dist_2 = distance(me, b);
                         coordinates[2] = { x: i, y: j, type: 2};
                     }
                     break;
                 case 3:
-                    if(dist(me, b) < dist_3){
-                        dist_3 = dist(me, b);
+                    if(distance(me, b) < dist_3){
+                        dist_3 = distance(me, b);
                         coordinates[3] = { x: i, y: j, type: 3};
                     }
                     break;
