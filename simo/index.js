@@ -28,8 +28,6 @@ client.onAgentsSensing(agents => {
     }
 });
 
-
-
 function agentLoop() {
     // Array to store potential intention options
     const options = [];
@@ -71,11 +69,44 @@ function agentLoop() {
     /**
      * Select best intention from available options
      */
+
     let best_option = null;
     for (const option of options) {
             best_option = option;
             myAgent.push(best_option);
+    
     }
+
+
+    if (myAgent.intention_queue.some(item => item.predicate[0] === "go_put_down")) {
+        const item  = myAgent.intention_queue.find(item => item.predicate[0] === "go_put_down");
+
+        var totInHead = item.predicate[4];
+        for(let p of myAgent.parcelsInMind) {
+            for (const [id, parcel] of parcels.entries()) {
+                if (p === id) {                          
+                    // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
+                    totInHead += parcel.reward;
+                }
+            }
+        }
+
+        var utility = totInHead;
+
+        // if (item && item.predicate[4] != totInHead) 
+        //     // console.log("Item found: ", item);THERE WE WILL CHANGE ACCORDING TO HOW MANY PARCELS HAS PLAYER IN HIS HEAD
+            
+
+        // myAgent.intention_queue = myAgent.intention_queue.filter(item => item.predicate[0] !== "go_put_down");
+        
+        // console.log("\n\n\nChanging utility from ", item.predicate[4], " to ", utility, " for go_put_down action.\n\n\n")
+
+        myAgent.push( [ 'go_put_down', "", "", "", utility ] )
+        
+    } else {
+        myAgent.push( [ 'go_put_down', "", "", "", 0 ] )
+    }
+
 
     /**
      * Revise/queue intention if a best option is found

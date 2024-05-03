@@ -3,7 +3,6 @@ import { parcels } from './utils.js';
 export { Agent };
 
 
-
 /**
  * Intention execution loop
  */
@@ -11,6 +10,7 @@ class Agent {
 
     intention_queue = new Array();
     parcelsInMind = [];
+
 
     async intentionLoop() {
         
@@ -31,14 +31,15 @@ class Agent {
                 
                 if (ret == true) {
                     if (intention.predicate[0] == "go_pick_up") {
-                        let entry = intention.predicate[3]
+                        let timestamp = new Date().getTime();
+                        let entry = [intention.predicate[3], timestamp]
                         this.parcelsInMind.push(entry);
                     }
                     else if(intention.predicate[0] == "go_put_down") {
                         this.parcelsInMind = [];
                     }
                 }
-                console.log("inmind", this.parcelsInMind);
+                // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
                 this.intention_queue.shift();
             }
@@ -46,7 +47,6 @@ class Agent {
             await new Promise( res => setImmediate( res ) );
         }
     }
-
 
     createString(predicate) {
         if (predicate[0] == "go_pick_up") {
@@ -89,9 +89,6 @@ class Agent {
             const current = new Intention(this, predicate)
             this.intention_queue.push(current);
         }
-
-
-
 
         this.intention_queue = this.bubbleSort(this.intention_queue);
 

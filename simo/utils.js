@@ -4,7 +4,7 @@ export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, myp
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ1ZWRjNzIzNDljIiwibmFtZSI6InBqIiwiaWF0IjoxNzE0NzIxNjk4fQ.dRyEgInS4aOniZXrRDi4V4eJ22CIAM6uXE8uqrMBzzA'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY0OWIzNDI1ZDdlIiwibmFtZSI6ImdvZCIsImlhdCI6MTcxMTQ1MzMxN30.oixFXuclRDvyfEU7-vugB9uG2wsddGDWFa-_gzzd8-o'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
@@ -115,30 +115,30 @@ export function find_nearest(me, map){
                 continue;
             }
 
-            b = {i, j}
+            var b = {i, j}
 
             switch (map[i][j]) {
                 case 0:
-                    if(dist(me, b) < dist_0){
-                        dist_0 = dist(me, b);
+                    if(distance(me, b) < dist_0){
+                        dist_0 = distance(me, b);
                         coordinates[0] = { x: i, y: j, type: 0};
                     }
                     break;
                 case 1:
-                    if(dist(me, b) < dist_1){
-                        dist_1 = dist(me, b);
+                    if(distance(me, b) < dist_1){
+                        dist_1 = distance(me, b);
                         coordinates[1] = { x: i, y: j, type: 1};
                     }
                     break;
                 case 2:
-                    if(dist(me, b) < dist_2){
-                        dist_2 = dist(me, b);
+                    if(distance(me, b) < dist_2){
+                        dist_2 = distance(me, b);
                         coordinates[2] = { x: i, y: j, type: 2};
                     }
                     break;
                 case 3:
-                    if(dist(me, b) < dist_3){
-                        dist_3 = dist(me, b);
+                    if(distance(me, b) < dist_3){
+                        dist_3 = distance(me, b);
                         coordinates[3] = { x: i, y: j, type: 3};
                     }
                     break;
