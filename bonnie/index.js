@@ -81,13 +81,25 @@ function agentLoop() {
     if (myAgent.intention_queue.some(item => item.predicate[0] === "go_put_down")) {
         const item  = myAgent.intention_queue.find(item => item.predicate[0] === "go_put_down");
 
-        if (item) 
-            // console.log("Item found: ", item);THERE WE WILL CHANGE ACCORDING TO HOW MANY PARCELS HAS PLAYER IN HIS HEAD
-            var utility = item.predicate[4] + 5;
-    
-        myAgent.intention_queue = myAgent.intention_queue.filter(item => item.predicate[0] !== "go_put_down");
+        var totInHead = item.predicate[4];
+        for(let p of myAgent.parcelsInMind) {
+            for (const [id, parcel] of parcels.entries()) {
+                if (p === id) {                          
+                    // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
+                    totInHead += parcel.reward;
+                }
+            }
+        }
+
+        var utility = totInHead;
+
+        // if (item && item.predicate[4] != totInHead) 
+        //     // console.log("Item found: ", item);THERE WE WILL CHANGE ACCORDING TO HOW MANY PARCELS HAS PLAYER IN HIS HEAD
+            
+
+        // myAgent.intention_queue = myAgent.intention_queue.filter(item => item.predicate[0] !== "go_put_down");
         
-        console.log("\n\n\nChanging utility from ", item.predicate[4], " to ", utility, " for go_put_down action.\n\n\n")
+        // console.log("\n\n\nChanging utility from ", item.predicate[4], " to ", utility, " for go_put_down action.\n\n\n")
 
         myAgent.push( [ 'go_put_down', "", "", "", utility ] )
         

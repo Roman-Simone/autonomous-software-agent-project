@@ -10,6 +10,7 @@ export { Agent };
 class Agent {
 
     intention_queue = new Array();
+    parcelsInMind = [];
 
     async intentionLoop() {
         
@@ -20,12 +21,24 @@ class Agent {
                 const intention = this.intention_queue[0];
 
                 // Start achieving intention
-                await intention.achieve()
+                let ret = await intention.achieve()
+
                 // Catch eventual error and continue
                 .catch( error => {
-                    // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
-                } );
 
+                    console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                } );
+                
+                if (ret == true) {
+                    if (intention.predicate[0] == "go_pick_up") {
+                        let entry = intention.predicate[3]
+                        this.parcelsInMind.push(entry);
+                    }
+                    else if(intention.predicate[0] == "go_put_down") {
+                        this.parcelsInMind = [];
+                    }
+                }
+                console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
                 this.intention_queue.shift();
             }
@@ -48,7 +61,7 @@ class Agent {
     checkSwitch(last) {
 
         let ret = false
-        console.log("last --> " + last);
+        // console.log("last --> " + last);
 
         if (last) {
             if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {
@@ -82,12 +95,12 @@ class Agent {
 
         this.intention_queue = this.bubbleSort(this.intention_queue);
 
-        this.printQueue("push");
+        // this.printQueue("push");
 
         // console.log(this.createString(current) + " pushed");
 
         if (this.checkSwitch(last)) {
-            console.log("switching intention");
+            // console.log("switching intention");
             last.stop();
         }
     }
