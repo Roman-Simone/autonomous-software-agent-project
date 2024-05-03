@@ -48,36 +48,35 @@ class Agent {
         return ret;
     }
 
-    async push(desire, ...args) {
+    async push(predicate) {
 
         const last = this.intention_queue[0];
 
         //Check if the intention is already in the queue and in case upadate it
         for (let i = 0; i < this.intention_queue.length; i++) {
 
-            if (this.intention_queue[i].desire == "go_pick_up" && args[0].id == this.intention_queue[i].args[0].id) {
+            if (this.intention_queue[i][0] == "go_pick_up" && predicate[3] == this.intention_queue[i][3]) {
                 this.intention_queue.splice(i, 1);
             }
 
-            else if (this.intention_queue[i].desire == "go_put_down" && desire == "go_put_down") {
+            else if (this.intention_queue[i][0] == "go_put_down" && predicate[0] == "go_put_down") {
                 this.intention_queue.splice(i, 1);
             }
         }
 
-        const current = new Intention(desire, ...args)
+        const current = new Intention(this, predicate)
         this.intention_queue.push(current);
 
-        this.sortQueue();
+        // this.intention_queue = this.sortQueue();
 
-        // this.printQcueue("push");
+        // this.intentionLoop = this.printQueue("push");
         
         // console.log(this.createString(current) + " pushed");
         
-
-        if (this.checkSwitch(last)) {
-            console.log("switching intention");
-            last.stop();
-        }
+        // if (this.checkSwitch(last)) {
+        //     console.log("switching intention");
+        //     last.stop();
+        // }
     }
 
     async stop() {
@@ -88,7 +87,8 @@ class Agent {
     }
 
     sortQueue() {
-        this.intention_queue.sort((a, b) => b.args[1].utility - a.args[1].utility);
+        let ret = this.intention_queue.sort((a, b) => b.args[1].utility - a.args[1].utility);
+        return ret;
     }
 
     printQueue(zone = "") {

@@ -58,11 +58,12 @@ function agentLoop() {
 
                 // console.log("Parcel: ", parcel, " - utility: ", util);
                 // Add option to options array
-                options.push({
-                    desire: 'go_pick_up',
-                    args: [parcel],
-                    utility: util
-                });
+                // options.push({
+                //     desire: 'go_pick_up',
+                //     args: [parcel],
+                //     utility: score
+                // });
+                options.push( [ 'go_pick_up', parcel.x, parcel.y, parcel.id, score ] )
             }
         }
     }
@@ -71,28 +72,21 @@ function agentLoop() {
      * Select best intention from available options
      */
     let best_option = null;
-    let highest_utility = Number.MIN_VALUE;
     for (const option of options) {
-        let parcel = option.args[0];
-        let util = option.utility;
-        const dist = distance(me, parcel);
-        // Select option with nearest distance and a reward score greater than 2
-        if (util > 2 && util > highest_utility) {
-            highest_utility = util;
             best_option = option;
-        }
+            myAgent.push(best_option);
     }
 
     /**
      * Revise/queue intention if a best option is found
      */
-    if (best_option) {
-        // console.log("Pushing best option: ", best_option);
+    // if (best_option) {
+    //     // console.log("Pushing best option: ", best_option);
 
-        // Push best option to agent intention queue
-        myAgent.push(best_option.desire, ...best_option.args, best_option.utility); 
-        // myAgent.push('go_put_down', []);
-    }
+    //     // Push best option to agent intention queue
+    //     myAgent.push(best_option.desire, ...best_option.args, best_option.utility); 
+    //     // myAgent.push('go_put_down', []);
+    // }
 }
 
 // Function to trigger agentLoop when parcels are sensed
