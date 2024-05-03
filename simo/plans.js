@@ -147,7 +147,7 @@ class BlindMove extends Plan {
 
 
 
-class BFS extends Plan {
+class GoToBFS extends Plan {
     static isApplicableTo ( go_to_BFS, x, y, id, utility ) {
         return go_to_BFS == 'go_to_BFS';
     }
@@ -159,6 +159,7 @@ class BFS extends Plan {
 
 
         for (var i = 0; i < path.length; i++) {
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
             // console.log("move")
             var next_x = path[i].x;
             var next_y = path[i].y;
@@ -221,5 +222,5 @@ const plans = [];
 
 plans.push( GoPickUp )
 // plans.push( new BlindMove() )
-plans.push( BFS )
+plans.push( GoToBFS )
 plans.push( GoPutDown )
