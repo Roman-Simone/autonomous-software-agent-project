@@ -1,4 +1,4 @@
-import { plans } from './plans.js';
+import { plans, Plan, GoPickUp } from './plans.js';
 export { Intention };
 
 
@@ -63,20 +63,21 @@ class Intention {
 
             // if stopped then quit
             if ( this.stopped ) throw [ 'stopped intention', ...this.predicate ];
-
             // if plan is 'statically' applicable
+
             if ( planClass.isApplicableTo( ...this.predicate ) ) {
                 // plan is instantiated
+                
                 this.#current_plan = new planClass(this.parent);
-                this.log('achieving intention', ...this.predicate, 'with plan', planClass.name);
+                // this.log('achieving intention', ...this.predicate, 'with plan', planClass.name);
                 // and plan is executed and result returned
                 try {
                     const plan_res = await this.#current_plan.execute( ...this.predicate );
-                    this.log( 'succesful intention', ...this.predicate, 'with plan', planClass.name, 'with result:', plan_res );
+                    // this.log( 'succesful intention', ...this.predicate, 'with plan', planClass.name, 'with result:', plan_res );
                     return plan_res
                 // or errors are caught so to continue with next plan
                 } catch (error) {
-                    this.log( 'failed intention', ...this.predicate,'with plan', planClass.name, 'with error:', ...error );
+                    // this.log( 'failed intention', ...this.predicate,'with plan', planClass.name, 'with error:', ...error );
                 }
             }
 

@@ -1,7 +1,7 @@
 
 import { Intention } from './intention.js';
 import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe } from './utils.js';
-export { plans };
+export { plans, Plan, GoPickUp };
 
 
 /**
@@ -53,8 +53,8 @@ class Plan {
 
 class GoPickUp extends Plan {
 
-    isApplicableTo ( go_pick_up, x, y, id ) {
-        return desire == 'go_pick_up';
+    static isApplicableTo ( go_pick_up, x, y, id, score ) {
+        return go_pick_up == 'go_pick_up';
     }
 
     async execute ( go_pick_up, x, y ) {
@@ -70,8 +70,8 @@ class GoPickUp extends Plan {
 
 class GoPutDown extends Plan {
     
-        isApplicableTo ( go_put_down, x, y, id ) {
-            return desire == 'go_put_down';
+        static isApplicableTo ( go_put_down, x, y, id, utility ) {
+            return go_put_down == 'go_put_down';
         }
     
         async execute ( go_put_down, x, y ) {
@@ -148,8 +148,8 @@ class BlindMove extends Plan {
 
 
 class BFS extends Plan {
-    isApplicableTo ( go_to_BFS, x, y, id ) {
-        return desire == 'go_to_BFS';
+    static isApplicableTo ( go_to_BFS, x, y, id, utility ) {
+        return go_to_BFS == 'go_to_BFS';
     }
 
     async execute ( go_to_BFS, x, y ) {
@@ -219,7 +219,7 @@ class BFS extends Plan {
 
 const plans = [];
 
-plans.push( new GoPickUp() )
-plans.push( new BlindMove() )
-plans.push( new BFS() )
-plans.push( new GoPutDown() )
+plans.push( GoPickUp )
+// plans.push( new BlindMove() )
+plans.push( BFS )
+plans.push( GoPutDown )
