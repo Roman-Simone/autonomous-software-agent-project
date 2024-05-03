@@ -12,36 +12,67 @@ class Agent {
     intention_queue = new Array();
 
     async intentionLoop() {
-        while (true) {
+        // while (true) {
 
+        //     // Consumes intention_queue if not empty
+        //     if (this.intention_queue.length > 0) {
+        //         // Current intention
+        //         const intention = this.intention_queue[0];
+                
+
+                
+        //         // Start achieving intention
+        //         await intention.achieve();
+
+        //         .catch( error => {
+        //             // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+        //         } );
+
+        //         // Remove from the queue
+        //         this.intention_queue.shift();
+        //     }
+        //     await new Promise(res => setImmediate(res));
+
+        // }
+        while ( true ) {
             // Consumes intention_queue if not empty
-            if (this.intention_queue.length > 0) {
+            if ( this.intention_queue.length > 0 ) {
                 // Current intention
                 const intention = this.intention_queue[0];
 
                 // Start achieving intention
-                await intention.achieve();
+                await intention.achieve()
+                // Catch eventual error and continue
+                .catch( error => {
+                    // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                } );
 
                 // Remove from the queue
                 this.intention_queue.shift();
             }
-            await new Promise(res => setImmediate(res));
-
+            // Postpone next iteration at setImmediate
+            await new Promise( res => setImmediate( res ) );
         }
     }
 
 
-    createString(intention) {
-        return intention.desire + ' ' + intention.args[0].id;
+    createString(predicate) {
+        if (predicate[0] == "go_pick_up") {
+            return predicate[0] + predicate[3];
+        }
+        else if (predicate[0] == "go_put_down") {
+            return predicate[0];
+        }
+        return "undefined";
     }
 
-    checkSwitch(last_intention) {
+    checkSwitch(last) {
 
         let ret = false
-        console.log("last --> " + last_intention);
+        console.log("last --> " + last);
 
-        if (last_intention != undefined) {
-            if (this.createString(last_intention) != this.createString(this.intention_queue[0])) {
+        if (last) {
+            if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {
                 ret = true;
             }
         }
@@ -52,31 +83,34 @@ class Agent {
 
         const last = this.intention_queue[0];
 
+        let update = false;
         //Check if the intention is already in the queue and in case upadate it
         for (let i = 0; i < this.intention_queue.length; i++) {
-
-            if (this.intention_queue[i][0] == "go_pick_up" && predicate[3] == this.intention_queue[i][3]) {
-                this.intention_queue.splice(i, 1);
-            }
-
-            else if (this.intention_queue[i][0] == "go_put_down" && predicate[0] == "go_put_down") {
-                this.intention_queue.splice(i, 1);
+            // console.log("comparing " + this.createString(predicate) + " with " + this.createString(this.intention_queue[i].predicate));
+            if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
+                this.intention_queue[i].predicate[4] = predicate[4];
+                update = true;
             }
         }
 
-        const current = new Intention(this, predicate)
-        this.intention_queue.push(current);
+        if (!update) {
+            const current = new Intention(this, predicate)
+            this.intention_queue.push(current);
+        }
 
-        // this.intention_queue = this.sortQueue();
 
-        // this.intentionLoop = this.printQueue("push");
-        
+
+
+        this.intention_queue = this.bubbleSort(this.intention_queue);
+
+        this.printQueue("push");
+
         // console.log(this.createString(current) + " pushed");
-        
-        // if (this.checkSwitch(last)) {
-        //     console.log("switching intention");
-        //     last.stop();
-        // }
+
+        if (this.checkSwitch(last)) {
+            console.log("switching intention");
+            last.stop();
+        }
     }
 
     async stop() {
@@ -86,15 +120,29 @@ class Agent {
         }
     }
 
-    sortQueue() {
-        let ret = this.intention_queue.sort((a, b) => b.args[1].utility - a.args[1].utility);
-        return ret;
+    bubbleSort(arr) {
+        const n = arr.length;
+        let swapped;
+
+        do {
+            swapped = false;
+            for (let i = 0; i < n - 1; i++) {
+                if (arr[i].predicate[4] < arr[i + 1].predicate[4]) {  //switch < > to change sorting order
+                    const temp = arr[i];
+                    arr[i] = arr[i + 1];
+                    arr[i + 1] = temp;
+                    swapped = true;
+                }
+            }
+        } while (swapped);
+
+        return arr;
     }
 
     printQueue(zone = "") {
         console.log('\n[START QUEUE] called from ' + zone);
         for (let i = 0; i < this.intention_queue.length; i++) {
-            console.log("\t[ELEMENT " + i + "]: " + this.intention_queue[i].desire + " PARCELL->" + this.intention_queue[i].args[0] + " UTILITY->" + this.intention_queue[i].args[1]);
+            console.log("\t[ELEMENT " + i + "]: " + this.intention_queue[i].predicate[0] + " PARCELL->" + this.intention_queue[i].predicate[3] + " UTILITY->" + this.intention_queue[i].predicate[4]);
         }
         console.log('[END QUEUE]\n')
     }
