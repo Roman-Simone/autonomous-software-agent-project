@@ -80,7 +80,7 @@ class GoPutDown extends Plan {
             var y = -1;
             nearest_delivery = find_nearest_delivery();
             x = nearest_delivery.x;
-            y = nearest_delivery.y;
+            y = nearest_delivery.y;            
             
             if ( this.stopped ) throw ['stopped']; // if stopped then quit
             await this.subIntention( ['go_to_BFS', x, y] );
