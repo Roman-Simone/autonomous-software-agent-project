@@ -8,20 +8,44 @@ export { plans };
  * Plan library
  */
 
+
 class Plan {
 
+    // This is used to stop the plan
+    #stopped = false;
     stop () {
-        console.log( 'stop plan and all sub intentions');
+        // this.log( 'stop plan' );
+        this.#stopped = true;
         for ( const i of this.#sub_intentions ) {
             i.stop();
         }
     }
+    get stopped () {
+        return this.#stopped;
+    }
 
+    /**
+     * #parent refers to caller
+     */
+    #parent;
+
+    constructor ( parent ) {
+        this.#parent = parent;
+    }
+
+    log ( ...args ) {
+        if ( this.#parent && this.#parent.log )
+            this.#parent.log( '\t', ...args )
+        else
+            console.log( ...args )
+    }
+
+    // this is an array of sub intention. Multiple ones could eventually being achieved in parallel.
     #sub_intentions = [];
 
-    async subIntention ( desire, ...args ) {
-        const sub_intention = new Intention( desire, ...args );
-        this.#sub_intentions.push(sub_intention);
+    async subIntention ( predicate ) {
+        const sub_intention = new Intention( this, predicate );
+        this.#sub_intentions.push( sub_intention );
         return await sub_intention.achieve();
     }
 
@@ -29,33 +53,41 @@ class Plan {
 
 class GoPickUp extends Plan {
 
-    isApplicableTo ( desire ) {
+    isApplicableTo ( go_pick_up, x, y, id ) {
         return desire == 'go_pick_up';
     }
 
-    async execute ( {x, y} ) {
-        await this.subIntention( 'go_to_BFS', {x, y} );
+    async execute ( go_pick_up, x, y ) {
+        if ( this.stopped ) throw ['stopped']; // if stopped then quit
+        await this.subIntention( ['go_to_BFS', x, y] );
+        if ( this.stopped ) throw ['stopped']; // if stopped then quit
         await client.pickup()
+        if ( this.stopped ) throw ['stopped']; // if stopped then quit
+        return true;
         // await this.subIntention( 'go_put_down');
     }
 }
 
 class GoPutDown extends Plan {
     
-        isApplicableTo ( desire ) {
+        isApplicableTo ( go_put_down, x, y, id ) {
             return desire == 'go_put_down';
         }
     
-        async execute ( ) {
+        async execute ( go_put_down, x, y ) {
             let nearest_delivery = {x: -1, y: -1};
             var x = -1;
             var y = -1;
             nearest_delivery = find_nearest_delivery();
             x = nearest_delivery.x;
             y = nearest_delivery.y;
-
-            await this.subIntention( 'go_to_BFS', {x, y} );
+            
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
+            await this.subIntention( ['go_to_BFS', x, y] );
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
             await client.putdown()
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
+            return true;
             
         }
     
@@ -113,25 +145,14 @@ class BlindMove extends Plan {
 }
 
 
-function isInt(x, y){
-    
-    const decimalPartX = x % 1;
-    const decimalPartY = y % 1;
-    
-    if (decimalPartX > 0 || decimalPartY > 0) {
-        return false;
-    } else {
-        return true;
-    }
 
-}
 
 class BFS extends Plan {
-    isApplicableTo ( desire ) {
+    isApplicableTo ( go_to_BFS, x, y, id ) {
         return desire == 'go_to_BFS';
     }
 
-    async execute ( {x, y} ) {
+    async execute ( go_to_BFS, x, y ) {
         var path = findPath_BFS(x, y);
         // console.log('path', path);
         // console.log(path.length)

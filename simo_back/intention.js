@@ -10,7 +10,9 @@ class Intention extends Promise {
     #current_plan;
     stop () {
         console.log( 'stop intention and current plan');
-        this.#current_plan.stop();
+        console.log( 'current intention --> ', this.#current_plan);
+        if (this.#current_plan != undefined)
+            this.#current_plan.stop();
     }
 
     desire;
