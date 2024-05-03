@@ -1,27 +1,51 @@
 
 import { Intention } from './intention.js';
 import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe } from './utils.js';
-export { plans };
+export { plans, Plan, GoPickUp };
 
 
 /**
  * Plan library
  */
 
+
 class Plan {
 
+    // This is used to stop the plan
+    #stopped = false;
     stop () {
-        console.log( 'stop plan and all sub intentions');
+        // this.log( 'stop plan' );
+        this.#stopped = true;
         for ( const i of this.#sub_intentions ) {
             i.stop();
         }
     }
+    get stopped () {
+        return this.#stopped;
+    }
 
+    /**
+     * #parent refers to caller
+     */
+    #parent;
+
+    constructor ( parent ) {
+        this.#parent = parent;
+    }
+
+    log ( ...args ) {
+        if ( this.#parent && this.#parent.log )
+            this.#parent.log( '\t', ...args )
+        else
+            console.log( ...args )
+    }
+
+    // this is an array of sub intention. Multiple ones could eventually being achieved in parallel.
     #sub_intentions = [];
 
-    async subIntention ( desire, ...args ) {
-        const sub_intention = new Intention( desire, ...args );
-        this.#sub_intentions.push(sub_intention);
+    async subIntention ( predicate ) {
+        const sub_intention = new Intention( this, predicate );
+        this.#sub_intentions.push( sub_intention );
         return await sub_intention.achieve();
     }
 
@@ -29,33 +53,41 @@ class Plan {
 
 class GoPickUp extends Plan {
 
-    isApplicableTo ( desire ) {
-        return desire == 'go_pick_up';
+    static isApplicableTo ( go_pick_up, x, y, id, score ) {
+        return go_pick_up == 'go_pick_up';
     }
 
-    async execute ( {x, y} ) {
-        await this.subIntention( 'go_to_BFS', {x, y} );
+    async execute ( go_pick_up, x, y ) {
+        if ( this.stopped ) throw ['stopped']; // if stopped then quit
+        await this.subIntention( ['go_to_BFS', x, y] );
+        if ( this.stopped ) throw ['stopped']; // if stopped then quit
         await client.pickup()
+        if ( this.stopped ) throw ['stopped']; // if stopped then quit
+        return true;
         // await this.subIntention( 'go_put_down');
     }
 }
 
 class GoPutDown extends Plan {
     
-        isApplicableTo ( desire ) {
-            return desire == 'go_put_down';
+        static isApplicableTo ( go_put_down, x, y, id, utility ) {
+            return go_put_down == 'go_put_down';
         }
     
-        async execute ( ) {
+        async execute ( go_put_down, x, y ) {
             let nearest_delivery = {x: -1, y: -1};
             var x = -1;
             var y = -1;
             nearest_delivery = find_nearest_delivery();
             x = nearest_delivery.x;
             y = nearest_delivery.y;
-
-            await this.subIntention( 'go_to_BFS', {x, y} );
+            
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
+            await this.subIntention( ['go_to_BFS', x, y] );
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
             await client.putdown()
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
+            return true;
             
         }
     
@@ -113,50 +145,57 @@ class BlindMove extends Plan {
 }
 
 
-function isInt(x, y){
-    
-    const decimalPartX = x % 1;
-    const decimalPartY = y % 1;
-    
-    if (decimalPartX > 0 || decimalPartY > 0) {
-        return false;
-    } else {
-        return true;
+
+
+class GoToBFS extends Plan {
+    static isApplicableTo ( go_to_BFS, x, y, id, utility ) {
+        return go_to_BFS == 'go_to_BFS';
     }
 
-}
-
-class BFS extends Plan {
-    isApplicableTo ( desire ) {
-        return desire == 'go_to_BFS';
-    }
-
-    async execute ( {x, y} ) {
+    async execute ( go_to_BFS, x, y ) {
         var path = findPath_BFS(x, y);
-        console.log('path', path);
-        console.log(path.length)
+        // console.log('path', path);
+        // console.log(path.length)
 
 
         for (var i = 0; i < path.length; i++) {
-            console.log("move")
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
+            // console.log("move")
             var next_x = path[i].x;
             var next_y = path[i].y;
-            let status_x = undefined;
-
             
 
+            let status_x = false;
+            let status_y = false;
+
             if (next_x == me.x + 1) {
-                await client.move('right');
+                status_x = await client.move('right');
             } 
             else if (next_x == me.x - 1) {
-                await client.move('left');
+                status_x = await client.move('left');
             } 
-            else if (next_y == me.y + 1) {
-                await client.move('up');
+
+            // if (status_x) {
+            //     me.x = status_x.x;
+            //     me.y = status_x.y;
+            // }
+
+            if (next_y == me.y + 1) {
+                status_y = await client.move('up');
             } 
             else if (next_y == me.y - 1) {
-                await client.move('down');
+                status_y = await client.move('down');
             }
+
+            // if (status_y) {
+            //     me.x = status_y.x;
+            //     me.y = status_y.y;
+            // }
+            
+            // if ( ! status_x && ! status_y) {
+            //     console.log('Failed moving')
+            //     throw 'stucked';
+            // }
            
                 
             await client.onYou(({ id, name, x_me, y_me, score }) => {
@@ -174,27 +213,14 @@ class BFS extends Plan {
                 me.score = score;
             });
             
-            // await updateMe();
-            // new Promise((resolve) => {
-            //     client.onYou( ( {id, name, x, y, score} ) => {
-            //         // console.log('me', {id, name, x, y, score})
-            //         me.id = id
-            //         me.name = name
-            //         me.x = x
-            //         me.y = y
-            //         me.score = score
-            //     } );
-            // });
-            // await updateMe();
-            // me.x = next_x;
-            // me.y = next_y;
+            //CHECK 
         }
     }
 }
 
 const plans = [];
 
-plans.push( new GoPickUp() )
-plans.push( new BlindMove() )
-plans.push( new BFS() )
-plans.push( new GoPutDown() )
+plans.push( GoPickUp )
+// plans.push( new BlindMove() )
+plans.push( GoToBFS )
+plans.push( GoPutDown )
