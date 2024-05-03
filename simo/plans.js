@@ -141,22 +141,39 @@ class BFS extends Plan {
             // console.log("move")
             var next_x = path[i].x;
             var next_y = path[i].y;
-            let status_x = undefined;
-
             
 
+            let status_x = false;
+            let status_y = false;
+
             if (next_x == me.x + 1) {
-                await client.move('right');
+                status_x = await client.move('right');
             } 
             else if (next_x == me.x - 1) {
-                await client.move('left');
+                status_x = await client.move('left');
             } 
-            else if (next_y == me.y + 1) {
-                await client.move('up');
+
+            // if (status_x) {
+            //     me.x = status_x.x;
+            //     me.y = status_x.y;
+            // }
+
+            if (next_y == me.y + 1) {
+                status_y = await client.move('up');
             } 
             else if (next_y == me.y - 1) {
-                await client.move('down');
+                status_y = await client.move('down');
             }
+
+            // if (status_y) {
+            //     me.x = status_y.x;
+            //     me.y = status_y.y;
+            // }
+            
+            // if ( ! status_x && ! status_y) {
+            //     console.log('Failed moving')
+            //     throw 'stucked';
+            // }
            
                 
             await client.onYou(({ id, name, x_me, y_me, score }) => {
