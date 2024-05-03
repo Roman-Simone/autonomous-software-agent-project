@@ -10,52 +10,47 @@ export { Agent };
 class Agent {
 
     intention_queue = new Array();
-    current_intention = undefined;
 
     async intentionLoop() {
         while (true) {
+
             // Consumes intention_queue if not empty
             if (this.intention_queue.length > 0) {
                 // Current intention
-                current_intention = this.intention_queue[0];
+                const intention = this.intention_queue[0];
 
                 // Start achieving intention
-                await current_intention.achieve();
+                await intention.achieve();
 
                 // Remove from the queue
-                // this.intention_queue.shift();
-                this.removeElement(current_intention);
+                this.intention_queue.shift();
             }
             await new Promise(res => setImmediate(res));
+
         }
     }
 
-    async removeElement(element){
-        
+
+    createString(intention) {
+        return intention.desire + ' ' + intention.args[0].id;
     }
 
+    checkSwitch(last_intention) {
 
-    //Function to check if the current intention is the last one in the queue
-    async checkIsDone() {
-        let ret = false;
-        let id_parcel = -1;
+        let ret = false
+        console.log("last --> " + last_intention);
 
-        if (this.current_intention == undefined) {
-            ret = false;
+        if (last_intention != undefined) {
+            if (this.createString(last_intention) != this.createString(this.intention_queue[0])) {
+                ret = true;
+            }
         }
-        else if (this.current_intention.desire == "go_put_down" && this.intention_queue[0].desire != "go_put_down") {
-            ret = true;
-        }
-        else if (this.current_intention.desire == "go_pick_up" && this.intention_queue[0].args[0].id != this.current_intention.args[0].id) {
-            ret = true;
-            id_parcel = this.current_intention.args[0].id;
-        }
-
-        return { ret, id_parcel };
+        return ret;
     }
-
 
     async push(desire, ...args) {
+
+        const last = this.intention_queue[0];
 
         //Check if the intention is already in the queue and in case upadate it
         for (let i = 0; i < this.intention_queue.length; i++) {
@@ -74,8 +69,15 @@ class Agent {
 
         this.sortQueue();
 
-        this.printQueue("push");
-        this.checkQueue();
+        // this.printQcueue("push");
+        
+        // console.log(this.createString(current) + " pushed");
+        
+
+        if (this.checkSwitch(last)) {
+            console.log("switching intention");
+            last.stop();
+        }
     }
 
     async stop() {
@@ -86,7 +88,7 @@ class Agent {
     }
 
     sortQueue() {
-        this.intention_queue.sort((a, b) => a.args[1].utility - b.args[1].utility);
+        this.intention_queue.sort((a, b) => b.args[1].utility - a.args[1].utility);
     }
 
     printQueue(zone = "") {
