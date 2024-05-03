@@ -12,28 +12,7 @@ class Agent {
     intention_queue = new Array();
 
     async intentionLoop() {
-        // while (true) {
-
-        //     // Consumes intention_queue if not empty
-        //     if (this.intention_queue.length > 0) {
-        //         // Current intention
-        //         const intention = this.intention_queue[0];
-                
-
-                
-        //         // Start achieving intention
-        //         await intention.achieve();
-
-        //         .catch( error => {
-        //             // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
-        //         } );
-
-        //         // Remove from the queue
-        //         this.intention_queue.shift();
-        //     }
-        //     await new Promise(res => setImmediate(res));
-
-        // }
+        
         while ( true ) {
             // Consumes intention_queue if not empty
             if ( this.intention_queue.length > 0 ) {
