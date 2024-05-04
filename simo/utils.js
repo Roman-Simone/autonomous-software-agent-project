@@ -4,7 +4,7 @@ export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, myp
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY0OWIzNDI1ZDdlIiwibmFtZSI6ImdvZCIsImlhdCI6MTcxMTQ1MzMxN30.oixFXuclRDvyfEU7-vugB9uG2wsddGDWFa-_gzzd8-o'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhMzg0ODI4ZmViIiwibmFtZSI6InBqIiwiaWF0IjoxNzE0NzY1MjAyfQ.X0v8q8rT_nJmPVWF3fkORZFBSBT59ifbUWghzRd6gSQ'
 )
 
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {

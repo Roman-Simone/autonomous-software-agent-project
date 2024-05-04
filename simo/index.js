@@ -14,7 +14,7 @@ await client.onMap((width, height, tiles) => {
     // console.log("Map initialized: ", map);
 
     // Extract delivery coordinates from tiles
-    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({x: t.x, y: t.y}));
+    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 
     // console.log("Delivery coordinates: ", deliveryCoordinates);
 });
@@ -61,7 +61,7 @@ function agentLoop() {
                 //     args: [parcel],
                 //     utility: score
                 // });
-                options.push( [ 'go_pick_up', parcel.x, parcel.y, parcel.id, score ] )
+                options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, score])
             }
         }
     }
@@ -72,52 +72,22 @@ function agentLoop() {
 
     let best_option = null;
     for (const option of options) {
-            best_option = option;
-            myAgent.push(best_option);
-    
+        best_option = option;
+        myAgent.push(best_option);
+
     }
 
-
-    if (myAgent.intention_queue.some(item => item.predicate[0] === "go_put_down")) {
-        const item  = myAgent.intention_queue.find(item => item.predicate[0] === "go_put_down");
-
-        var totInHead = item.predicate[4];
-        for(let p of myAgent.parcelsInMind) {
-            for (const [id, parcel] of parcels.entries()) {
-                if (p === id) {                          
-                    // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
-                    totInHead += parcel.reward;
-                }
+    let totInHead = 0;
+    for (let p of myAgent.parcelsInMind) {
+        for (const [id, parcel] of parcels.entries()) {
+            if (p === id) {
+                totInHead += parcel.reward;
             }
         }
-
-        var utility = totInHead;
-
-        // if (item && item.predicate[4] != totInHead) 
-        //     // console.log("Item found: ", item);THERE WE WILL CHANGE ACCORDING TO HOW MANY PARCELS HAS PLAYER IN HIS HEAD
-            
-
-        // myAgent.intention_queue = myAgent.intention_queue.filter(item => item.predicate[0] !== "go_put_down");
-        
-        // console.log("\n\n\nChanging utility from ", item.predicate[4], " to ", utility, " for go_put_down action.\n\n\n")
-
-        myAgent.push( [ 'go_put_down', "", "", "", utility ] )
-        
-    } else {
-        myAgent.push( [ 'go_put_down', "", "", "", 0 ] )
     }
 
+    myAgent.push(['go_put_down', "", "", "", totInHead])
 
-    /**
-     * Revise/queue intention if a best option is found
-     */
-    // if (best_option) {
-    //     // console.log("Pushing best option: ", best_option);
-
-    //     // Push best option to agent intention queue
-    //     myAgent.push(best_option.desire, ...best_option.args, best_option.utility); 
-    //     // myAgent.push('go_put_down', []);
-    // }
 }
 
 // Function to trigger agentLoop when parcels are sensed
