@@ -4,9 +4,8 @@ export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, myp
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY0OWIzNDI1ZDdlIiwibmFtZSI6ImdvZCIsImlhdCI6MTcxMTQ1MzMxN30.oixFXuclRDvyfEU7-vugB9uG2wsddGDWFa-_gzzd8-o'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRmMGJlNTRiOTMwIiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxMzMzODI0OH0.7RahzmJmay_pfog1J2IdvkgwF43tM9nBOJBd2eBM7yM'
 )
-
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
     const dx = Math.abs( Math.round(x1) - Math.round(x2) )
     const dy = Math.abs( Math.round(y1) - Math.round(y2) )
