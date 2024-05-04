@@ -157,7 +157,6 @@ function find_nearest_delivery(){
 
     let min_distance = 1000000;
     let nearest_delivery = {x: -1, y: -1};
-
     for (var i = 0; i < deliveryCoordinates.length; i++) {
         if (distance(me, deliveryCoordinates[i]) < min_distance) {
             min_distance = distance(me, deliveryCoordinates[i]);
