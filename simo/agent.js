@@ -34,6 +34,7 @@ class Agent {
             if ( this.intention_queue.length > 0 ) {
                 // Current intention
                 const intention = this.intention_queue[0];
+                console.log(intention.predicate[0]);
 
                 // Start achieving intention
                 let ret = await intention.achieve()
@@ -42,6 +43,7 @@ class Agent {
                 .catch( error => {
 
                     // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                    this.remove(intention.predicate);
                 } );
                 
                 if (ret == true) {
@@ -55,10 +57,21 @@ class Agent {
                 }
                 // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
-                this.intention_queue.shift();
+                this.remove(intention.predicate);
             }
             // Postpone next iteration at setImmediate
             await new Promise( res => setImmediate( res ) );
+        }
+    }
+
+    async remove(predicate) {
+        // if (predicate[0] == "go_put_down") {
+        //     return;
+        // }
+        for (let i = 0; i < this.intention_queue.length; i++) {
+            if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
+                this.intention_queue.splice(i, 1);
+            }
         }
     }
 
@@ -83,7 +96,7 @@ class Agent {
 
         this.intention_queue = this.bubbleSort(this.intention_queue);
 
-        this.printQueue("push");
+        // this.printQueue("push");
 
         // console.log(this.createString(current) + " pushed");
 
@@ -99,6 +112,7 @@ class Agent {
             intention.stop();
         }
     }
+
 
     createString(predicate) {
         if (predicate[0] == "go_pick_up") {

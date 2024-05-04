@@ -86,7 +86,7 @@ function agentLoop() {
         }
     }
 
-    console.log("Options: ", options);
+    // console.log("Options: ", options);
     /**
      * Select best intention from available options
      */

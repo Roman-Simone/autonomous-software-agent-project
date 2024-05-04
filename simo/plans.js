@@ -78,6 +78,7 @@ class GoPutDown extends Plan {
             let nearest_delivery = {x: -1, y: -1};
             var x = -1;
             var y = -1;
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
             nearest_delivery = find_nearest_delivery();
             x = nearest_delivery.x;
             y = nearest_delivery.y;
