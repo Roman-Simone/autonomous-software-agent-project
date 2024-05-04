@@ -1,6 +1,6 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe } from './utils.js';
+import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, parcels } from './utils.js';
 export { plans, Plan, GoPickUp };
 
 
@@ -161,8 +161,8 @@ class GoToBFS extends Plan {
         for (var i = 0; i < path.length; i++) {
             if ( this.stopped ) throw ['stopped']; // if stopped then quit
             // console.log("move")
-
-            // await client.pickup()
+            
+            // let ok = false;
 
             var next_x = path[i].x;
             var next_y = path[i].y;
@@ -214,6 +214,13 @@ class GoToBFS extends Plan {
                 else
                     me.y = y_me;
                 me.score = score;
+            
+                // for(let p of parcels){
+                //     if(p.x == me.x && p.y == me.y){
+                //         ok = true;
+                //     }
+                // }
+    
             });
             
             //CHECK 

@@ -12,6 +12,21 @@ class Agent {
     intention_queue = new Array();
     parcelsInMind = [];
 
+    get_inmind_score(){
+        var tot_score = 0;
+
+        for(let p of this.parcelsInMind) {
+            for (const [id, parcel] of parcels.entries()) {
+                if (p === id) {                          
+                    // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
+                    tot_score += parcel.reward;
+                }
+            }
+        }
+
+        return tot_score;
+    }
+
     async intentionLoop() {
         
         while ( true ) {
@@ -38,7 +53,7 @@ class Agent {
                         this.parcelsInMind = [];
                     }
                 }
-                console.log("inmind", this.parcelsInMind);
+                // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
                 this.intention_queue.shift();
             }
@@ -89,9 +104,6 @@ class Agent {
             const current = new Intention(this, predicate)
             this.intention_queue.push(current);
         }
-
-
-
 
         this.intention_queue = this.bubbleSort(this.intention_queue);
 
