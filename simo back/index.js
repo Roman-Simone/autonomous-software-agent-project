@@ -58,11 +58,12 @@ function agentLoop() {
 
                 // console.log("Parcel: ", parcel, " - utility: ", util);
                 // Add option to options array
-                options.push({
-                    desire: 'go_pick_up',
-                    args: [parcel],
-                    utility: score
-                });
+                // options.push({
+                //     desire: 'go_pick_up',
+                //     args: [parcel],
+                //     utility: score
+                // });
+                options.push( [ 'go_pick_up', parcel.x, parcel.y, parcel.id, score ] )
             }
         }
     }
@@ -73,7 +74,7 @@ function agentLoop() {
     let best_option = null;
     for (const option of options) {
             best_option = option;
-            myAgent.push(best_option.desire, ...best_option.args, best_option.utility);
+            myAgent.push(best_option);
     }
 
     /**
