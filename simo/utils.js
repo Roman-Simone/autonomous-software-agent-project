@@ -1,12 +1,11 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe}
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, map}
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhMzg0ODI4ZmViIiwibmFtZSI6InBqIiwiaWF0IjoxNzE0NzY1MjAyfQ.X0v8q8rT_nJmPVWF3fkORZFBSBT59ifbUWghzRd6gSQ'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1Y2RlNGI0YjUzIiwibmFtZSI6InNpbW9zIiwiaWF0IjoxNzE0ODU0ODk3fQ.U7EoJqObVza9-UssoEMjTs0FJ7fpPxcDe7zFOVSm8t8'
 )
-
 function distance( {x:x1, y:y1}, {x:x2, y:y2}) {
     const dx = Math.abs( Math.round(x1) - Math.round(x2) )
     const dy = Math.abs( Math.round(y1) - Math.round(y2) )

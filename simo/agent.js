@@ -11,12 +11,25 @@ class Agent {
 
     intention_queue = new Array();
     parcelsInMind = [];
-    #skip = 0;
+
+    get_inmind_score(){
+        var tot_score = 0;
+
+        for(let p of this.parcelsInMind) {
+            for (const [id, parcel] of parcels.entries()) {
+                if (p === id) {                          
+                    // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
+                    tot_score += parcel.reward;
+                }
+            }
+        }
+
+        return tot_score;
+    }
 
     async intentionLoop() {
         
         while ( true ) {
-            // console.log(this.parcelsInMind)
             // Consumes intention_queue if not empty
             if ( this.intention_queue.length > 0 ) {
                 // Current intention
@@ -27,59 +40,26 @@ class Agent {
 
                 // Catch eventual error and continue
                 .catch( error => {
-                    // console.error( error );
+
+                    // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
                 } );
                 
                 if (ret == true) {
-                    // console.log("sono viufberubvcweiubvdiwu")
-                    if (intention.predicate[0] === "go_pick_up") {
-                        console.log("sono viufberubvcweiubvdiwu")
+                    if (intention.predicate[0] == "go_pick_up") {
                         let entry = intention.predicate[3]
                         this.parcelsInMind.push(entry);
-                        for (let i = 0; i<1000000;i++){
-                            console.log(this.createString(intention.predicate) + " pushed");
-                        }
                     }
-                    if(intention.predicate[0] === "go_put_down") {
-                        console.log("put down");
+                    else if(intention.predicate[0] == "go_put_down") {
                         this.parcelsInMind = [];
                     }
                 }
-                // else if (ret == "stucked"){
-                    
-                // }
-                
-
+                // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
-                // this.intention_queue.shift();
+                this.intention_queue.shift();
             }
             // Postpone next iteration at setImmediate
             await new Promise( res => setImmediate( res ) );
         }
-    }
-
-
-    createString(predicate) {
-        if (predicate[0] == "go_pick_up") {
-            return predicate[0] + predicate[3];
-        }
-        else if (predicate[0] == "go_put_down") {
-            return predicate[0];
-        }
-        return "undefined";
-    }
-
-    checkSwitch(last) {
-
-        let ret = false
-        // console.log("last --> " + last);
-
-        if (last) {
-            if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {
-                ret = true;
-            }
-        }
-        return ret;
     }
 
     async push(predicate) {
@@ -118,6 +98,29 @@ class Agent {
         for (const intention of this.intention_queue) {
             intention.stop();
         }
+    }
+
+    createString(predicate) {
+        if (predicate[0] == "go_pick_up") {
+            return predicate[0] + predicate[3];
+        }
+        else if (predicate[0] == "go_put_down") {
+            return predicate[0];
+        }
+        return "undefined";
+    }
+
+    checkSwitch(last) {
+
+        let ret = false
+        // console.log("last --> " + last);
+
+        if (last) {
+            if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {
+                ret = true;
+            }
+        }
+        return ret;
     }
 
     bubbleSort(arr) {

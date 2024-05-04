@@ -74,11 +74,10 @@ class Intention {
                 try {
                     const plan_res = await this.#current_plan.execute( ...this.predicate );
                     // this.log( 'succesful intention', ...this.predicate, 'with plan', planClass.name, 'with result:', plan_res );
-                    return plan_res;
+                    return plan_res
                 // or errors are caught so to continue with next plan
                 } catch (error) {
-                    this.log( 'Error Intention:', ...error );
-                    return "stucked"
+                    // this.log( 'failed intention', ...this.predicate,'with plan', planClass.name, 'with error:', ...error );
                 }
             }
 

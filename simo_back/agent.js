@@ -3,6 +3,7 @@ import { parcels } from './utils.js';
 export { Agent };
 
 
+
 /**
  * Intention execution loop
  */
@@ -10,11 +11,12 @@ class Agent {
 
     intention_queue = new Array();
     parcelsInMind = [];
-
+    #skip = 0;
 
     async intentionLoop() {
         
         while ( true ) {
+            // console.log(this.parcelsInMind)
             // Consumes intention_queue if not empty
             if ( this.intention_queue.length > 0 ) {
                 // Current intention
@@ -25,28 +27,37 @@ class Agent {
 
                 // Catch eventual error and continue
                 .catch( error => {
-
-                    console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                    // console.error( error );
                 } );
                 
                 if (ret == true) {
-                    if (intention.predicate[0] == "go_pick_up") {
-                        let timestamp = new Date().getTime();
-                        let entry = [intention.predicate[3], timestamp]
+                    // console.log("sono viufberubvcweiubvdiwu")
+                    if (intention.predicate[0] === "go_pick_up") {
+                        console.log("sono viufberubvcweiubvdiwu")
+                        let entry = intention.predicate[3]
                         this.parcelsInMind.push(entry);
+                        for (let i = 0; i<1000000;i++){
+                            console.log(this.createString(intention.predicate) + " pushed");
+                        }
                     }
-                    else if(intention.predicate[0] == "go_put_down") {
+                    if(intention.predicate[0] === "go_put_down") {
+                        console.log("put down");
                         this.parcelsInMind = [];
                     }
                 }
-                // console.log("inmind", this.parcelsInMind);
+                // else if (ret == "stucked"){
+                    
+                // }
+                
+
                 // Remove from the queue
-                this.intention_queue.shift();
+                // this.intention_queue.shift();
             }
             // Postpone next iteration at setImmediate
             await new Promise( res => setImmediate( res ) );
         }
     }
+
 
     createString(predicate) {
         if (predicate[0] == "go_pick_up") {
@@ -92,7 +103,7 @@ class Agent {
 
         this.intention_queue = this.bubbleSort(this.intention_queue);
 
-        // this.printQueue("push");
+        this.printQueue("push");
 
         // console.log(this.createString(current) + " pushed");
 
