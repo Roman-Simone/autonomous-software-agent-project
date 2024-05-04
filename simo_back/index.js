@@ -14,7 +14,7 @@ await client.onMap((width, height, tiles) => {
     // console.log("Map initialized: ", map);
 
     // Extract delivery coordinates from tiles
-    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({x: t.x, y: t.y}));
+    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 
     // console.log("Delivery coordinates: ", deliveryCoordinates);
 });
@@ -27,8 +27,6 @@ client.onAgentsSensing(agents => {
         beliefset.set(a.id, a);
     }
 });
-
-
 
 function agentLoop() {
     // Array to store potential intention options
@@ -63,7 +61,7 @@ function agentLoop() {
                 //     args: [parcel],
                 //     utility: score
                 // });
-                options.push( [ 'go_pick_up', parcel.x, parcel.y, parcel.id, score ] )
+                options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, score])
             }
         }
     }
@@ -71,22 +69,25 @@ function agentLoop() {
     /**
      * Select best intention from available options
      */
+
     let best_option = null;
     for (const option of options) {
-            best_option = option;
-            myAgent.push(best_option);
+        best_option = option;
+        myAgent.push(best_option);
+
     }
 
-    /**
-     * Revise/queue intention if a best option is found
-     */
-    // if (best_option) {
-    //     // console.log("Pushing best option: ", best_option);
+    let totInHead = 0;
+    for (let p of myAgent.parcelsInMind) {
+        for (const [id, parcel] of parcels.entries()) {
+            if (p === id) {
+                totInHead += parcel.reward;
+            }
+        }
+    }
 
-    //     // Push best option to agent intention queue
-    //     myAgent.push(best_option.desire, ...best_option.args, best_option.utility); 
-    //     // myAgent.push('go_put_down', []);
-    // }
+    myAgent.push(['go_put_down', "", "", "", totInHead])
+
 }
 
 // Function to trigger agentLoop when parcels are sensed
