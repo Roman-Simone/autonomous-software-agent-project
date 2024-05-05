@@ -3,7 +3,6 @@ import { distance, from_json_to_matrix, find_nearest, client, parcels, me, map, 
 
 // Define global variables
 const beliefset = new Map();
-
 var utilityPutDown = 0;
 
 const k = 1;                // costante per il calcolo della go_put_down utility
@@ -54,7 +53,6 @@ function calculate_putdown_utility(utility) {
     for (let p of myAgent.parcelsInMind) {
         for (const [id, parcel] of parcels.entries()) {
             if (p === id) {
-                // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
                 utility += parcel.reward;
             }
         }
@@ -65,16 +63,38 @@ function calculate_putdown_utility(utility) {
     return utility;
 }
 
+// Function to update the configuration of elements
+//!CONFIGURATION
+// Config received:  {
+//     MAP_FILE: 'map_20',
+//     PARCELS_GENERATION_INTERVAL: '5s',
+//     PARCELS_MAX: '5',
+//     MOVEMENT_STEPS: 1,
+//     MOVEMENT_DURATION: 500,
+//     AGENTS_OBSERVATION_DISTANCE: 5,
+//     PARCELS_OBSERVATION_DISTANCE: 5,
+//     AGENT_TIMEOUT: 10000,
+//     PARCEL_REWARD_AVG: 50,
+//     PARCEL_REWARD_VARIANCE: 10,
+//     PARCEL_DECADING_INTERVAL: 'infinite',
+//     RANDOMLY_MOVING_AGENTS: 2,
+//     RANDOM_AGENT_SPEED: '2s',
+//     CLOCK: 50
+//   }
+var configElements;
+client.onConfig((config) => {
+    configElements = config;
+    console.log("Configuration received: ", configElements);
+});
+
+
 // Function to update beliefset when agents are sensed
 client.onAgentsSensing(agents => {
     // Update beliefset with new agent information
     for (let a of agents) {
-        // console.log("New agent sensed: ", a.id, a.x, a.y, a.score)
         beliefset.set(a.id, a);
     }
 });
-
-
 
 
 // Function to calculate utility of a parcel
@@ -83,7 +103,7 @@ function utilityFunction(parcel) {
     let moltiplicatorDistance = 1
 
     // Calculate utility of picking up the parcel
-    retUtility = parcel.reward - (moltiplicatorDistance * distance(parcel, me));
+    retUtility = parcel.reward - (moltiplicatorDistance * distanceBFS(parcel.x, parcel.y));
 
     return retUtility;
 }
@@ -95,7 +115,6 @@ function utilityFunctionPutDown() {
     for (let p of myAgent.parcelsInMind) {
         for (const [id, parcel] of parcels.entries()) {
             if (p === id) {
-                // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
                 rewardInMind += parcel.reward;
             }
         }
@@ -103,8 +122,6 @@ function utilityFunctionPutDown() {
 
     utilityPutDown = rewardInMind / 2
 }
-
-
 
 
 function agentLoop() {
@@ -119,7 +136,6 @@ function agentLoop() {
             if (util && parcel.reward > 3) {
                 options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
             }
-
         }
     }
     utilityFunctionPutDown();
@@ -145,7 +161,7 @@ function agentLoop() {
 
 
 // Call agentLoop every 5 seconds
-setInterval(agentLoop, 5000);
+setInterval(agentLoop, 3000);
 
 
 // Function to trigger agentLoop when parcels are sensed
@@ -156,3 +172,4 @@ const myAgent = new Agent();
 
 // Start intention loop of the agent
 myAgent.intentionLoop();
+
