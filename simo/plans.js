@@ -159,7 +159,7 @@ class GoToBFS extends Plan {
         // console.log(path.length)
 
 
-        for (var i = 0; i < path.length; i++) {
+        for (var i = 1; i < path.length; i++) {
             if ( this.stopped ) throw ['stopped']; // if stopped then quit
             // console.log("move")
             
@@ -179,10 +179,11 @@ class GoToBFS extends Plan {
                 status_x = await client.move('left');
             } 
 
-            // if (status_x) {
-            //     me.x = status_x.x;
-            //     me.y = status_x.y;
-            // }
+            if (status_x) {
+                me.x = status_x.x;
+                me.y = status_x.y;
+            }
+            if ( this.stopped ) throw ['stopped']; // if stopped then quit
 
             if (next_y == me.y + 1) {
                 status_y = await client.move('up');
@@ -191,38 +192,38 @@ class GoToBFS extends Plan {
                 status_y = await client.move('down');
             }
 
-            // if (status_y) {
-            //     me.x = status_y.x;
-            //     me.y = status_y.y;
-            // }
+            if (status_y) {
+                me.x = status_y.x;
+                me.y = status_y.y;
+            }
             
-            // if ( ! status_x && ! status_y) {
-            //     console.log('Failed moving')
-            //     throw 'stucked';
-            // }
+            if ( ! status_x && ! status_y) {
+                console.log('Failed moving')
+                throw 'stucked';
+            }
            
                 
-            await client.onYou(({ id, name, x_me, y_me, score }) => {
-                // console.log('me', {id, name, x, y, score})
-                me.id = id;
-                me.name = name;
-                if (x_me * 10 != me.x * 10)
-                    me.x = next_x;
-                else
-                    me.x = x_me;
-                if (y_me * 10 != me.y * 10)
-                    me.y = next_y;
-                else
-                    me.y = y_me;
-                me.score = score;
+            // await client.onYou(({ id, name, x_me, y_me, score }) => {
+            //     // console.log('me', {id, name, x, y, score})
+            //     me.id = id;
+            //     me.name = name;
+            //     if (x_me * 10 != me.x * 10)
+            //         me.x = next_x;
+            //     else
+            //         me.x = x_me;
+            //     if (y_me * 10 != me.y * 10)
+            //         me.y = next_y;
+            //     else
+            //         me.y = y_me;
+            //     me.score = score;
             
-                // for(let p of parcels){
-                //     if(p.x == me.x && p.y == me.y){
-                //         ok = true;
-                //     }
-                // }
+            //     // for(let p of parcels){
+            //     //     if(p.x == me.x && p.y == me.y){
+            //     //         ok = true;
+            //     //     }
+            //     // }
     
-            });
+            // });
             
             //CHECK 
         }

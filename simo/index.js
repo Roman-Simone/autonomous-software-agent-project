@@ -8,7 +8,7 @@ const k = 1;                // costante per il calcolo della go_put_down utility
 
 // here I want to implement f(score, distance) = alpha*score + beta/distance
 function calculate_pickup_utility(parcel) {
-    if (!parcel.carriedBy) {
+    if (!parcel.carriedBy && parcel.reward > 3) {
         let score = parcel.reward;
         // Calculate intrinsic score of the parcel
         var me_parcel = distance(parcel, me) < 3;                       // true se sono vicino al parcel  
@@ -75,26 +75,17 @@ client.onAgentsSensing(agents => {
 function agentLoop() {
     // Array to store potential intention options
     const options = [];
+  
     // Iterate through available parcels
     for (const [id, parcel] of parcels.entries()) {
         if (!parcel.carriedBy) {
             // Check if parcel is not carried by any agent
             let util = calculate_pickup_utility(parcel);                    // se == 0 intrinsic_score < 0 --> non ne vale la pena
-            if (util) {
+            if (util && parcel.reward > 3) {
                 options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
             }
+
         }
-    }
-
-    // console.log("Options: ", options);
-    /**
-     * Select best intention from available options
-     */
-
-    let best_option = null;
-    for (const option of options) {
-        best_option = option;
-        myAgent.push(best_option);
     }
 
     if (myAgent.intention_queue.some(item => item.predicate[0] === "go_put_down")) {
@@ -102,21 +93,29 @@ function agentLoop() {
 
         var utility = calculate_putdown_utility(item.predicate[4]);
 
-        myAgent.push(['go_put_down', "", "", "", utility])
+        options.push(['go_put_down', "", "", "", utility])
 
     } else {
-        myAgent.push(['go_put_down', "", "", "", 0])
+        options.push(['go_put_down', "", "", "", 0])
     }
 
-    // for (let item of myAgent.intention_queue) {
-    //     if (item.predicate[0] === "go_pick_up") {
-    //         console.log(item.predicate[0], " - utility: ", item.predicate[4]);
-    //     } else {
-    //         var tot_score_inmind = myAgent.get_inmind_score();
+    console.log("Options: ", options);
+    /**
+     * Select best intention from available options
+     */
 
-    //         console.log(item.predicate[0], " - utility: ", item.predicate[4], " (inmymind: ", tot_score_inmind, ")");
-    //     }
-    // }
+    let best_option;
+    let bestUtility = -1.0;
+    for (const option of options) {
+        let current_utility = option[4];
+        if (current_utility > bestUtility) {
+            best_option = option
+            bestUtility = current_utility
+        }
+    }
+    console.log("Best option: ", best_option);
+
+    myAgent.push(best_option);
 }
 
 
