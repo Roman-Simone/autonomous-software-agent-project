@@ -1,5 +1,5 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, map}
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, map, find_random_delivery}
 
 
 const client = new DeliverooApi(
@@ -164,6 +164,16 @@ function find_nearest_delivery(){
         }
     }
     return nearest_delivery;
+}
+
+//* Find random delivery 
+function find_random_delivery(){
+
+    let random_delivery = deliveryCoordinates[Math.floor(Math.random() * deliveryCoordinates.length)];
+
+    delivery_coordinates = {x: random_delivery.x, y: random_delivery.y};
+    
+    return delivery_coordinates;
 }
 
 //* BFS

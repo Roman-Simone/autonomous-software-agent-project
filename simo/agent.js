@@ -44,6 +44,7 @@ class Agent {
 
                     // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
                     this.remove(intention.predicate);
+                    
                 } );
                 
                 if (ret == true) {
@@ -121,10 +122,9 @@ class Agent {
         if (predicate[0] == "go_pick_up") {
             return predicate[0] + predicate[3];
         }
-        else if (predicate[0] == "go_put_down") {
+        else {
             return predicate[0];
         }
-        return "undefined";
     }
 
     checkSwitch(last) {
