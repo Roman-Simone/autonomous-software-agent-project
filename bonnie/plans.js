@@ -144,6 +144,8 @@ class GoToBFS extends Plan {
 
         for (var i = 1; i < path.length; i++) {
             if (this.stopped) throw ['stopped']; // if stopped then quit
+            await client.pickup()
+            if (this.stopped) throw ['stopped']; // if stopped then quit
             // console.log("move")
 
             // let ok = false;
