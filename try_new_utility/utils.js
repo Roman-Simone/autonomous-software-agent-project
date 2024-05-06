@@ -6,11 +6,12 @@ const client = new DeliverooApi(
     'http://localhost:8080',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ'
 )
-function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
-    const dx = Math.abs(Math.round(x1) - Math.round(x2))
-    const dy = Math.abs(Math.round(y1) - Math.round(y2))
-    return dx + dy;
-}
+
+// function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
+//     const dx = Math.abs(Math.round(x1) - Math.round(x2))
+//     const dy = Math.abs(Math.round(y1) - Math.round(y2))
+//     return dx + dy;
+// }
 
 function distanceBFS({x: x, y: y}) {
     return findPath_BFS(x, y).length;
@@ -28,8 +29,8 @@ export function from_json_to_matrix(width, height, tiles, map) {
             map[i][j] = 0;                                       // '0' are blocked tiles (empty or not_tile)
             for (let k = 0; k < tiles.length; k++) {
                 if (tiles[k].x == i && tiles[k].y == j) {
-                    map[i][j] = 3;                               // '3' are walkable non-spawning tiles 
-                    if (tiles[k].parcelSpawner) map[i][j] = 1;   // '1' are walkable spawning tiles  
+                    map[i][j] = 1;                               // '1' are walkable non-spawning tiles 
+                    if (tiles[k].parcelSpawner) map[i][j] = 3;   // '3' are walkable spawning tiles  
                     if (tiles[k].delivery) map[i][j] = 2;        // '2' are delivery tiles
                 }
             }
@@ -43,8 +44,8 @@ await client.onYou(({ id, name, x, y, score }) => {
     // console.log('me', {id, name, x, y, score})
     me.id = id
     me.name = name
-    me.x = x
-    me.y = y
+    me.x = Math.round(x);
+    me.y = Math.round(y);
     me.score = score
 })
 
@@ -94,33 +95,7 @@ var MULT = 0;
 await client.onMap((width, height, tiles) => {
     map = from_json_to_matrix(width, height, tiles, map);
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
-
-    // console.log("width_map: ", width, "\nheight_map: ", height)
-
-    // if(height == 10 && width == 10){
-    //     console.log("10x10")
-    //     // go_pick_up UTILITY PARAMETERS    
-    //     ALPHA = 0.7;               // score weigth 
-    //     BETA = 1;                 // distance weigth  
-            
-    //     // go_put_down UTILITY PARAMETERS   
-    //     GAMMA = 0.65;             // score weigth  
-    //     DELTA = 1;                // distance weigth  
-    //     MULT = 3 //3 / 4;
-    // } else if(height == 20 && width == 20){
-    //     console.log("20x20")
-    //     // go_pick_up UTILITY PARAMETERS    
-    //     ALPHA = 0.7;              // score weigth 
-    //     BETA = 1;                 // distance weigth  
-            
-    //     // go_put_down UTILITY PARAMETERS   
-    //     GAMMA = 0.8;             // score weigth  
-    //     DELTA = 1;                // distance weigth  
-    //     MULT = 3;    
-    // }
 });
-
-
 
 function options() {
     const options = []
@@ -197,7 +172,7 @@ export function find_nearest(me, map) {
 //* Find nearest delivery 
 function find_nearest_delivery() {
 
-    let min_distance = 1000000;
+    let min_distance = Number.MAX_VALUE;
     let nearest_delivery = { x: -1, y: -1 };
     for (var i = 0; i < deliveryCoordinates.length; i++) {
         if (distanceBFS(deliveryCoordinates[i]) < min_distance) {
@@ -205,6 +180,8 @@ function find_nearest_delivery() {
             nearest_delivery = deliveryCoordinates[i];
         }
     }
+
+    // console.log("nearest_delivery: ", nearest_delivery, "(I'm on x: ", me.x, " y: ", me.y, ")");
     return nearest_delivery;
 }
 
