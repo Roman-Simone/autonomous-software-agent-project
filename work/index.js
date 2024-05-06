@@ -79,13 +79,14 @@ client.onAgentsSensing(agents => {
 function agentLoop() {
     // Array to store potential intention options
     const options = [];
+    console.log("Options BEFORE: ", options)
 
     // Iterate through available parcels
     for (const [id, parcel] of parcels.entries()) {
-        if (!parcel.carriedBy) {
+        if (!parcel.carriedBy && parcel.reward > 3) {
             // Check if parcel is not carried by any agent
             let util = calculate_pickup_utility(parcel);                    // se == 0 intrinsic_score < 0 --> non ne vale la pena
-            if (util && parcel.reward > 3) {
+            if (util) {
                 options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
             }
 
@@ -95,7 +96,7 @@ function agentLoop() {
     let u = 2
     options.push(['go_random_delivery', "", "", "", u]);
 
-    console.log("Options: ", options)
+    console.log("Options LATER: ", options)
 
     /**
      * Select best intention from available options
