@@ -4,7 +4,7 @@ export { ALPHA, BETA, GAMMA, DELTA, MULT, distance, me, parcels, client, findPat
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY0OWIzNDI1ZDdlIiwibmFtZSI6ImdvZCIsImlhdCI6MTcxMTQ1MzMxN30.oixFXuclRDvyfEU7-vugB9uG2wsddGDWFa-_gzzd8-o'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcyMDFhZWVjNWZiIiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNDk4MjE3M30.XxQ1B9FCP2ltA8L5QPTZ63Y4z46vO_T4VTDN25K5cOI'
 )
 function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
     const dx = Math.abs(Math.round(x1) - Math.round(x2))
@@ -96,7 +96,7 @@ await client.onMap((width, height, tiles) => {
     if(height == 10 && width == 10){
         console.log("10x10")
         // go_pick_up UTILITY PARAMETERS    
-        ALPHA = 0.7;              // score weigth 
+        ALPHA = 0.7;               // score weigth 
         BETA = 1;                 // distance weigth  
             
         // go_put_down UTILITY PARAMETERS   
@@ -106,13 +106,13 @@ await client.onMap((width, height, tiles) => {
     } else if(height == 20 && width == 20){
         console.log("20x20")
         // go_pick_up UTILITY PARAMETERS    
-        ALPHA = 0.5;              // score weigth 
+        ALPHA = 0.7;              // score weigth 
         BETA = 1;                 // distance weigth  
             
         // go_put_down UTILITY PARAMETERS   
         GAMMA = 0.8;             // score weigth  
         DELTA = 1;                // distance weigth  
-        MULT = 2;    
+        MULT = 3;    
     }
 });
 
