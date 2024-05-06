@@ -102,10 +102,7 @@ class Agent {
 
         // this.printQueue("push");
 
-        // console.log(this.createString(current) + " pushed");
-
         if (this.checkSwitch(last)) {
-            // console.log("switching intention");
             last.stop();
         }
     }
