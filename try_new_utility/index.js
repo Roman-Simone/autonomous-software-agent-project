@@ -1,61 +1,126 @@
 import { Agent } from "./agent.js";
-import { distance, find_nearest, client, parcels, me, map, distanceBFS, ALPHA, BETA, GAMMA, DELTA, MULT } from "./utils.js";
+import { distanceBFS_notMe, find_nearest, client, parcels, me, map, distanceBFS, find_nearest_delivery } from "./utils.js";
 
 // Define global variables
 const beliefset = new Map();
 
 var utilityPutDown = 0;
+var decade_frequency = 0;
 
-// here I want to implement f(score, distance) = alpha*score + beta/distance + min(distance(agent, parcel))
-function calculate_pickup_utility(parcel) {
+// here I want to implement f(score, distance) = alpha*score + beta/(distance_parcel + distance_delivery) + min(distance(agent, parcel))
 
-    if (!parcel.carriedBy && parcel.reward > 3) {
-        let score = parcel.reward;
+// function calculate_pickup_utility(parcel) {
 
-        var intrinsic_score = ALPHA * score + BETA / (distance(parcel, me) + distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]));
+//     if (!parcel.carriedBy && parcel.reward > 3) {
+//         let score = parcel.reward;
 
-        // Consider parcel only if intrinsic score is positive
-        if (intrinsic_score > 0) {
-            // Calculate utility of picking up the parcel
-            var util = intrinsic_score;
-            // Adjust utility based on distance from agents in beliefset
-            if (beliefset.size > 0) {
-                let min_score_parcel_agent = Number.MAX_VALUE;
-                for (let a of beliefset.values()) {
-                    let score_parcel_agent = distance(a, parcel);
-                    if (score_parcel_agent < min_score_parcel_agent) {
-                        min_score_parcel_agent = score_parcel_agent;
-                    }
-                }
-                util += min_score_parcel_agent;
-            }
+//         var intrinsic_score = ALPHA * score - BETA * (distanceBFS(parcel) + distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]));
 
-        } else {
-            return 0;
-        }
-        return util;
+//         // Consider parcel only if intrinsic score is positive
+//         if (intrinsic_score > 0) {
+//             // Calculate utility of picking up the parcel
+//             var util = intrinsic_score;
+//             // Adjust utility based on distance from agents in beliefset
+//             if (beliefset.size > 0) {
+//                 let min_score_parcel_agent = Number.MAX_VALUE;
+//                 for (let a of beliefset.values()) {
+//                     let score_parcel_agent = distance(a, parcel);
+//                     if (score_parcel_agent < min_score_parcel_agent) {
+//                         min_score_parcel_agent = score_parcel_agent;
+//                     }
+//                 }
+//                 util -= min_score_parcel_agent;
+//             }
+
+//         } else {
+//             return 0;
+//         }
+//         return util;
+//     } else {
+//         return 0;
+//     }
+// }
+
+// function calculate_putdown_utility() {
+
+//     if (myAgent.parcelsInMind.length == 0)
+//         return 0;
+
+//     var scoreInMind = 0;
+//     for (let p of myAgent.parcelsInMind) {
+//         for (const [id, parcel] of parcels.entries()) {
+//             if (p === id) {
+//                 scoreInMind += parcel.reward;
+//             }
+//         }
+//     }
+//     var utility = (GAMMA * scoreInMind - DELTA * (distanceBFS(find_nearest(me.x, me.y, map)[2]))) * MULT;
+
+//     return utility;
+// }
+
+// Function to update the configuration of elements
+//!CONFIGURATION
+// Config received:  {
+//     MAP_FILE: 'map_20',
+//     PARCELS_GENERATION_INTERVAL: '5s',
+//     PARCELS_MAX: '5',
+//     MOVEMENT_STEPS: 1,
+//     MOVEMENT_DURATION: 500,
+//     AGENTS_OBSERVATION_DISTANCE: 5,
+//     PARCELS_OBSERVATION_DISTANCE: 5,
+//     AGENT_TIMEOUT: 10000,
+//     PARCEL_REWARD_AVG: 50,
+//     PARCEL_REWARD_VARIANCE: 10,
+//     PARCEL_DECADING_INTERVAL: 'infinite',
+//     RANDOMLY_MOVING_AGENTS: 2,
+//     RANDOM_AGENT_SPEED: '2s',
+//     CLOCK: 50
+//   }
+
+
+var movement_duration = 0;
+var parcel_decading_interval = 0;
+var configElements;
+client.onConfig((config) => {
+    configElements = config;
+
+    var movement_duration = configElements.MOVEMENT_DURATION;
+    var parcel_decading_interval = configElements.PARCEL_DECADING_INTERVAL;
+
+    if (parcel_decading_interval == "infinite") {
+        parcel_decading_interval = Number.MAX_VALUE;
     } else {
-        return 0;
+        parcel_decading_interval = parseInt(parcel_decading_interval.slice(0, -1)) * 1000;
     }
+
+    // console.log("Parcel decading interval: ", parcel_decading_interval);
+
+    decade_frequency = movement_duration / parcel_decading_interval;
+
+    console.log("Decade frequency: ", decade_frequency);
+});
+
+
+
+
+function calculate_pickup_utility(parcel) {
+    var scoreParcel = parcel.reward;
+    var scoreInMind = myAgent.get_inmind_score();
+
+    var RewardParcel = scoreParcel - decade_frequency * distanceBFS(parcel);
+    var RewardInMind = scoreInMind - decade_frequency * distanceBFS(parcel);
+    var utility =  RewardParcel + RewardInMind - decade_frequency * distanceBFS_notMe(parcel, find_nearest_delivery());
+    return utility;
 }
 
 function calculate_putdown_utility() {
-
-    if (myAgent.parcelsInMind.length == 0)
-        return 0;
-
-    var scoreInMind = 0;
-    for (let p of myAgent.parcelsInMind) {
-        for (const [id, parcel] of parcels.entries()) {
-            if (p === id) {
-                scoreInMind += parcel.reward;
-            }
-        }
-    }
-    var utility = (GAMMA * scoreInMind + DELTA / (distance(me, find_nearest(me.x, me.y, map)[2]))) * MULT;
-
+    var scoreInMind = myAgent.get_inmind_score();
+    var utility = scoreInMind - decade_frequency * distanceBFS(find_nearest(me.x, me.y, map)[2]);
     return utility;
 }
+
+
 
 // Function to update beliefset when agents are sensed
 client.onAgentsSensing(agents => {
@@ -70,7 +135,6 @@ client.onAgentsSensing(agents => {
 function agentLoop() {
     // Array to store potential intention options
     const options = [];
-    console.log("Options BEFORE: ", options)
 
     // Iterate through available parcels
     for (const [id, parcel] of parcels.entries()) {
@@ -87,7 +151,7 @@ function agentLoop() {
     let u = 2
     options.push(['go_random_delivery', "", "", "", u]);
 
-    console.log("Options LATER: ", options)
+    console.log("options: ", options)
 
     /**
      * Select best intention from available options
@@ -103,7 +167,7 @@ function agentLoop() {
         }
     }
 
-    console.log("ALPHA: ", ALPHA, ", BETA: ", BETA, ", GAMMA: ", GAMMA, ", DELTA: ", DELTA, ", MULT: ", MULT)
+    console.log("\n\nbest_option: ", best_option, "\n\n")
 
     myAgent.push(best_option);
 }
