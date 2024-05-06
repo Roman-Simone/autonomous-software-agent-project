@@ -12,8 +12,8 @@ function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
     return dx + dy;
 }
 
-function distanceBFS({ x: x2, y: y2 }) {
-    return findPath_BFS(x2, y2).length;
+function distanceBFS(x, y) {
+    return findPath_BFS(x, y).length;
 }
 
 export function from_json_to_matrix(width, height, tiles, map) {
@@ -70,6 +70,7 @@ async function mypos() {
 
 var parcels = new Map()
 client.onParcelsSensing(async (perceived_parcels) => {
+    parcels.clear()
     for (const p of perceived_parcels) {
         parcels.set(p.id, p)
     }
