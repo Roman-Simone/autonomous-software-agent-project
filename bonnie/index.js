@@ -1,46 +1,30 @@
 import { Agent } from "./agent.js";
-import { distance, from_json_to_matrix, find_nearest, client, parcels, me } from "./utils.js";
+import { distance, from_json_to_matrix, find_nearest, client, parcels, me, map, distanceBFS } from "./utils.js";
 
 // Define global variables
-var map = [];
-var deliveryCoordinates = [];
 const beliefset = new Map();
-var del_index = 0; 
 
-const k = 1;                // costante per il calcolo della go_put_down utility
+var utilityPutDown = 0;
 
-function get_higher_parcel_score(){
-    max_score = Number.MIN_VALUE;
+// go_pick_up UTILITY PARAMETERS
+const ALPHA = 0.7;              // score weigth
+const BETA = 1;                 // distance weigth
 
-    for(let p of parcels) {
-        if(p.reward > max_score) {
-            max_score = p.reward;
-        }   
-    }
+// go_put_down UTILITY PARAMETERS
+const GAMMA = 0.8;             // score weigth
+const DELTA = 1;                // distance weigth
+const MULT = 1/2;
 
-    return max_score;
-}
-
-
-
-// here I want to implement f(score, distance) = alpha*score + beta/distance
+// here I want to implement f(score, distance) = alpha*score + beta/distance + min(distance(agent, parcel))
 function calculate_pickup_utility(parcel) {
-    if (!parcel.carriedBy) {
-        let score = parcel.reward;
-        // Calculate intrinsic score of the parcel
-        var me_parcel = distance(parcel, me) < 3;                       // true se sono vicino al parcel  
-        var parcel_delivery = distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]) < 3;           // true se parcel è vicinno dal delivery
-        if(me_parcel && parcel_delivery)
-            var intrinsic_score = score + 4*distance(parcel, me) + 4*distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]);
-        else if (me_parcel && !parcel_delivery)
-            var intrinsic_score = score + 4*distance(parcel, me) - 0.5*distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]);            
-        else if (!me_parcel && parcel_delivery)
-            var intrinsic_score = score - 0.5*distance(parcel, me) + 4*distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]);            
-        else if (!me_parcel && !parcel_delivery)
-            var intrinsic_score = score - 0.5*distance(parcel, me) - 0.5*distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]);
-                    
+    
 
-            // Consider parcel only if intrinsic score is positive
+    if (!parcel.carriedBy && parcel.reward > 3) {
+        let score = parcel.reward;
+        
+        var intrinsic_score = ALPHA*score + BETA/(distance(parcel, me) + distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]));
+        
+        // Consider parcel only if intrinsic score is positive
         if (intrinsic_score > 0) {
             // Calculate utility of picking up the parcel
             var util = intrinsic_score;
@@ -59,39 +43,29 @@ function calculate_pickup_utility(parcel) {
         } else {
             return 0;
         }
+        // console.log("parcel: ", parcel, "\nutility: ", util, "\n-------------------------------------------");
         return util;
     } else {
         return 0;
     }
 }
 
-function calculate_putdown_utility(utility) {
-    for(let p of myAgent.parcelsInMind) {
+function calculate_putdown_utility() {
+    
+    var score = 0;
+
+    for (let p of myAgent.parcelsInMind) {
         for (const [id, parcel] of parcels.entries()) {
-            if (p === id) {                          
-                // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
-                utility += parcel.reward;
+            if (p === id) {
+                score += parcel.reward;
             }
         }
     }
-    
-    utility = k/((1+k*utility)*(1+k*distance(me, find_nearest(me.x, me.y, map)[2])));               // utility = k/(1+k*reward)*(1+k*distance)
+    var utility = (GAMMA*score + DELTA/(distance(me, find_nearest(me.x, me.y, map)[2])))*MULT;
 
+    // console.log("go_put_down\nutility: ", utility, "\n-------------------------------------------");
     return utility;
 }
-
-// Function to handle map initialization
-await client.onMap((width, height, tiles) => {
-    // Convert JSON data to a matrix representation
-    map = from_json_to_matrix(width, height, tiles, map);
-
-    // console.log("Map initialized: ", map);
-
-    // Extract delivery coordinates from tiles
-    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({x: t.x, y: t.y}));
-
-    // console.log("Delivery coordinates: ", deliveryCoordinates);
-});
 
 // Function to update beliefset when agents are sensed
 client.onAgentsSensing(agents => {
@@ -102,16 +76,66 @@ client.onAgentsSensing(agents => {
     }
 });
 
+
+
+
+// // Function to calculate utility of a parcel
+// function utilityFunction(parcel) {
+//     let retUtility = 0;
+//     let moltiplicatorDistance = 1
+
+//     // Calculate utility of picking up the parcel
+//     retUtility = parcel.reward - (moltiplicatorDistance * distance(parcel, me));
+
+//     return retUtility;
+// }
+
+// // Function to calculate utility of a parcel
+// function utilityFunctionPutDown() {
+
+//     let rewardInMind = 0;
+//     for (let p of myAgent.parcelsInMind) {
+//         for (const [id, parcel] of parcels.entries()) {
+//             if (p === id) {
+//                 // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
+//                 rewardInMind += parcel.reward;
+//             }
+//         }
+//     }
+
+//     utilityPutDown = rewardInMind / 2
+// }
+
+
+
+
 function agentLoop() {
     // Array to store potential intention options
     const options = [];
+
+    // for(let intention of myAgent.intention_queue){
+    //     console.log(intention.predicate[0], " - utility: ", intention.predicate[4])
+    // }
+    console.log("-------------------------------------------")
+
     // Iterate through available parcels
     for (const [id, parcel] of parcels.entries()) {
-        // Check if parcel is not carried by any agent
+        if (!parcel.carriedBy) {
+            // Check if parcel is not carried by any agent
+            let util = calculate_pickup_utility(parcel);                    // se == 0 intrinsic_score < 0 --> non ne vale la pena
+            if (util && parcel.reward > 3) {
+                options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
+            }
 
-        var util = calculate_pickup_utility(parcel);                    // se == 0 intrinsic_score < 0 --> non ne vale la pena
-        if(util){
-            options.push( [ 'go_pick_up', parcel.x, parcel.y, id, util ] );
+        }
+    }
+    options.push(['go_put_down', "", "", "", calculate_putdown_utility()])
+
+    for(let option of options){
+        if(option[0] == "go_put_down"){
+            console.log(option[0], " - utility: ", option[4], " (", myAgent.get_inmind_score(), ")")
+        } else {
+            console.log(option[0], " - utility: ", option[4])
         }
     }
 
@@ -119,53 +143,33 @@ function agentLoop() {
      * Select best intention from available options
      */
 
-    let best_option = null;
+    if(myAgent.intention_queue.length == 0){            
+        myAgent.push('go_random_delivery', "", "", "", 1);
+    }
+
+    let best_option;
+    let bestUtility = -1.0;
     for (const option of options) {
-            best_option = option;
-            myAgent.push(best_option);
-    
-    }
+        let current_utility = option[4];
+        if (current_utility > bestUtility) {
 
-    
-    
-    if (myAgent.intention_queue.some(item => item.predicate[0] === "go_put_down")) {
-        const item  = myAgent.intention_queue.find(item => item.predicate[0] === "go_put_down");
-
-        var utility = calculate_putdown_utility(item.predicate[4]);
-        
-        myAgent.push( [ 'go_put_down', "", "", "", utility ] )
-        
-    } else {
-        myAgent.push( [ 'go_put_down', "", "", "", 0 ] )
-    }
-
-    for (let item of myAgent.intention_queue) {
-        if(item.predicate[0] === "go_pick_up") {
-            console.log(item.predicate[0], " - utility: ", item.predicate[4]);
-        } else{
-            var tot_score_inmind = myAgent.get_inmind_score();
-
-            console.log(item.predicate[0], " - utility: ", item.predicate[4], " (inmymind: ", tot_score_inmind, ")");
+            best_option = option
+            bestUtility = current_utility
         }
     }
-    console.log("---------------------------------------")
-    
-    
-    
-    // if (myAgent.intention_queue.length === 1) {                     // è rimasto solo un go_put_down, quindi sono fermo, DA DECIDERE COSA FARE
-    // }
 
-    /**
-     * Revise/queue intention if a best option is found
-     */
-    // if (best_option) {
-    //     // console.log("Pushing best option: ", best_option);
+    console.log("Choosing best_option ", best_option[0], " - utility: ", best_option[4])
 
-    //     // Push best option to agent intention queue
-    //     myAgent.push(best_option.desire, ...best_option.args, best_option.utility); 
-    //     // myAgent.push('go_put_down', []);
-    // }
+    myAgent.push(best_option);
+    
+    console.log(myAgent.intention_queue)
 }
+
+
+
+// Call agentLoop every 5 seconds
+setInterval(agentLoop, 5000);
+
 
 // Function to trigger agentLoop when parcels are sensed
 client.onParcelsSensing(agentLoop);

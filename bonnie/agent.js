@@ -28,12 +28,13 @@ class Agent {
     }
 
     async intentionLoop() {
-        
+
         while ( true ) {
             // Consumes intention_queue if not empty
             if ( this.intention_queue.length > 0 ) {
                 // Current intention
                 const intention = this.intention_queue[0];
+                console.log(intention.predicate[0]);
 
                 // Start achieving intention
                 let ret = await intention.achieve()
@@ -41,7 +42,9 @@ class Agent {
                 // Catch eventual error and continue
                 .catch( error => {
 
-                    console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                    // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                    this.remove(intention.predicate);
+                    
                 } );
                 
                 if (ret == true) {
@@ -55,35 +58,25 @@ class Agent {
                 }
                 // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
-                this.intention_queue.shift();
+                this.remove(intention.predicate);
             }
             // Postpone next iteration at setImmediate
             await new Promise( res => setImmediate( res ) );
         }
     }
 
-
-    createString(predicate) {
-        if (predicate[0] == "go_pick_up") {
-            return predicate[0] + predicate[3];
-        }
-        else if (predicate[0] == "go_put_down") {
-            return predicate[0];
-        }
-        return "undefined";
-    }
-
-    checkSwitch(last) {
-
-        let ret = false
-        // console.log("last --> " + last);
-
-        if (last) {
-            if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {
-                ret = true;
+    async remove(predicate) {
+        // if (predicate[0] == "go_put_down") {
+        //     return;
+        // }
+        for (let i = 0; i < this.intention_queue.length; i++) {
+            if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
+                this.intention_queue.splice(i, 1);
+                return true;
             }
         }
-        return ret;
+        console.log("Predicate not found in queue");
+        return false;
     }
 
     async push(predicate) {
@@ -122,6 +115,29 @@ class Agent {
         for (const intention of this.intention_queue) {
             intention.stop();
         }
+    }
+
+
+    createString(predicate) {
+        if (predicate[0] == "go_pick_up") {
+            return predicate[0] + predicate[3];
+        }
+        else {
+            return predicate[0];
+        }
+    }
+
+    checkSwitch(last) {
+
+        let ret = false
+        // console.log("last --> " + last);
+
+        if (last) {
+            if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {
+                ret = true;
+            }
+        }
+        return ret;
     }
 
     bubbleSort(arr) {
