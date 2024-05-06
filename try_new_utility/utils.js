@@ -1,10 +1,10 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { ALPHA, BETA, GAMMA, DELTA, MULT, distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, map, find_random_delivery, deliveryCoordinates, distanceBFS }
+export { me, parcels, client, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, mypos, updateMe, map, find_random_delivery, deliveryCoordinates, distanceBFS }
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcyMDFhZWVjNWZiIiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNDk4MjE3M30.XxQ1B9FCP2ltA8L5QPTZ63Y4z46vO_T4VTDN25K5cOI'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ'
 )
 function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
     const dx = Math.abs(Math.round(x1) - Math.round(x2))
@@ -12,8 +12,12 @@ function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
     return dx + dy;
 }
 
-function distanceBFS(x, y) {
+function distanceBFS({x: x, y: y}) {
     return findPath_BFS(x, y).length;
+}
+
+function distanceBFS_notMe({x: startX, y: startY}, {x: endX, y: endY}) {
+    return findPath_BFS_notMe(startX, startY, endX, endY).length;
 }
 
 export function from_json_to_matrix(width, height, tiles, map) {
@@ -91,29 +95,29 @@ await client.onMap((width, height, tiles) => {
     map = from_json_to_matrix(width, height, tiles, map);
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 
-    console.log("width_map: ", width, "\nheight_map: ", height)
+    // console.log("width_map: ", width, "\nheight_map: ", height)
 
-    if(height == 10 && width == 10){
-        console.log("10x10")
-        // go_pick_up UTILITY PARAMETERS    
-        ALPHA = 0.7;               // score weigth 
-        BETA = 1;                 // distance weigth  
+    // if(height == 10 && width == 10){
+    //     console.log("10x10")
+    //     // go_pick_up UTILITY PARAMETERS    
+    //     ALPHA = 0.7;               // score weigth 
+    //     BETA = 1;                 // distance weigth  
             
-        // go_put_down UTILITY PARAMETERS   
-        GAMMA = 0.8;             // score weigth  
-        DELTA = 1;                // distance weigth  
-        MULT = 3 / 4;
-    } else if(height == 20 && width == 20){
-        console.log("20x20")
-        // go_pick_up UTILITY PARAMETERS    
-        ALPHA = 0.7;              // score weigth 
-        BETA = 1;                 // distance weigth  
+    //     // go_put_down UTILITY PARAMETERS   
+    //     GAMMA = 0.65;             // score weigth  
+    //     DELTA = 1;                // distance weigth  
+    //     MULT = 3 //3 / 4;
+    // } else if(height == 20 && width == 20){
+    //     console.log("20x20")
+    //     // go_pick_up UTILITY PARAMETERS    
+    //     ALPHA = 0.7;              // score weigth 
+    //     BETA = 1;                 // distance weigth  
             
-        // go_put_down UTILITY PARAMETERS   
-        GAMMA = 0.8;             // score weigth  
-        DELTA = 1;                // distance weigth  
-        MULT = 3;    
-    }
+    //     // go_put_down UTILITY PARAMETERS   
+    //     GAMMA = 0.8;             // score weigth  
+    //     DELTA = 1;                // distance weigth  
+    //     MULT = 3;    
+    // }
 });
 
 
@@ -156,26 +160,26 @@ export function find_nearest(me, map) {
 
             switch (map[i][j]) {
                 case 0:
-                    if (distance(me, b) < dist_0) {
-                        dist_0 = distance(me, b);
+                    if (distanceBFS(b) < dist_0) {
+                        dist_0 = distanceBFS(b);
                         coordinates[0] = { x: i, y: j, type: 0 };
                     }
                     break;
                 case 1:
-                    if (distance(me, b) < dist_1) {
-                        dist_1 = distance(me, b);
+                    if (distanceBFS(b) < dist_1) {
+                        dist_1 = distanceBFS(b);
                         coordinates[1] = { x: i, y: j, type: 1 };
                     }
                     break;
                 case 2:
-                    if (distance(me, b) < dist_2) {
-                        dist_2 = distance(me, b);
+                    if (distanceBFS(b) < dist_2) {
+                        dist_2 = distanceBFS(b);
                         coordinates[2] = { x: i, y: j, type: 2 };
                     }
                     break;
                 case 3:
-                    if (distance(me, b) < dist_3) {
-                        dist_3 = distance(me, b);
+                    if (distanceBFS(b) < dist_3) {
+                        dist_3 = distanceBFS(b);
                         coordinates[3] = { x: i, y: j, type: 3 };
                     }
                     break;
@@ -196,8 +200,8 @@ function find_nearest_delivery() {
     let min_distance = 1000000;
     let nearest_delivery = { x: -1, y: -1 };
     for (var i = 0; i < deliveryCoordinates.length; i++) {
-        if (distance(me, deliveryCoordinates[i]) < min_distance) {
-            min_distance = distance(me, deliveryCoordinates[i]);
+        if (distanceBFS(deliveryCoordinates[i]) < min_distance) {
+            min_distance = distanceBFS(deliveryCoordinates[i]);
             nearest_delivery = deliveryCoordinates[i];
         }
     }
@@ -237,6 +241,8 @@ function getNeighbors(x, y) {
 }
 
 function isValidPosition(x, y) {
+    x = Math.round(x);
+    y = Math.round(y);
     const width = map.length;
     const height = map[0].length;
 
@@ -251,6 +257,37 @@ function findPath_BFS(endX, endY) {
 
     var startX = me.x;
     var startY = me.y;
+
+    queue.push({ x: startX, y: startY, pathSoFar: [] });
+    visited.add(`${startX},${startY}`);
+
+    while (queue.length > 0) {
+        const { x, y, pathSoFar } = queue.shift();
+
+        if (x === endX && y === endY) {
+            // Found the end point, return the path
+            return [...pathSoFar, { x: endX, y: endY }]; // Include the end point in the path
+        }
+
+        const neighbors = getNeighbors(x, y);
+        for (const neighbor of neighbors) {
+            const { x: neighborX, y: neighborY } = neighbor;
+
+            if (!visited.has(`${neighborX},${neighborY}`)) {
+                visited.add(`${neighborX},${neighborY}`);
+                queue.push({ x: neighborX, y: neighborY, pathSoFar: [...pathSoFar, { x, y }] });
+            }
+        }
+    }
+
+    // If no path is found, return an empty array
+    return [];
+}
+
+function findPath_BFS_notMe(startX, startY, endX, endY) {
+
+    const visited = new Set();
+    const queue = [];
 
     queue.push({ x: startX, y: startY, pathSoFar: [] });
     visited.add(`${startX},${startY}`);
