@@ -108,15 +108,22 @@ function calculate_pickup_utility(parcel) {
     var scoreParcel = parcel.reward;
     var scoreInMind = myAgent.get_inmind_score();
 
-    var RewardParcel = scoreParcel - decade_frequency * distanceBFS(parcel);
-    var RewardInMind = scoreInMind - decade_frequency * distanceBFS(parcel);
-    var utility =  RewardParcel + RewardInMind - decade_frequency * distanceBFS_notMe(parcel, find_nearest_delivery());
+    var distance_parcel = distanceBFS(parcel);
+    var distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
+
+    var RewardParcel = scoreParcel - decade_frequency * distance_parcel;
+    var RewardInMind = scoreInMind - decade_frequency * distance_parcel;
+    console.log("distanceBFS(parcel ", parcel.id, "): ", distanceBFS(parcel))
+    // console.log("distanceBFS_notMe(parcel, find_nearest_delivery()): ", distanceBFS_notMe(parcel, find_nearest_delivery()))
+    var utility = RewardParcel + RewardInMind - decade_frequency * distance_delivery;
+
+    // console.log("\n----------------------------------------------------------\nparcel: ", parcel, "\nRewardParcel: ", RewardParcel, "\nRewardInMind: ", RewardInMind, "\ndist_from_delivery", decade_frequency * distanceBFS_notMe(parcel, find_nearest_delivery()), "\nutility: ", utility, "\n----------------------------------------------------------")
     return utility;
 }
 
 function calculate_putdown_utility() {
     var scoreInMind = myAgent.get_inmind_score();
-    var utility = scoreInMind - decade_frequency * distanceBFS(find_nearest(me.x, me.y, map)[2]);
+    var utility = scoreInMind - decade_frequency * distanceBFS(find_nearest_delivery());
     return utility;
 }
 
@@ -137,10 +144,13 @@ function agentLoop() {
     const options = [];
 
     // Iterate through available parcels
+
+
     for (const [id, parcel] of parcels.entries()) {
         if (!parcel.carriedBy && parcel.reward > 3) {
             // Check if parcel is not carried by any agent
             let util = calculate_pickup_utility(parcel);                    // se == 0 intrinsic_score < 0 --> non ne vale la pena
+            // console.log("parcel (", parcel.id, ")  - pickup_utility: ", util)
             if (util) {
                 options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
             }
@@ -151,7 +161,7 @@ function agentLoop() {
     let u = 2
     options.push(['go_random_delivery', "", "", "", u]);
 
-    console.log("options: ", options)
+    // console.log("======================================================\noptions: ", options, "\n======================================================")
 
     /**
      * Select best intention from available options
@@ -167,9 +177,10 @@ function agentLoop() {
         }
     }
 
-    console.log("\n\nbest_option: ", best_option, "\n\n")
+    // console.log("\n\nbest_option: ", best_option, "\n\n")
 
     myAgent.push(best_option);
+
 }
 
 
