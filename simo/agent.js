@@ -18,6 +18,7 @@ class Agent {
         for(let p of this.parcelsInMind) {
             for (const [id, parcel] of parcels.entries()) {
                 if (p === id) {                          
+                    // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
                     tot_score += parcel.reward;
                 }
             }
@@ -27,19 +28,23 @@ class Agent {
     }
 
     async intentionLoop() {
-        
+
         while ( true ) {
             // Consumes intention_queue if not empty
             if ( this.intention_queue.length > 0 ) {
                 // Current intention
                 const intention = this.intention_queue[0];
+                console.log(intention.predicate[0]);
 
                 // Start achieving intention
                 let ret = await intention.achieve()
 
                 // Catch eventual error and continue
                 .catch( error => {
+
+                    // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
                     this.remove(intention.predicate);
+                    
                 } );
                 
                 if (ret == true) {
@@ -51,7 +56,7 @@ class Agent {
                         this.parcelsInMind = [];
                     }
                 }
-
+                // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
                 this.remove(intention.predicate);
             }
@@ -70,6 +75,7 @@ class Agent {
                 return true;
             }
         }
+        console.log("Predicate not found in queue");
         return false;
     }
 
@@ -80,6 +86,7 @@ class Agent {
         let update = false;
         //Check if the intention is already in the queue and in case upadate it
         for (let i = 0; i < this.intention_queue.length; i++) {
+            // console.log("comparing " + this.createString(predicate) + " with " + this.createString(this.intention_queue[i].predicate));
             if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
                 this.intention_queue[i].predicate[4] = predicate[4];
                 update = true;

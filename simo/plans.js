@@ -1,6 +1,6 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, parcels, find_random_delivery } from './utils.js';
+import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, mypos, updateMe, parcels, find_random_delivery } from './utils.js';
 export { plans, Plan, GoPickUp };
 
 
@@ -8,6 +8,19 @@ export { plans, Plan, GoPickUp };
  * Plan library
  */
 
+async function check_tile(x, y){
+    for(let parcel of parcels){
+        if(x == parcel.x && y == parcel.y){
+            await client.pickup()
+        }
+    }
+
+    for(let del of deliveryCoordinates){
+        if(x == del.x && y == del.y){
+            await client.putdown()
+        }
+    }
+}
 
 class Plan {
 
@@ -146,9 +159,11 @@ class GoToBFS extends Plan {
 
             if (next_x == me.x + 1) {
                 status_x = await client.move('right');
+                check_tile(next_x, next_y)
             }
             else if (next_x == me.x - 1) {
                 status_x = await client.move('left');
+                check_tile(next_x, next_y)
             }
 
             if (status_x) {
@@ -159,9 +174,11 @@ class GoToBFS extends Plan {
 
             if (next_y == me.y + 1) {
                 status_y = await client.move('up');
+                check_tile(next_x, next_y)
             }
             else if (next_y == me.y - 1) {
                 status_y = await client.move('down');
+                check_tile(next_x, next_y)
             }
 
             if (status_y) {

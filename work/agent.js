@@ -28,7 +28,7 @@ class Agent {
     }
 
     async intentionLoop() {
-        
+
         while ( true ) {
             // Consumes intention_queue if not empty
             if ( this.intention_queue.length > 0 ) {
@@ -102,10 +102,7 @@ class Agent {
 
         // this.printQueue("push");
 
-        // console.log(this.createString(current) + " pushed");
-
         if (this.checkSwitch(last)) {
-            // console.log("switching intention");
             last.stop();
         }
     }
