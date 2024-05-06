@@ -6,20 +6,16 @@ const client = new DeliverooApi(
     'http://localhost:8080',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRiYjQ5YjZiMzAxIiwibmFtZSI6InNpbW9zIiwiaWF0IjoxNzE0OTAwMjQ3fQ.Ln_OcLohraWwFOrMFTldjltybg_Pp283R_azBuWxyVs'
 )
-
-// Function to calculate distance between two points with Manhattan distance
 function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
     const dx = Math.abs(Math.round(x1) - Math.round(x2))
     const dy = Math.abs(Math.round(y1) - Math.round(y2))
     return dx + dy;
 }
 
-// Function to calculate distance between two points with BFS
-function distanceBFS(x, y) {
-    return findPath_BFS(x, y).length;
+function distanceBFS({ x: x2, y: y2 }) {
+    return findPath_BFS(x2, y2).length;
 }
 
-// Function to convert json map to matrix
 export function from_json_to_matrix(width, height, tiles, map) {
     var map = [];
     for (let i = 0; i < width; i++) {
@@ -38,16 +34,15 @@ export function from_json_to_matrix(width, height, tiles, map) {
     return map;
 }
 
-// Function to update the agent's position
 var me = {};
 await client.onYou(({ id, name, x, y, score }) => {
+    // console.log('me', {id, name, x, y, score})
     me.id = id
     me.name = name
     me.x = x
     me.y = y
     me.score = score
 })
-
 
 async function updateMe() {
     return new Promise(function (resolve) {
@@ -79,8 +74,6 @@ client.onParcelsSensing(async (perceived_parcels) => {
         parcels.set(p.id, p)
     }
 })
-
-
 
 var map = [];
 var deliveryCoordinates = [];
@@ -210,11 +203,8 @@ function getNeighbors(x, y) {
 }
 
 function isValidPosition(x, y) {
-    x = Math.round(x);
-    y = Math.round(y);
     const width = map.length;
     const height = map[0].length;
-    
 
     return x >= 0 && x < width && y >= 0 && y < height && map[x][y] !== 0;
 }
