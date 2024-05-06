@@ -1,25 +1,21 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, map, find_random_delivery, distanceBFS }
+export { distance, me, parcels, client, findPath_BFS, find_nearest_delivery, mypos, updateMe, map, find_random_delivery, deliveryCoordinates, distanceBFS }
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRiYjQ5YjZiMzAxIiwibmFtZSI6InNpbW9zIiwiaWF0IjoxNzE0OTAwMjQ3fQ.Ln_OcLohraWwFOrMFTldjltybg_Pp283R_azBuWxyVs'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQyNGFiMGRkYzg1IiwibmFtZSI6InNpbW9zIiwiaWF0IjoxNzE0OTM2NDA1fQ.abYUHb26hh6P4gw4z2YgIQA-JgOCqob8qiWPRK6HKsg'
 )
-
-// Function to calculate distance between two points with Manhattan distance
 function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
     const dx = Math.abs(Math.round(x1) - Math.round(x2))
     const dy = Math.abs(Math.round(y1) - Math.round(y2))
     return dx + dy;
 }
 
-// Function to calculate distance between two points with BFS
-function distanceBFS(x, y) {
-    return findPath_BFS(x, y).length;
+function distanceBFS({ x: x2, y: y2 }) {
+    return findPath_BFS(x2, y2).length;
 }
 
-// Function to convert json map to matrix
 export function from_json_to_matrix(width, height, tiles, map) {
     var map = [];
     for (let i = 0; i < width; i++) {
@@ -38,16 +34,15 @@ export function from_json_to_matrix(width, height, tiles, map) {
     return map;
 }
 
-// Function to update the agent's position
 var me = {};
 await client.onYou(({ id, name, x, y, score }) => {
+    // console.log('me', {id, name, x, y, score})
     me.id = id
     me.name = name
     me.x = x
     me.y = y
     me.score = score
 })
-
 
 async function updateMe() {
     return new Promise(function (resolve) {
@@ -79,8 +74,6 @@ client.onParcelsSensing(async (perceived_parcels) => {
         parcels.set(p.id, p)
     }
 })
-
-
 
 var map = [];
 var deliveryCoordinates = [];
@@ -182,7 +175,7 @@ function find_random_delivery() {
 
     let random_delivery = deliveryCoordinates[Math.floor(Math.random() * deliveryCoordinates.length)];
 
-    delivery_coordinates = { x: random_delivery.x, y: random_delivery.y };
+    let delivery_coordinates = { x: random_delivery.x, y: random_delivery.y };
 
     return delivery_coordinates;
 }
@@ -210,11 +203,8 @@ function getNeighbors(x, y) {
 }
 
 function isValidPosition(x, y) {
-    x = Math.round(x);
-    y = Math.round(y);
     const width = map.length;
     const height = map[0].length;
-    
 
     return x >= 0 && x < width && y >= 0 && y < height && map[x][y] !== 0;
 }
