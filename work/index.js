@@ -113,11 +113,8 @@ function calculate_pickup_utility(parcel) {
 
     var RewardParcel = scoreParcel - decade_frequency * distance_parcel;
     var RewardInMind = scoreInMind - decade_frequency * distance_parcel;
-    console.log("distanceBFS(parcel ", parcel.id, "): ", distanceBFS(parcel))
-    // console.log("distanceBFS_notMe(parcel, find_nearest_delivery()): ", distanceBFS_notMe(parcel, find_nearest_delivery()))
     var utility = RewardParcel + RewardInMind - decade_frequency * distance_delivery;
 
-    // console.log("\n----------------------------------------------------------\nparcel: ", parcel, "\nRewardParcel: ", RewardParcel, "\nRewardInMind: ", RewardInMind, "\ndist_from_delivery", decade_frequency * distanceBFS_notMe(parcel, find_nearest_delivery()), "\nutility: ", utility, "\n----------------------------------------------------------")
     return utility;
 }
 
@@ -161,8 +158,6 @@ function agentLoop() {
     let u = 2
     options.push(['go_random_delivery', "", "", "", u]);
 
-    // console.log("======================================================\noptions: ", options, "\n======================================================")
-
     /**
      * Select best intention from available options
      */
@@ -176,8 +171,6 @@ function agentLoop() {
             bestUtility = current_utility
         }
     }
-
-    // console.log("\n\nbest_option: ", best_option, "\n\n")
 
     myAgent.push(best_option);
 
