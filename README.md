@@ -44,3 +44,21 @@ The project is divided into two main parts.
         agent picking up a new parcel).</li>
     <li>Validate and test the system with predefined simulation runs.</li>
 </ul>
+
+## Utility Function
+
+We use the following utility function for the $go\_put\_down$ intention:
+
+$$
+    utility = scoreInMind - f * dist(me, nearest_delivery) * n_parcels_inmind;
+$$
+
+where:
+
+<ul>
+    <li>$scoreInMind$ is the total reward the agent is carrying in his head (he has pick up).</li>
+    <li>$f = $</li>
+</ul>
+
+
+
