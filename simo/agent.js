@@ -23,7 +23,6 @@ class Agent {
                     else {
                         tot_score += parcel.reward;
                     }
-                    console.log(parcel.reward)
                 }
             }
         }

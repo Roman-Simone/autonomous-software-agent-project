@@ -12,14 +12,17 @@ class Agent {
     intention_queue = new Array();
     parcelsInMind = [];
 
-    get_inmind_score(){
+    get_inmind_score() {
         var tot_score = 0;
-
-        for(let p of this.parcelsInMind) {
+        for (let parcelInMind of this.parcelsInMind) {
             for (const [id, parcel] of parcels.entries()) {
-                if (p === id) {                          
-                    // console.log("Parcel in head: ", parcel, " - Score: ", parcel.reward);
-                    tot_score += parcel.reward;
+                if (parcelInMind === id) {
+                    if (parcel.reward <= 1) {
+                        this.parcelsInMind = this.parcelsInMind.filter(parcel => parcel !== parcelInMind);
+                    }
+                    else {
+                        tot_score += parcel.reward;
+                    }
                 }
             }
         }
@@ -29,9 +32,9 @@ class Agent {
 
     async intentionLoop() {
 
-        while ( true ) {
+        while (true) {
             // Consumes intention_queue if not empty
-            if ( this.intention_queue.length > 0 ) {
+            if (this.intention_queue.length > 0) {
                 // Current intention
                 const intention = this.intention_queue[0];
                 console.log(intention.predicate[0]);
@@ -39,20 +42,21 @@ class Agent {
                 // Start achieving intention
                 let ret = await intention.achieve()
 
-                // Catch eventual error and continue
-                .catch( error => {
+                    // Catch eventual error and continue
+                    .catch(error => {
 
-                    // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
-                    this.remove(intention.predicate);
-                    
-                } );
-                
+                        // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                        this.remove(intention.predicate);
+
+                    });
+
                 if (ret == true) {
                     if (intention.predicate[0] == "go_pick_up") {
                         let entry = intention.predicate[3]
                         this.parcelsInMind.push(entry);
                     }
-                    else if(intention.predicate[0] == "go_put_down") {
+                    else if (intention.predicate[0] == "go_put_down") {
+
                         this.parcelsInMind = [];
                     }
                 }
@@ -61,7 +65,7 @@ class Agent {
                 this.remove(intention.predicate);
             }
             // Postpone next iteration at setImmediate
-            await new Promise( res => setImmediate( res ) );
+            await new Promise(res => setImmediate(res));
         }
     }
 
