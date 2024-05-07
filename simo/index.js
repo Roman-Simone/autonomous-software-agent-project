@@ -1,63 +1,10 @@
 import { Agent } from "./agent.js";
-import { distanceBFS_notMe, find_nearest, client, parcels, me, map, distanceBFS, find_nearest_delivery } from "./utils.js";
+import { distanceBFS_notMe, client, parcels, me, map, distanceBFS, find_nearest_delivery } from "./utils.js";
 
 // Define global variables
 const beliefset = new Map();
 
-var utilityPutDown = 0;
-var decade_frequency = 0;
 
-// here I want to implement f(score, distance) = alpha*score + beta/(distance_parcel + distance_delivery) + min(distance(agent, parcel))
-
-// function calculate_pickup_utility(parcel) {
-
-//     if (!parcel.carriedBy && parcel.reward > 3) {
-//         let score = parcel.reward;
-
-//         var intrinsic_score = ALPHA * score - BETA * (distanceBFS(parcel) + distance(parcel, find_nearest(parcel.x, parcel.y, map)[2]));
-
-//         // Consider parcel only if intrinsic score is positive
-//         if (intrinsic_score > 0) {
-//             // Calculate utility of picking up the parcel
-//             var util = intrinsic_score;
-//             // Adjust utility based on distance from agents in beliefset
-//             if (beliefset.size > 0) {
-//                 let min_score_parcel_agent = Number.MAX_VALUE;
-//                 for (let a of beliefset.values()) {
-//                     let score_parcel_agent = distance(a, parcel);
-//                     if (score_parcel_agent < min_score_parcel_agent) {
-//                         min_score_parcel_agent = score_parcel_agent;
-//                     }
-//                 }
-//                 util -= min_score_parcel_agent;
-//             }
-
-//         } else {
-//             return 0;
-//         }
-//         return util;
-//     } else {
-//         return 0;
-//     }
-// }
-
-// function calculate_putdown_utility() {
-
-//     if (myAgent.parcelsInMind.length == 0)
-//         return 0;
-
-//     var scoreInMind = 0;
-//     for (let p of myAgent.parcelsInMind) {
-//         for (const [id, parcel] of parcels.entries()) {
-//             if (p === id) {
-//                 scoreInMind += parcel.reward;
-//             }
-//         }
-//     }
-//     var utility = (GAMMA * scoreInMind - DELTA * (distanceBFS(find_nearest(me.x, me.y, map)[2]))) * MULT;
-
-//     return utility;
-// }
 
 // Function to update the configuration of elements
 //!CONFIGURATION
@@ -78,23 +25,19 @@ var decade_frequency = 0;
 //     CLOCK: 50
 //   }
 
-
-var movement_duration = 0;
-var parcel_decading_interval = 0;
+var decade_frequency = 0;
 var configElements;
 client.onConfig((config) => {
     configElements = config;
 
-    var movement_duration = configElements.MOVEMENT_DURATION;
-    var parcel_decading_interval = configElements.PARCEL_DECADING_INTERVAL;
+    let movement_duration = configElements.MOVEMENT_DURATION;
+    let parcel_decading_interval = configElements.PARCEL_DECADING_INTERVAL;
 
     if (parcel_decading_interval == "infinite") {
         parcel_decading_interval = Number.MAX_VALUE;
     } else {
         parcel_decading_interval = parseInt(parcel_decading_interval.slice(0, -1)) * 1000;
     }
-
-    // console.log("Parcel decading interval: ", parcel_decading_interval);
 
     decade_frequency = movement_duration / parcel_decading_interval;
 
@@ -141,8 +84,6 @@ function agentLoop() {
     const options = [];
 
     // Iterate through available parcels
-
-
     for (const [id, parcel] of parcels.entries()) {
         if (!parcel.carriedBy && parcel.reward > 3) {
             // Check if parcel is not carried by any agent
@@ -151,7 +92,6 @@ function agentLoop() {
             if (util) {
                 options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
             }
-
         }
     }
     options.push(['go_put_down', "", "", "", calculate_putdown_utility()])
@@ -176,11 +116,8 @@ function agentLoop() {
 
 }
 
-
-
 // Call agentLoop every 2 seconds
 setInterval(agentLoop, 2000);
-
 
 // Function to trigger agentLoop when parcels are sensed
 client.onParcelsSensing(agentLoop);
