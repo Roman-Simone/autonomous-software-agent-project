@@ -1,13 +1,12 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, mypos, updateMe, parcels, find_random_delivery } from './utils.js';
-export { plans, Plan, GoPickUp };
+import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery } from './utils.js';
+export { plans, Plan };
 
 
 /**
  * Plan library
  */
-
 async function check_tile(x, y){
     for(let parcel of parcels){
         if(x == parcel.x && y == parcel.y){
@@ -138,83 +137,49 @@ class GoToBFS extends Plan {
 
     async execute(go_to_BFS, x, y) {
         var path = findPath_BFS(x, y);
-        // console.log('path', path);
-        // console.log(path.length)
-
 
         for (var i = 1; i < path.length; i++) {
             if (this.stopped) throw ['stopped']; // if stopped then quit
             await client.pickup()
             if (this.stopped) throw ['stopped']; // if stopped then quit
-            // console.log("move")
-
-            // let ok = false;
 
             var next_x = path[i].x;
             var next_y = path[i].y;
-
 
             let status_x = false;
             let status_y = false;
 
             if (next_x == me.x + 1) {
                 status_x = await client.move('right');
-                check_tile(next_x, next_y)
             }
             else if (next_x == me.x - 1) {
                 status_x = await client.move('left');
-                check_tile(next_x, next_y)
             }
 
             if (status_x) {
                 me.x = status_x.x;
                 me.y = status_x.y;
+                check_tile(next_x, next_y)
             }
             if (this.stopped) throw ['stopped']; // if stopped then quit
 
             if (next_y == me.y + 1) {
                 status_y = await client.move('up');
-                check_tile(next_x, next_y)
             }
             else if (next_y == me.y - 1) {
                 status_y = await client.move('down');
-                check_tile(next_x, next_y)
             }
 
             if (status_y) {
                 me.x = status_y.x;
                 me.y = status_y.y;
+                check_tile(next_x, next_y)
             }
 
             if (!status_x && !status_y) {
                 console.log('Failed moving')
                 throw 'stucked';
             }
-
-
-            // await client.onYou(({ id, name, x_me, y_me, score }) => {
-            //     // console.log('me', {id, name, x, y, score})
-            //     me.id = id;
-            //     me.name = name;
-            //     if (x_me * 10 != me.x * 10)
-            //         me.x = next_x;
-            //     else
-            //         me.x = x_me;
-            //     if (y_me * 10 != me.y * 10)
-            //         me.y = next_y;
-            //     else
-            //         me.y = y_me;
-            //     me.score = score;
-
-            //     // for(let p of parcels){
-            //     //     if(p.x == me.x && p.y == me.y){
-            //     //         ok = true;
-            //     //     }
-            //     // }
-
-            // });
-
-            //CHECK 
         }
     }
 }
