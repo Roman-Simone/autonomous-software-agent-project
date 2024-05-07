@@ -1,23 +1,125 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { me, parcels, client, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, mypos, updateMe, map, find_random_delivery, deliveryCoordinates, distanceBFS }
+import { myAgent } from "./index.js";
+export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, client, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS }
 
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQyNGFiMGRkYzg1IiwibmFtZSI6InNpbW9zIiwiaWF0IjoxNzE0OTM2NDA1fQ.abYUHb26hh6P4gw4z2YgIQA-JgOCqob8qiWPRK6HKsg'
 )
 
-// function distance({ x: x1, y: y1 }, { x: x2, y: y2 }) {
-//     const dx = Math.abs(Math.round(x1) - Math.round(x2))
-//     const dy = Math.abs(Math.round(y1) - Math.round(y2))
-//     return dx + dy;
-// }
+var decade_frequency = 0;
+var configElements;
+client.onConfig((config) => {
+    configElements = config;
 
-function distanceBFS({x: x, y: y}) {
+    //!CONFIGURATION
+    // Config received:  {
+    //     MAP_FILE: 'map_20',
+    //     PARCELS_GENERATION_INTERVAL: '5s',
+    //     PARCELS_MAX: '5',
+    //     MOVEMENT_STEPS: 1,
+    //     MOVEMENT_DURATION: 500,
+    //     AGENTS_OBSERVATION_DISTANCE: 5,
+    //     PARCELS_OBSERVATION_DISTANCE: 5,
+    //     AGENT_TIMEOUT: 10000,
+    //     PARCEL_REWARD_AVG: 50,
+    //     PARCEL_REWARD_VARIANCE: 10,
+    //     PARCEL_DECADING_INTERVAL: 'infinite',
+    //     RANDOMLY_MOVING_AGENTS: 2,
+    //     RANDOM_AGENT_SPEED: '2s',
+    //     CLOCK: 50
+    //   }
+
+    let movement_duration = configElements.MOVEMENT_DURATION;
+    let parcel_decading_interval = configElements.PARCEL_DECADING_INTERVAL;
+
+    if (parcel_decading_interval == "infinite") {
+        parcel_decading_interval = Number.MAX_VALUE;
+    } else {
+        parcel_decading_interval = parseInt(parcel_decading_interval.slice(0, -1)) * 1000;
+    }
+
+    decade_frequency = movement_duration / parcel_decading_interval;
+});
+
+function calculate_pickup_utility(parcel) {
+    let scoreParcel = parcel.reward;
+    let scoreInMind = myAgent.get_inmind_score();
+    let numParcelInMind = myAgent.parcelsInMind.length
+
+    let distance_parcel = distanceBFS(parcel);
+    let distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
+
+    for (let parcelInMind of myAgent.parcelsInMind) {
+        let rewardAtEnd = parcelInMind.reward - decade_frequency * (distance_parcel + distance_delivery);
+        if (rewardAtEnd <= 0) {
+            numParcelInMind = numParcelInMind - 1;
+        }
+    }
+
+
+    let RewardParcel = scoreParcel - decade_frequency * distance_parcel;
+    let RewardInMind = scoreInMind - ((decade_frequency * distance_parcel) * numParcelInMind);
+    let utility = (RewardParcel + RewardInMind) - (decade_frequency * distance_delivery) * (numParcelInMind + 1);
+
+
+    let min_distance_parcel_agent = Number.MAX_VALUE;
+    let nearest_agent = "";
+    for (let a of beliefset.values()) {
+        if (distanceBFS_notMe(parcel, a) < min_distance_parcel_agent) {
+            min_distance_parcel_agent = distanceBFS_notMe(parcel, a);
+            nearest_agent = a.name;
+        }
+    }
+
+    let mult_malus = 0.7;
+
+    if (min_distance_parcel_agent < distance_parcel) {
+        utility -= mult_malus * (distance_parcel - min_distance_parcel_agent);
+
+    }
+
+    return utility;
+}
+
+function calculate_putdown_utility() {
+    let scoreInMind = myAgent.get_inmind_score();
+    let distanceDelivery = distanceBFS(find_nearest_delivery());
+    let numParcelInMind = myAgent.parcelsInMind.length
+
+    for (let parcelInMind of myAgent.parcelsInMind) {
+        let rewardAtEnd = parcelInMind.reward - (decade_frequency * distanceDelivery);
+        if (rewardAtEnd <= 0) {
+            numParcelInMind = numParcelInMind - 1;
+        }
+    }
+
+    var utility = scoreInMind - ((decade_frequency * distanceDelivery) * numParcelInMind);
+    return utility;
+}
+
+// Define global variables
+const beliefset = new Map();
+// Function to update beliefset when agents are sensed
+client.onAgentsSensing(agents => {
+    // Update beliefset with new agent information
+    for (let a of agents) {
+        beliefset.set(a.id, a);
+    }
+});
+
+function manhattan({ x: x1, y: y1 }, { x: x2, y: y2 }) {
+    const dx = Math.abs(Math.round(x1) - Math.round(x2))
+    const dy = Math.abs(Math.round(y1) - Math.round(y2))
+    return dx + dy;
+}
+
+function distanceBFS({ x: x, y: y }) {
     return findPath_BFS(x, y).length;
 }
 
-function distanceBFS_notMe({x: startX, y: startY}, {x: endX, y: endY}) {
+function distanceBFS_notMe({ x: startX, y: startY }, { x: endX, y: endY }) {
     return findPath_BFS_notMe(startX, startY, endX, endY).length;
 }
 
@@ -41,37 +143,12 @@ export function from_json_to_matrix(width, height, tiles, map) {
 
 var me = {};
 await client.onYou(({ id, name, x, y, score }) => {
-    // console.log('me', {id, name, x, y, score})
     me.id = id
     me.name = name
     me.x = Math.round(x);
     me.y = Math.round(y);
     me.score = score
 })
-
-async function updateMe() {
-    return new Promise(function (resolve) {
-        client.onYou(({ id, name, x, y, score }) => {
-            // console.log('me', {id, name, x, y, score})
-            me.id = id
-            me.name = name
-            me.x = x
-            me.y = y
-            me.score = score
-        });
-    });
-}
-async function mypos() {
-    let myPromise = new Promise(function (resolve) {
-        client.onYou(({ x, y }) => {
-            resolve({ x, y });
-        });
-    });
-
-    return await myPromise;
-}
-
-
 
 var parcels = new Map()
 client.onParcelsSensing(async (perceived_parcels) => {
@@ -83,91 +160,10 @@ client.onParcelsSensing(async (perceived_parcels) => {
 
 var map = [];
 var deliveryCoordinates = [];
-var width_map = 0;
-var height_map = 0;
-
-var ALPHA = 0;
-var BETA = 0;
-var GAMMA = 0;
-var DELTA = 0;
-var MULT = 0;
-
 await client.onMap((width, height, tiles) => {
     map = from_json_to_matrix(width, height, tiles, map);
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 });
-
-function options() {
-    const options = []
-    for (const parcel of parcels.values())
-        options.push({ intention: 'pick up parcel', args: [parcel] });
-    for (const tile of tiles.values())
-        if (tile.delivery) options.push({ intention: 'deliver to', args: [tile] });
-}
-
-function select(options) {
-    for (const option of options) {
-        if (option.intention == 'pick up parcel' && picked_up.length == 0)
-            return option;
-    }
-}
-
-
-export function find_nearest(me, map) {
-
-    let dist_0 = Number.MAX_VALUE;
-    let dist_1 = Number.MAX_VALUE;
-    let dist_2 = Number.MAX_VALUE;
-    let dist_3 = Number.MAX_VALUE;
-
-    let coordinates = [];
-    for (var i = 0; i < 4; i++) {
-        coordinates.push({ x: -1, y: -1, type: -1 });
-    }
-
-    for (var i = 0; i < map.length; i++) {
-        for (var j = 0; j < map[i].length; j++) {
-            if (i == me.x && j == me.y) {
-                continue;
-            }
-
-            var b = { i, j }
-
-            switch (map[i][j]) {
-                case 0:
-                    if (distanceBFS(b) < dist_0) {
-                        dist_0 = distanceBFS(b);
-                        coordinates[0] = { x: i, y: j, type: 0 };
-                    }
-                    break;
-                case 1:
-                    if (distanceBFS(b) < dist_1) {
-                        dist_1 = distanceBFS(b);
-                        coordinates[1] = { x: i, y: j, type: 1 };
-                    }
-                    break;
-                case 2:
-                    if (distanceBFS(b) < dist_2) {
-                        dist_2 = distanceBFS(b);
-                        coordinates[2] = { x: i, y: j, type: 2 };
-                    }
-                    break;
-                case 3:
-                    if (distanceBFS(b) < dist_3) {
-                        dist_3 = distanceBFS(b);
-                        coordinates[3] = { x: i, y: j, type: 3 };
-                    }
-                    break;
-                default:
-                    // Handle other cases if needed
-                    break;
-            }
-        }
-    }
-
-    return coordinates;
-}
-
 
 //* Find nearest delivery 
 function find_nearest_delivery() {
