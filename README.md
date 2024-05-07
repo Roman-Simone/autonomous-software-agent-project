@@ -49,38 +49,38 @@ The project is divided into two main parts.
 
 ### go_put_down
 
-We use the following utility function for the $go\_put\_down$ intention:
+We use the following utility function for the go_put_down intention:
 
 $$
-    utility = scoreInMind - f * dist(me, nearest_delivery) * n_parcels_inmind;
+    utility = scoreInMind - f * dist(me, nearestDelivery) * nParcelsInMind;
 $$
 
-where $scoreInMind$ is the total reward the agent is carrying in his head (he has picked up), $f = \frac{movement\_duration}{parcel\_decaying\_interval}$ which is a ratio that determines how much a parcel's score decays at each step of our agent. Clearly, at each timestep, the total $scoreInMind$ decays by one unit for each parcel he's carrying.
+where $scoreInMind$ is the total reward the agent is carrying in his head (he has picked up), $f = \frac{movementDuration}{parcelDecayingInterval}$ which is a ratio that determines how much a parcel's score decays at each step of our agent. Clearly, at each timestep, the total $scoreInMind$ decays by one unit for each parcel he's carrying.
 
 ### go_pick_up
 
-The $go\_pick\_up$ utility is more complicated:
+The go_pick_up utility is more complicated:
 
 $$
-    utility = RewardParcel + RewardInMind - decade_frequency * distance_delivery * (numParcelInMind + 1);
+    utility = RewardParcel + RewardInMind - f * dist(me, delivery) * (numParcelInMind + 1);
 $$
 
 where:
 
 $$
-    RewardInMind = scoreInMind - decade_frequency * dist(me, parcel) * numParcelInMind;
+    RewardInMind = scoreInMind - f * dist(me, parcel) * numParcelInMind;
 $$
 
 and 
 
 $$
-    RewardParcel = scoreParcel - decade_frequency * dist(me, parcel)
+    RewardParcel = scoreParcel - f * dist(me, parcel)
 $$
 
 We also introduce a penalty if the distance between me and parcel A is greater than the distance between the nearest agent and parcel A. This penalty is added to the utility function as follows:
 
 $$
-    utility = utility - malus * (distance(me, parcel) - dist(nearest_agent, parcel))
+    utility = utility - malus * (distance(me, parcel) - dist(nearestAgent, parcel))
 $$
 
 where $malus$ is the penalty factor applied to the difference between the distance from me to the parcel and the distance from the nearest agent to the parcel. 
