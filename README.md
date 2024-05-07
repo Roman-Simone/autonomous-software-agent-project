@@ -45,7 +45,9 @@ The project is divided into two main parts.
     <li>Validate and test the system with predefined simulation runs.</li>
 </ul>
 
-## Utility Function
+## Utility Functions
+
+### go_put_down
 
 We use the following utility function for the $go\_put\_down$ intention:
 
@@ -53,12 +55,32 @@ $$
     utility = scoreInMind - f * dist(me, nearest_delivery) * n_parcels_inmind;
 $$
 
+where $scoreInMind$ is the total reward the agent is carrying in his head (he has picked up), $f = \frac{movement\_duration}{parcel\_decaying\_interval}$ which is a ratio that determines how much a parcel's score decays at each step of our agent. Clearly, at each timestep, the total $scoreInMind$ decays by one unit for each parcel he's carrying.
+
+### go_pick_up
+
+The $go\_pick\_up$ utility is more complicated:
+
+$$
+    utility = RewardParcel + RewardInMind - decade_frequency * distance_delivery * (numParcelInMind + 1);
+$$
+
 where:
 
-<ul>
-    <li>$scoreInMind$ is the total reward the agent is carrying in his head (he has pick up).</li>
-    <li>$f = $</li>
-</ul>
+$$
+    RewardInMind = scoreInMind - decade_frequency * dist(me, parcel) * numParcelInMind;
+$$
 
+and 
 
+$$
+    RewardParcel = scoreParcel - decade_frequency * dist(me, parcel)
+$$
 
+We also introduce a penalty if the distance between me and parcel A is greater than the distance between the nearest agent and parcel A. This penalty is added to the utility function as follows:
+
+$$
+    utility = utility - malus * (distance(me, parcel) - dist(nearest_agent, parcel))
+$$
+
+where $malus$ is the penalty factor applied to the difference between the distance from me to the parcel and the distance from the nearest agent to the parcel. 

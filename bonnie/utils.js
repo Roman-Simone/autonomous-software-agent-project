@@ -79,7 +79,7 @@ function calculate_pickup_utility(parcel) {
         utility -= mult_malus * (distance_parcel - min_distance_parcel_agent);
 
     }
-
+    
     return utility;
 }
 
