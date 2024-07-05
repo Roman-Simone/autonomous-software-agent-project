@@ -1,8 +1,7 @@
 
 import { Intention } from './intention.js';
 import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery } from './utils.js';
-export { plans, Plan };
-
+export { plans, Plan }; 
 
 /**
  * Plan library
@@ -152,6 +151,11 @@ class GoToBFS extends Plan {
 
             if (next_x == me.x + 1) {
                 status_x = await client.move('right');
+                await client.say( '09fd649e76e', {
+                    hello: 'moving right',
+                    iam: client.name,
+                    id: client.id
+                } );
             }
             else if (next_x == me.x - 1) {
                 status_x = await client.move('left');

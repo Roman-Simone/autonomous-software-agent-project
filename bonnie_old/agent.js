@@ -23,7 +23,7 @@ class Agent {
                     else {
                         tot_score += parcel.reward;
                     }
-                    console.log(parcel.reward)
+                    // console.log(parcel.reward)
                 }
             }
         }
@@ -38,7 +38,7 @@ class Agent {
             if (this.intention_queue.length > 0) {
                 // Current intention
                 const intention = this.intention_queue[0];
-                console.log(intention.predicate[0]);
+                // console.log(intention.predicate[0]);
 
                 // Start achieving intention
                 let ret = await intention.achieve()
