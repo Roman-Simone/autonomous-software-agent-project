@@ -1,8 +1,7 @@
 
 import { Intention } from './intention.js';
-import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery } from './utils.js';
+import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery, friend_id } from './utils.js';
 export { plans, Plan };
-
 
 /**
  * Plan library
@@ -152,9 +151,20 @@ class GoToBFS extends Plan {
 
             if (next_x == me.x + 1) {
                 status_x = await client.move('right');
+                // await client.say( friend_id, {
+                //     hello: 'turning right',
+                //     iam: client.name,
+                //     id: client.id
+                // } );
             }
             else if (next_x == me.x - 1) {
                 status_x = await client.move('left');
+                // await client.say( friend_id, {
+                //     hello: 'turning left',
+                //     iam: client.name,
+                //     id: client.id
+                // } );
+
             }
 
             if (status_x) {
@@ -166,9 +176,19 @@ class GoToBFS extends Plan {
 
             if (next_y == me.y + 1) {
                 status_y = await client.move('up');
+                // await client.say( friend_id, {
+                //     hello: 'going up',
+                //     iam: client.name,
+                //     id: client.id
+                // } );
             }
             else if (next_y == me.y - 1) {
                 status_y = await client.move('down');
+                // await client.say( friend_id, {
+                //     hello: 'going down',
+                //     iam: client.name,
+                //     id: client.id
+                // } );
             }
 
             if (status_y) {
