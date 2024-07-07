@@ -5,7 +5,7 @@ export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, clien
 
 const client = new DeliverooApi(
     'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQyNGFiMGRkYzg1IiwibmFtZSI6InNpbW9zIiwiaWF0IjoxNzE0OTM2NDA1fQ.abYUHb26hh6P4gw4z2YgIQA-JgOCqob8qiWPRK6HKsg'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFiNzQyZWYzZWI5IiwibmFtZSI6ImJvbWJlciIsImlhdCI6MTcyMDE2NTMwMH0.B06QsaWeS0m0pG-hyv6JS464euuRekRP44Io6KMUYHk'
 )
 
 // Function to update the configuration of elements
