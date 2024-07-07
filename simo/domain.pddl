@@ -13,6 +13,7 @@
         (up ?t1 ?t2)
         (down ?t1 ?t2)
         (holding ?a ?p)
+        (posing ?t)
     )
     
     (:action move-right
@@ -81,17 +82,14 @@
         )
     )
 
-    (:action deliver
+    (:action put-down
         :parameters (?me ?p ?t)
         :precondition (and
             (me ?me)
-            (parcel ?p)
-            (holding ?me ?p)
-            (delivery ?t)
             (at ?me ?t)
         )
         :effect (and
-            (not (holding ?me ?p))
-            (at ?p ?t))
+            (posing ?t)
+        )
     )
 )
