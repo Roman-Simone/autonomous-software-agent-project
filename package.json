@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@unitn-asa/deliveroo-js-client": "^0.0.37",
+    "@unitn-asa/pddl-client": "^0.0.37",
     "js-priority-queue": "^0.1.5",
     "lodash": "^4.17.21"
   }
