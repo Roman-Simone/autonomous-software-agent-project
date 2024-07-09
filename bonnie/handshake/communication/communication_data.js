@@ -2,31 +2,25 @@ export { CommunicationData }
 
 class CommunicationData{
 
-    friend_name = ""
+    name = ""
     
-    friend_id = ""
+    id = ""
+
+    role = ""
 
     friend_pos = { x: -1, y: -1};
     
-    parcels = [];
-
-    agents = [];
-
-    // curr_goal = { x: -1, y: -1, info: ''};          // info = delivery, put_down, random
-
-    goals = [];
-
-    order = [];
+    options = [];
+    
+    best_option = [];
 
     constructor(){
-        this.friend_name = "";
-        this.friend_id = "";
+        this.name = "";
+        this.id = "";
         this.friend_pos = { x: -1, y: -1};
-        this.parcels = [];
-        this.agents = [];    
-        this.curr_goal = { x: -1, y: -1, info: ""};          // info = delivery, put_down, random
-        this.goals = [];
-        this.order = [];   
+        this.role = "";
+        this.options = [];
+        this.best_option = []; 
     }
 
     // set_mydata(order = []){

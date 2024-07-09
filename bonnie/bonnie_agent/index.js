@@ -14,12 +14,9 @@ await handshake();
 // Create an instance of Agent
 const myAgent = new Agent();
 
-
 async function agentLoop() {
     // Array to store potential intention options
     const options = [];
-
-    console.log("MY ID: ", me.id)
 
     // Iterate through available parcels
     for (const [id, parcel] of parcels.entries()) {
