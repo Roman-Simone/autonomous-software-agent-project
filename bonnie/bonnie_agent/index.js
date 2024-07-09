@@ -1,19 +1,24 @@
+// import { friend } from "../bonnie_agent/utils.js";
 import { Agent } from "./agent.js";
-import { calculate_pickup_utility, calculate_putdown_utility, client, parcels, friend_id, me } from "./utils.js";
-export { myAgent };
+import { calculate_pickup_utility, calculate_putdown_utility, parcels, friend_id, me } from "./utils.js";
+import { CommunicationData } from "./communication/communication_data.js";
+import { handshake, role } from "./communication/coordination.js";
+import { client, friend_name } from "./config.js";
+export { myAgent, ack};
 
+
+var ack = false;
+
+// Create an instance of Agent
+const myAgent = new Agent();
 
 
 async function agentLoop() {
     // Array to store potential intention options
     const options = [];
 
-
-    await client.say( friend_id, {
-        hello: '[STATE] ' + me.x + ' ' + me.y + " " + myAgent.get_inmind_score(),
-        iam: client.name,
-        id: client.id
-    } );
+    console.log("MY ID: ", me.id)
+    if (friend_name == "god" && !ack) await handshake();
 
     // Iterate through available parcels
     for (const [id, parcel] of parcels.entries()) {
@@ -32,6 +37,7 @@ async function agentLoop() {
     /**
      * Select best intention from available options
      */
+    
     let best_option;
     let bestUtility = -1.0;
     for (const option of options) {
@@ -50,11 +56,9 @@ async function agentLoop() {
 // Call agentLoop every 2 seconds
 setInterval(agentLoop, 2000);
 
-// Function to trigger agentLoop when parcels are sensed
 client.onParcelsSensing(agentLoop);
 
-// Create an instance of Agent
-const myAgent = new Agent();
+// Function to trigger agentLoop when parcels are sensed
 
-// Start intention loop of the agent
 myAgent.intentionLoop();
+

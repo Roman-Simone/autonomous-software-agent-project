@@ -1,7 +1,6 @@
 
 import { Intention } from './intention.js';
-import { me, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery, friend_id } from './utils.js';
-// import { client } from './communication/communication.js';
+import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery, friend_id } from './utils.js';
 export { plans, Plan };
 
 /**

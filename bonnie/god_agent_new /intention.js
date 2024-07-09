@@ -1,8 +1,7 @@
-import { myAgent } from './index.js';
-import { client } from "./config.js";
 import { plans, Plan } from './plans.js';
 export { Intention };
-import { friend_id } from './utils.js';
+import { myAgent } from './index.js';
+import { client, friend_id } from './utils.js';
 
 /**
  * Intention

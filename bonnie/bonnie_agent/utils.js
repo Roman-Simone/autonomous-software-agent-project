@@ -1,16 +1,17 @@
-import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
 import { myAgent } from "./index.js";
-export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, client, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS }
+import { client, friend_name } from "./config.js";
+// import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
+import { role } from "./communication/coordination.js";
+export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, role, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
 
 // BONNIE
 
-const client = new DeliverooApi(
-    'http://localhost:8080',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ'
-)
+// const client = new DeliverooApi(
+//     'http://localhost:8080',
+//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ'
+// )
 
-var friend_name = "god";
-export var friend_id = "";
+var friend_id = "3215fd37c1f";
 
 // Function to update the configuration of elements
 //!CONFIGURATION
@@ -106,24 +107,27 @@ function calculate_putdown_utility() {
 
 // Define global variables
 const beliefset = new Map();
+
 // Function to update beliefset when agents are sensed
+
 client.onAgentsSensing(agents => {
     // Update beliefset with new agent information
     for (let a of agents) {
         beliefset.set(a.id, a);
-        console.log("friend: ", friend_name, " - current: ", a.name)
-        if(a.name == friend_name && friend_id == ""){
+        console.log("Agent: ", a.name, " - id: ", a.id);
+        // console.log("friend: ", friend_name, " - current: ", a.name)
+        if(friend_name != "" && a.name == friend_name && friend_id == ""){
             friend_id = a.id;
             console.log("Friend name: ", friend_name, " - id: ", friend_id);
         } 
     }
 });
 
-function manhattan({ x: x1, y: y1 }, { x: x2, y: y2 }) {
-    const dx = Math.abs(Math.round(x1) - Math.round(x2))
-    const dy = Math.abs(Math.round(y1) - Math.round(y2))
-    return dx + dy;
-}
+// function manhattan({ x: x1, y: y1 }, { x: x2, y: y2 }) {
+//     const dx = Math.abs(Math.round(x1) - Math.round(x2))
+//     const dy = Math.abs(Math.round(y1) - Math.round(y2))
+//     return dx + dy;
+// }
 
 function distanceBFS({ x: x, y: y }) {
     return findPath_BFS(x, y).length;
@@ -161,13 +165,6 @@ await client.onYou(({ id, name, x, y, score }) => {
 })
 
 
-client.onMsg( (id, name, msg, reply) => {
-    console.log("new msg received from", name+':', msg);
-    let answer = 'hello '+name+', here is reply.js as '+client.name+'. Do you need anything?';
-    console.log("my reply: ", answer);
-    if (reply)
-        try { reply(answer) } catch { (error) => console.error(error) }
-});
 
 var parcels = new Map()
 client.onParcelsSensing(async (perceived_parcels) => {
@@ -180,6 +177,7 @@ client.onParcelsSensing(async (perceived_parcels) => {
 var map = [];
 var deliveryCoordinates = [];
 await client.onMap((width, height, tiles) => {
+    console.log("Map received: ", width, height, tiles.length)
     map = from_json_to_matrix(width, height, tiles, map);
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 });
@@ -306,3 +304,5 @@ function findPath_BFS_notMe(startX, startY, endX, endY) {
     // If no path is found, return an empty array
     return [];
 }
+
+
