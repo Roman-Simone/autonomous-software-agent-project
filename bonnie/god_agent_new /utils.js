@@ -1,13 +1,16 @@
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-import { Slave } from "./index.js";
-export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, client, role, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS }
+import { myAgent, friend_name } from "./index.js";
+import { role } from "./communication/coordination.js";
+export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, role, friend_id, client, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
 
-// GOD
+// BONNIE
 
 const client = new DeliverooApi(
     'http://localhost:8080',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMyMTVmZDM3YzFmIiwibmFtZSI6ImdvZCIsImlhdCI6MTcxNTAwNTM2NX0.mTuS0kYQuqqQE0ttBSfCuBkgk_vwKyy0WykWR8YbCPc'
 )
+
+var friend_id = "";
 
 // Function to update the configuration of elements
 //!CONFIGURATION
@@ -15,7 +18,7 @@ const client = new DeliverooApi(
 //     MAP_FILE: 'map_20',
 //     PARCELS_GENERATION_INTERVAL: '5s',
 //     PARCELS_MAX: '5',
-//     MOVEMENT_STEPS: 1,
+//     MOVEMENT_STEPS: 1,   
 //     MOVEMENT_DURATION: 500,
 //     AGENTS_OBSERVATION_DISTANCE: 5,
 //     PARCELS_OBSERVATION_DISTANCE: 5,
@@ -47,13 +50,13 @@ client.onConfig((config) => {
 
 function calculate_pickup_utility(parcel) {
     let scoreParcel = parcel.reward;
-    let scoreInMind = Slave.get_inmind_score();
-    let numParcelInMind = Slave.parcelsInMind.length
+    let scoreInMind = myAgent.get_inmind_score();
+    let numParcelInMind = myAgent.parcelsInMind.length
 
     let distance_parcel = distanceBFS(parcel);
     let distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
 
-    for (let parcelInMind of Slave.parcelsInMind) {
+    for (let parcelInMind of myAgent.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - decade_frequency * (distance_parcel + distance_delivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
@@ -86,11 +89,11 @@ function calculate_pickup_utility(parcel) {
 }
 
 function calculate_putdown_utility() {
-    let scoreInMind = Slave.get_inmind_score();
+    let scoreInMind = myAgent.get_inmind_score();
     let distanceDelivery = distanceBFS(find_nearest_delivery());
-    let numParcelInMind = Slave.parcelsInMind.length
+    let numParcelInMind = myAgent.parcelsInMind.length
 
-    for (let parcelInMind of Slave.parcelsInMind) {
+    for (let parcelInMind of myAgent.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - (decade_frequency * distanceDelivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
@@ -103,19 +106,27 @@ function calculate_putdown_utility() {
 
 // Define global variables
 const beliefset = new Map();
+
 // Function to update beliefset when agents are sensed
+
 client.onAgentsSensing(agents => {
     // Update beliefset with new agent information
     for (let a of agents) {
         beliefset.set(a.id, a);
+        console.log("Agent: ", a.name, " - id: ", a.id);
+        // console.log("friend: ", friend_name, " - current: ", a.name)
+        if(a.name == friend_name && friend_name != "" && friend_id == ""){
+            friend_id = a.id;
+            console.log("Friend name: ", friend_name, " - id: ", friend_id);
+        } 
     }
 });
 
-function manhattan({ x: x1, y: y1 }, { x: x2, y: y2 }) {
-    const dx = Math.abs(Math.round(x1) - Math.round(x2))
-    const dy = Math.abs(Math.round(y1) - Math.round(y2))
-    return dx + dy;
-}
+// function manhattan({ x: x1, y: y1 }, { x: x2, y: y2 }) {
+//     const dx = Math.abs(Math.round(x1) - Math.round(x2))
+//     const dy = Math.abs(Math.round(y1) - Math.round(y2))
+//     return dx + dy;
+// }
 
 function distanceBFS({ x: x, y: y }) {
     return findPath_BFS(x, y).length;
@@ -153,42 +164,6 @@ await client.onYou(({ id, name, x, y, score }) => {
 })
 
 
-export var friend = {};
-var role = "";
-
-client.onMsg( (id, name, msg, reply) => {
-    
-    let words = msg.hello.split(" ");
-
-    console.log("message: ", msg)
-
-    if (words[0] == "[HANDSHAKE]") {
-        if (words[1] == "master_slave_connection" && words[2] == "MASTER_OK") {
-            role = "SLAVE"
-            console.log("I'm a SLAVE");
-            var answer = "[HANDSHAKE] master_slave_connection SLAVE_OK " + me.name + " " + me.id;
-        }
-    }
-
-    if (words[0] == "[STATE]") {
-        friend.x = parseInt(words[1]);
-        friend.y = parseInt(words[2]);
-        friend.inmind = parseInt(words[3]); 
-    } 
-
-    if (words[0] == "[INT]") {
-        let split = words[1].split(",")
-        friend.intention = split[0];
-        friend.intention_x = parseInt(split[1]);
-        friend.intention_y = parseInt(split[2]);
-    }
-
-    if (reply && answer)
-        try { 
-            console.log("sending reply: ", answer)
-            reply(answer) } catch { (error) => console.error(error) 
-        }
-});
 
 var parcels = new Map()
 client.onParcelsSensing(async (perceived_parcels) => {
@@ -327,3 +302,5 @@ function findPath_BFS_notMe(startX, startY, endX, endY) {
     // If no path is found, return an empty array
     return [];
 }
+
+
