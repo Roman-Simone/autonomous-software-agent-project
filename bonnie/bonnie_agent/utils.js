@@ -1,8 +1,7 @@
 import { myAgent } from "./index.js";
 import { client, friend_name } from "./config.js";
 // import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-import { role } from "./communication/coordination.js";
-export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, role, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
+export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
 
 // BONNIE
 
@@ -11,7 +10,7 @@ export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, role,
 //     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ'
 // )
 
-var friend_id = "3215fd37c1f";
+var friend_id = "";
 
 // Function to update the configuration of elements
 //!CONFIGURATION

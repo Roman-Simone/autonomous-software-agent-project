@@ -1,7 +1,8 @@
 import { client, friend_name } from "../config.js";
-export { handshake, friend_id }
+import { CommunicationData } from "./communication_data.js";
+export { handshake, CollaboratorData}
 
-var friend_id = ""
+var CollaboratorData = new CommunicationData();
 
 function getMessage(client) {
     return new Promise((resolve, reject) => {
@@ -39,9 +40,10 @@ async function handshake() {
         let splitMSG = receivedMSG.hello.split(" ");
         if(receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "firstMessage"){
             first_msg = true
-            friend_id = receivedMSG.id
-            console.log("Friend id: ", friend_id);
-            await client.say(friend_id, {
+            CollaboratorData.friend_id = receivedMSG.id;
+            CollaboratorData.friend_name = receivedMSG.name;
+            console.log("Friend id: ", CollaboratorData.friend_id);
+            await client.say(CollaboratorData.friend_id, {
                 hello: '[HANDSHAKE] ' + client.name + ' ack',
                 iam: client.name,
                 id: client.id
@@ -50,7 +52,9 @@ async function handshake() {
         // if is the second agent read message 
         else if ((receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "ack")){
             first_msg = true
-            friend_id = receivedMSG.id
+            CollaboratorData.friend_id = receivedMSG.id;
+            CollaboratorData.friend_name = receivedMSG.name;
+
         }
     }
 

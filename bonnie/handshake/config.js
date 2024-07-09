@@ -30,4 +30,4 @@ const client = new DeliverooApi(
 )
 
 
-export { client, friend_name };
+export { client, friend_name, my_name };

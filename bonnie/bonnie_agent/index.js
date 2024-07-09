@@ -1,13 +1,15 @@
 // import { friend } from "../bonnie_agent/utils.js";
 import { Agent } from "./agent.js";
 import { calculate_pickup_utility, calculate_putdown_utility, parcels, friend_id, me } from "./utils.js";
-import { CommunicationData } from "./communication/communication_data.js";
-import { handshake, role } from "./communication/coordination.js";
+import { handshake } from "./communication/coordination.js";
 import { client, friend_name } from "./config.js";
-export { myAgent, ack};
+export { myAgent };
 
 
-var ack = false;
+
+await handshake();
+
+
 
 // Create an instance of Agent
 const myAgent = new Agent();
@@ -18,7 +20,6 @@ async function agentLoop() {
     const options = [];
 
     console.log("MY ID: ", me.id)
-    if (friend_name == "god" && !ack) await handshake();
 
     // Iterate through available parcels
     for (const [id, parcel] of parcels.entries()) {
