@@ -239,6 +239,7 @@ client.onMap((width, height, tiles) => {
 let domain = await readFile('./domain.pddl');
 
 
+
 class PddlMove extends Plan{
 
     static isApplicableTo ( go_to, x, y ) {

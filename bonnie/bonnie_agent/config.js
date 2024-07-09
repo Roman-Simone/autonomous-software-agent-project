@@ -4,14 +4,14 @@ var friend_name = "";
 
 function getToken(agent) {
     const tokens = {
-        'bonnie': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ',   // bonnie
-        'god': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMyMTVmZDM3YzFmIiwibmFtZSI6ImdvZCIsImlhdCI6MTcxNTAwNTM2NX0.mTuS0kYQuqqQE0ttBSfCuBkgk_vwKyy0WykWR8YbCPc'    // god 
+        'agent_1': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwNmNiOWZjNTJkIiwibmFtZSI6ImFnZW50XzEiLCJpYXQiOjE3MjA1MDg1OTl9.AKtfhbXdLaqcZ0d_IhVRU1GAgKTPaAECjKYhtWNR7AM',   // bonnie
+        'agent_2': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZjYjlmYzUyZGVjIiwibmFtZSI6ImFnZW50XzIiLCJpYXQiOjE3MjA1MDg2NjJ9.tLgCugK--NQzW0EKFtTMt_XAs4ucktTaK9ZxZJctzFM'    // god 
     };
 
-    if (agent == 'bonnie') {
-        friend_name = 'god';
+    if (agent == 'agent_1') {
+        friend_name = 'agent_2';
     } else {
-        friend_name = 'bonnie';
+        friend_name = 'agent_1';
     }
 
     return tokens[agent] || 'Token non trovato';
