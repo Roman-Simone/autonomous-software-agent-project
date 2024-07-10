@@ -1,16 +1,8 @@
 import { myAgent } from "./index.js";
-import { client, friend_name } from "./config.js";
+import { client } from "./config.js";
 import { CollaboratorData, MyData  } from "./communication/coordination.js";
-export { computeBestOption, updateMyData, calculate_pickup_utility, calculate_putdown_utility, me, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
+export { computeBestOption, calculate_pickup_utility, calculate_putdown_utility, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
 
-// BONNIE
-
-// const client = new DeliverooApi(
-//     'http://localhost:8080',
-//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmQzN2MxZjM5IiwibmFtZSI6ImJvbm5pZSIsImlhdCI6MTcxNTAwNTQzMH0.Z0WSq1N0xFIc1XRv2EulR12nYKfHFzh0cnJ9hPmJHnQ'
-// )
-
-var friend_id = "";
 
 // Function to update the configuration of elements
 //!CONFIGURATION
@@ -48,11 +40,6 @@ client.onConfig((config) => {
     decade_frequency = movement_duration / parcel_decading_interval;
 });
 
-function updateMyData(){
-    MyData.pos = {x: me.x, y: me.y};
-
-    MyData.inmind = myAgent.get_inmind_score();
-}
 
 function findBestOption(options, id="undefined"){
     let bestUtility = -1.0;
@@ -70,20 +57,6 @@ function findBestOption(options, id="undefined"){
 }
 
 function computeBestOption(){
-
-
-    // dobbiamo confrontare COllaboratorData.options e MyData.options 
-
-    // console.log("------------------------- MASTER PRIMA -------------------------")
-    // for (let elem of MyData.options){
-    //     console.log(elem)
-    // }
-
-    // console.log("------------------------- SLAVE PRIMA -------------------------")
-    // for (let elem of CollaboratorData.options){
-    //     console.log(elem)
-    // }
-
 
     for (let s_elem of CollaboratorData.options){
         let found = false;
@@ -109,22 +82,10 @@ function computeBestOption(){
             CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, CollaboratorData.pos)]);
         }
     }
-    console.log("---------- OPTIONS MASTER AFTER ----------")
-    for (let elem of MyData.options){
-        console.log(elem);
-    }
-    
-    console.log("---------- OPTIONS SLAVE AFTER ----------")
-    for (let elem of CollaboratorData.options){
-        console.log(elem);
-    }
 
     MyData.best_option = findBestOption(MyData.options)
 
     CollaboratorData.best_option = findBestOption(CollaboratorData.options)
-
-    console.log("-----------> BEST MASTER: ", MyData.best_option)
-    console.log("-----------> BEST SLAVE: ", CollaboratorData.best_option)
 
     if(MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery"){}
     else if(MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down"){} 
@@ -132,10 +93,8 @@ function computeBestOption(){
         if(MyData.best_option[3] === CollaboratorData.best_option[3]){
             if (MyData.best_option[4] >= CollaboratorData.best_option[4]){
                 CollaboratorData.best_option = findBestOption(CollaboratorData.options, CollaboratorData.best_option[3])
-                console.log("[BEST_OPTIONS_UGUALI] ---> ho cambiato la bets_option dello SLAVE")
             }else{
                 MyData.best_option = findBestOption(MyData.options, MyData.best_option[3])
-                console.log("[BEST_OPTIONS_UGUALI] ---> ho cambiato la bets_option del MASTER")
             }
         }
     }
@@ -145,7 +104,7 @@ function computeBestOption(){
 
 function calculate_pickup_utility(parcel, slavePos=null) {
     let scoreParcel = parcel.reward;
-    let scoreInMind = myAgent.get_inmind_score();
+    MyData.scoreInMind = myAgent.get_inmind_score();
     let numParcelInMind = myAgent.parcelsInMind.length
 
     // let distance_parcel = 0;
@@ -165,7 +124,7 @@ function calculate_pickup_utility(parcel, slavePos=null) {
     }
 
     let RewardParcel = scoreParcel - decade_frequency * distance_parcel;
-    let RewardInMind = scoreInMind - ((decade_frequency * distance_parcel) * numParcelInMind);
+    let RewardInMind = MyData.scoreInMind - ((decade_frequency * distance_parcel) * numParcelInMind);
     let utility = (RewardParcel + RewardInMind) - (decade_frequency * distance_delivery) * (numParcelInMind + 1);
 
 
@@ -189,7 +148,7 @@ function calculate_pickup_utility(parcel, slavePos=null) {
 }
 
 function calculate_putdown_utility() {
-    let scoreInMind = myAgent.get_inmind_score();
+    MyData.inmind = myAgent.get_inmind_score();
     let distanceDelivery = distanceBFS(find_nearest_delivery());
     let numParcelInMind = myAgent.parcelsInMind.length
 
@@ -200,7 +159,7 @@ function calculate_putdown_utility() {
         }
     }
 
-    var utility = scoreInMind - ((decade_frequency * distanceDelivery) * numParcelInMind);
+    var utility = MyData.scoreInMind - ((decade_frequency * distanceDelivery) * numParcelInMind);
     return utility;
 }
 
@@ -213,12 +172,6 @@ client.onAgentsSensing(agents => {
     // Update beliefset with new agent information
     for (let a of agents) {
         beliefset.set(a.id, a);
-        // console.log("Agent: ", a.name, " - id: ", a.id);
-        // console.log("friend: ", friend_name, " - current: ", a.name)
-        if(friend_name != "" && a.name == friend_name && friend_id == ""){
-            friend_id = a.id;
-            // console.log("Friend name: ", friend_name, " - id: ", friend_id);
-        } 
     }
 });
 
@@ -254,13 +207,13 @@ export function from_json_to_matrix(width, height, tiles, map) {
     return map;
 }
 
-var me = {};
+
 await client.onYou(({ id, name, x, y, score }) => {
-    me.id = id
-    me.name = name
-    me.x = Math.round(x);
-    me.y = Math.round(y);
-    me.score = score
+    MyData.id = id
+    MyData.name = name
+    MyData.x = Math.round(x);
+    MyData.y = Math.round(y);
+    MyData.score = score
 })
 
 
@@ -344,8 +297,8 @@ function findPath_BFS(endX, endY) {
     const queue = [];
 
 
-    var startX = me.x;
-    var startY = me.y;
+    var startX = MyData.x;
+    var startY = MyData.y;
 
     queue.push({ x: startX, y: startY, pathSoFar: [] });
     visited.add(`${startX},${startY}`);

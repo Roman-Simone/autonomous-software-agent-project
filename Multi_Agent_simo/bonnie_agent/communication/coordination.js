@@ -65,12 +65,11 @@ async function handshake() {
         }
     }
 
-    console.log("Handshake completed");
+    return true
 }
 
 
 // SLAVE manda options e attende un ordine dal master
-
 async function slaveStateMessage(){
 
     // MyData.printParcels();
@@ -94,17 +93,13 @@ function masterRevision() {
         client.onMsg((id, name, msg, reply) => {
             try {
                 if (msg.data != undefined){
-                    // msg.data.printParcels();
                     CollaboratorData.copy(msg.data);
                     CollaboratorData.printParcels();
                 }
-
                 if(computeBestOption())
-
                 if (reply) {
                     reply(CollaboratorData);
                 }
-                
                 resolve(true); // Resolve the promise with the answer
             } catch (error) {
                 console.error(error);
