@@ -7,15 +7,10 @@ var MyData = new CommunicationData();
 function getMessage(client) {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
-            console.log("msg: ", msg);
             resolve(msg);
         });
     });
 }
-
-
-
-
 
 async function handshake() {
 
@@ -77,8 +72,8 @@ async function handshake() {
 
 // SLAVE manda options e attende un ordine dal master
 
-async function slaveStateMessage(options){
-    await client.ask(CollaboratorData.id, {
+async function slaveStateMessage(){
+    let reply = await client.ask(CollaboratorData.id, {
         hello: "[INFORM]",
         data: MyData,
         time: Date.now()
@@ -88,32 +83,42 @@ async function slaveStateMessage(options){
     return reply;
 }
 
+function computeBestOption(data){
+
+    MyData.options = ["option master"];
+    CollaboratorData.options = ["option slave"];
+
+    //computation
+
+    // at the end:
+    
+    MyData.best_option = ["best_option_master"];
+    CollaboratorData.best_option = ["best_option_slave"];
+
+    return true;
+}
+
 // MASTER riceve options e manda ordine allo slave
 
-async function masterRevision(){
-    await getOptionMessage(client).then(receivedMsg => {
-        console.log("Received message: ", receivedMsg);
-        receivedMSG = receivedMsg
-    });
-}
-
-function computeBestOption(data){
-    console.log("Received data (computing best option): ", data);
-    return "best_option";
-}
-
-function getOptionMessage(client) {
+function masterRevision() {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
-            console.log('new msg: ', msg);
-            
-            answer = computeBestOption(msg.data)            
-            console.log("my answer: ", answer);
-            
-            if (reply)
-                try { reply(answer) } catch { (error) => console.error(error) }
-
-            resolve(msg);
+            try {
+                console.log(MyData.role + " has received the msg: ", msg);
+                
+                if(computeBestOption(msg.data))
+                console.log("my best_option_master: ", MyData.best_option);
+                console.log("my best_option_slave: ", CollaboratorData.best_option);
+                
+                if (reply) {
+                    reply(CollaboratorData.best_option);
+                }
+                
+                resolve(true); // Resolve the promise with the answer
+            } catch (error) {
+                console.error(error);
+                reject(error); // Reject the promise if there's an error
+            }
         });
     });
 }

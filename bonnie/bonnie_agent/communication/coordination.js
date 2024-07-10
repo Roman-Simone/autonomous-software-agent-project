@@ -1,19 +1,20 @@
 import { client, friend_name } from "../config.js";
-export { handshake, friend_id }
+import { CommunicationData } from "./communication_data.js";
+import { computeBestOption } from "../utils.js"
 
-var friend_id = ""
+var CollaboratorData = new CommunicationData();
+var MyData = new CommunicationData();
 
 function getMessage(client) {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
-            console.log("msg: ", msg);
             resolve(msg);
         });
     });
 }
 
-
 async function handshake() {
+
     // Wait 500ms for synchronization
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -35,13 +36,19 @@ async function handshake() {
             receivedMSG = receivedMsg
         });
 
-        // if is the first agent read message and send ack
+        // if is the first agent read message and send ack (SLAVE)
         let splitMSG = receivedMSG.hello.split(" ");
         if(receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "firstMessage"){
             first_msg = true
-            friend_id = receivedMSG.id
-            console.log("Friend id: ", friend_id);
-            await client.say(friend_id, {
+            // SLAVE-SIDE
+            CollaboratorData.id = receivedMSG.id;
+            CollaboratorData.name = receivedMSG.name;
+            MyData.name = client.name;
+            MyData.id = client.id;
+            MyData.role = "SLAVE";
+            CollaboratorData.role = "MASTER";
+            console.log("Friend id: ", CollaboratorData.id);
+            await client.say(CollaboratorData.id, {
                 hello: '[HANDSHAKE] ' + client.name + ' ack',
                 iam: client.name,
                 id: client.id
@@ -50,7 +57,13 @@ async function handshake() {
         // if is the second agent read message 
         else if ((receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "ack")){
             first_msg = true
-            friend_id = receivedMSG.id
+            // MASTER-SIDE 
+            CollaboratorData.id = receivedMSG.id;
+            CollaboratorData.name = receivedMSG.name;
+            MyData.name = client.name;
+            MyData.id = client.id;
+            MyData.role = "MASTER";
+            CollaboratorData.role = "SLAVE";
         }
     }
 
@@ -58,4 +71,46 @@ async function handshake() {
 }
 
 
+// SLAVE manda options e attende un ordine dal master
 
+async function slaveStateMessage(){
+    let reply = await client.ask(CollaboratorData.id, {
+        hello: "[INFORM]",
+        data: MyData,
+        time: Date.now()
+    });
+
+    console.log("Received reply: ", reply);
+    return reply;
+}
+
+
+
+// MASTER riceve options e manda ordine allo slave
+
+function masterRevision() {
+    return new Promise((resolve, reject) => {
+        client.onMsg((id, name, msg, reply) => {
+            try {
+                console.log(MyData.role + " has received the msg: ", msg);
+                
+                CollaboratorData = msg.data;
+
+                if(computeBestOption())
+                console.log("my best_option_master: ", MyData.best_option);
+                console.log("my best_option_slave: ", CollaboratorData.best_option);
+                
+                if (reply) {
+                    reply(CollaboratorData.best_option);
+                }
+                
+                resolve(true); // Resolve the promise with the answer
+            } catch (error) {
+                console.error(error);
+                reject(error); // Reject the promise if there's an error
+            }
+        });
+    });
+}
+
+export { handshake, slaveStateMessage, masterRevision, CollaboratorData, MyData };

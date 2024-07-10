@@ -1,7 +1,7 @@
 import { myAgent } from "./index.js";
 import { client, friend_name } from "./config.js";
-// import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-export { calculate_pickup_utility, calculate_putdown_utility, me, parcels, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
+import { CollaboratorData, MyData  } from "./communication/coordination.js";
+export { computeBestOption, updateMyData, calculate_pickup_utility, calculate_putdown_utility, me, parcels, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
 
 // BONNIE
 
@@ -48,12 +48,119 @@ client.onConfig((config) => {
     decade_frequency = movement_duration / parcel_decading_interval;
 });
 
-function calculate_pickup_utility(parcel) {
+function updateMyData(){
+    MyData.pos = {x: me.x, y: me.y};
+    
+    MyData.parcels = new Map();
+
+    for (const [key, value] of parcels) {
+        MyData.parcels.set(key, value); 
+    }
+    
+    MyData.inmind = myAgent.get_inmind_score();
+    // console.log("---------------------> ", MyData.parcels)
+}
+
+function getParcelById(DataStruct, idToFind) {
+    // if(DataStruct.parcels.length !== 0){
+    //     if (DataStruct.parcels.has(idToFind)) {
+    //         return DataStruct.parcels.get(idToFind);
+    //     } else {
+    //         return null; // Restituisce null se la parcella non viene trovata
+    //     }    
+    // }
+    // console.log("parcels length ------> ", DataStruct.parcels.length)
+    console.log("------------------> ", typeof DataStruct.parcels)
+    for (const [id, parcel] of DataStruct.parcels) {
+        if (idToFind === id){
+            return parcel;
+        }
+    }
+}
+
+function computeBestOption(){
+
+
+    // dobbiamo confrontare COllaboratorData.options e MyData.options 
+
+    var master_options = [];
+    var slave_options = [];
+    
+
+    // MyData.options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
+    // MyData.options.push(['go_put_down', "", "", "", calculate_putdown_utility()])
+    // MyData.options.push(['go_random_delivery', "", "", "", u]);
+
+    console.log("------------------------- MASTER PRIMA -------------------------")
+    for (let elem of MyData.options){
+        master_options.push(elem);
+        console.log(elem)
+    }
+
+    console.log("------------------------- SLAVE PRIMA -------------------------")
+    for (let elem of CollaboratorData.options){
+        slave_options.push(elem);
+        console.log(elem)
+    }
+
+
+    for (let s_elem of CollaboratorData.options){
+        let found = false;
+        for (let m_elem of MyData.options){
+            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+                found = true;
+            }            
+            if (!found && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+                console.log("s_elem: ", s_elem[3]);
+                let parcel = getParcelById(CollaboratorData, s_elem[3]);
+                console.log("RETURNED: ", parcel)
+                console.log("parcel: ", parcel.x, "-", parcel.y);
+                master_options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
+            }
+        }
+    }
+    for (let m_elem of MyData.options){
+        let found = false;
+        for (let s_elem of CollaboratorData.options){
+            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+                found = true;
+            }            
+            if (!found && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+                let parcel = getParcelById(MyData, m_elem[3])
+                slave_options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, slavePos=CollaboratorData.pos)]);
+            }
+        }
+    }
+    console.log("---------- OPTIONS MASTER AFTER ----------")
+    for (let elem of master_options){
+        console.log("Master options: ", elem);
+    }
+    
+    console.log("---------- OPTIONS SLAVE AFTER ----------")
+    for (let elem of slave_options){
+        console.log("Slave options: ", elem);
+    }
+
+    
+
+    // MyData.best_option = ["best_option_master"];
+    // CollaboratorData.best_option = ["best_option_slave"];
+
+    return true;
+}
+
+function calculate_pickup_utility(parcel, slavePos=null) {
     let scoreParcel = parcel.reward;
     let scoreInMind = myAgent.get_inmind_score();
     let numParcelInMind = myAgent.parcelsInMind.length
 
-    let distance_parcel = distanceBFS(parcel);
+    // let distance_parcel = 0;
+    if (slavePos == null){
+        var distance_parcel = distanceBFS(parcel);
+    } else {
+        var distance_parcel = distanceBFS_notMe(slavePos, parcel)
+    }
+
     let distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
 
     for (let parcelInMind of myAgent.parcelsInMind) {
@@ -62,7 +169,6 @@ function calculate_pickup_utility(parcel) {
             numParcelInMind = numParcelInMind - 1;
         }
     }
-
 
     let RewardParcel = scoreParcel - decade_frequency * distance_parcel;
     let RewardInMind = scoreInMind - ((decade_frequency * distance_parcel) * numParcelInMind);
