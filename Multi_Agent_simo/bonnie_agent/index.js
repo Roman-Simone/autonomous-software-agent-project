@@ -16,12 +16,12 @@ async function agentLoop() {
     MyData.options = [];
 
     // Iterate through available parcels
-    for (const [id, parcel] of parcels.entries()) {
+    for (let parcel of MyData.parcels) {
         if (!parcel.carriedBy && parcel.reward > 3) {
             // Check if parcel is not carried by any agent
             let util = calculate_pickup_utility(parcel);                    // se == 0 intrinsic_score < 0 --> non ne vale la pena
             if (util) {
-                MyData.options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
+                MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, util]);
             }
         }
     }

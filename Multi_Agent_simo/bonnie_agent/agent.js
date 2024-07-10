@@ -1,5 +1,5 @@
 import { Intention } from './intention.js';
-import { parcels } from './utils.js';
+import { CollaboratorData, MyData  } from "./communication/coordination.js";
 export { Agent };
 
 //try
@@ -15,7 +15,7 @@ class Agent {
     get_inmind_score() {
         var tot_score = 0;
         for (let parcelInMind of this.parcelsInMind) {
-            for (const [id, parcel] of parcels.entries()) {
+            for (let parcel of MyData.parcels) {
                 if (parcelInMind === id) {
                     if (parcel.reward <= 1) {
                         this.parcelsInMind = this.parcelsInMind.filter(parcel => parcel !== parcelInMind);

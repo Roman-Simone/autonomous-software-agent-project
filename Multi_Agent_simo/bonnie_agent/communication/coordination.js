@@ -1,6 +1,6 @@
 import { client, friend_name } from "../config.js";
 import { CommunicationData } from "./communication_data.js";
-import { computeBestOption } from "../utils.js"
+import { computeBestOption, parcels } from "../utils.js"
 
 var CollaboratorData = new CommunicationData();
 var MyData = new CommunicationData();
@@ -74,9 +74,18 @@ async function handshake() {
 // SLAVE manda options e attende un ordine dal master
 
 async function slaveStateMessage(){
+
+    // MyData.printParcels();
+    console.log("MyData: ", MyData);
+
+    var id_parcel = []
+    for (const [id, parcel] of MyData.parcels.entries()) {
+        id_parcel.push(parcel);
+    }
     let reply = await client.ask(CollaboratorData.id, {
         hello: "[INFORM]",
         data: MyData,
+        parcels: id_parcel,
         time: Date.now()
     });
 
@@ -92,9 +101,14 @@ function masterRevision() {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
             try {
-                console.log(MyData.role + " has received the msg: ", msg);
-                
-                CollaboratorData = msg.data;
+                // console.log(MyData.role + " has received the msg: ", msg);
+
+                console.log("msg.data: ", msg.data);
+                console.log("msg.parcels: ", msg.parcels);
+                // msg.data.printParcels();
+                CollaboratorData.copy(msg.data);
+                CollaboratorData.printParcels();
+                console.log("CollaboratorData: ", CollaboratorData);
 
                 if(computeBestOption())
                 console.log("my best_option_master: ", MyData.best_option);

@@ -12,7 +12,7 @@ class CommunicationData{
     
     options = [];
 
-    parcels = new Map();
+    parcels = [];
 
     inmind = 0;
 
@@ -21,11 +21,21 @@ class CommunicationData{
     constructor(){
         this.name = "";
         this.id = "";
-        this.friend_pos = { x: -1, y: -1};
+        this.pos = { x: -1, y: -1};
         this.role = "";
         this.options = [];
         this.best_option = []; 
-        this.parcels = new Map();
+        this.parcels = [];
+    }
+    
+    copy(data){
+        this.name = data.name;
+        this.id = data.id;
+        this.pos = data.pos;
+        this.role = data.role;
+        this.options = data.options;
+        this.best_option = data.best_option;
+        this.parcels = data.parcels;
     }
 
     getParcelgivenId(idToFind){
@@ -40,4 +50,19 @@ class CommunicationData{
         return false
     }
 
+    
+
+    printParcels(){
+        for (let elem of this.parcels) {
+            console.log(elem)
+        }
+    }
+
+    print(){
+        console.log("name: ", this.name);
+        console.log("id: ", this.id);
+        console.log("role: ", this.role);
+        console.log("pos: ", this.pos);
+
+    }
 }
