@@ -1,5 +1,5 @@
 import { Intention } from './intention.js';
-import { MyData } from "./communication/coordination.js";
+import { MyData } from "../communication/coordination.js";
 export { Agent };
 
 //try

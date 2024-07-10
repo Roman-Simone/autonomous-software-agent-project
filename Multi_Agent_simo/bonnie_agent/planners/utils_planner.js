@@ -1,7 +1,8 @@
 import { MyData } from "../communication/coordination.js";
 import fs from 'fs';
-import { map } from "../utils.js"
-export { readFile , findPath_BFS, findPath_BFS_notMe }
+import { map } from "../belief/belief.js";
+import { deliveryCoordinates } from "../belief/belief.js";
+export { readFile , findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
 
 function readFile(path) {
 
@@ -114,6 +115,34 @@ function findPath_BFS_notMe(startX, startY, endX, endY) {
     return [];
 }
 
+//* Find nearest delivery 
+function find_nearest_delivery(ignoreCoordinates = undefined) {
 
+    let min_distance = Number.MAX_VALUE;
+    let nearest_delivery = { x: -1, y: -1 };
+    for (var i = 0; i < deliveryCoordinates.length; i++) {
+        if (distanceBFS(deliveryCoordinates[i]) < min_distance) {
+
+            if (ignoreCoordinates != undefined && deliveryCoordinates[i].x == ignoreCoordinates.x && deliveryCoordinates[i].y == ignoreCoordinates.y) continue;
+
+            min_distance = distanceBFS(deliveryCoordinates[i]);
+            nearest_delivery = deliveryCoordinates[i];
+        }
+    }
+
+    // console.log("nearest_delivery: ", nearest_delivery, "(I'm on x: ", me.x, " y: ", me.y, ")");
+    return nearest_delivery;
+}
+
+
+
+
+function distanceBFS({ x: x, y: y }) {
+    return findPath_BFS(x, y).length;
+}
+
+function distanceBFS_notMe({ x: startX, y: startY }, { x: endX, y: endY }) {
+    return findPath_BFS_notMe(startX, startY, endX, endY).length;
+}
 
 

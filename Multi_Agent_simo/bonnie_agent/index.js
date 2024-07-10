@@ -1,6 +1,6 @@
-import { Agent } from "./agent.js";
+import { Agent } from './intention&revision/agent.js';
+import { MyData, handshake, slaveStateMessage, masterRevision  } from "./communication/coordination.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery } from "./utils.js";
-import { handshake, slaveStateMessage, masterRevision, MyData } from "./communication/coordination.js";
 
 
 async function agentLoop() {

@@ -1,9 +1,8 @@
 import { myAgent } from "./index.js";
-import { client } from "./config.js";
+import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "./planners/utils_planner.js";
+import { decade_frequency, deliveryCoordinates, beliefset } from "./belief/belief.js";
 import { CollaboratorData, MyData } from "./communication/coordination.js";
-import { findPath_BFS, findPath_BFS_notMe } from "./planners/utils_planner.js";
-export { computeBestOption, calculate_pickup_utility, calculate_putdown_utility, distanceBFS_notMe, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
-
+export { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery, computeBestOption};
 
 // Function to update the configuration of elements
 //!CONFIGURATION
@@ -24,22 +23,7 @@ export { computeBestOption, calculate_pickup_utility, calculate_putdown_utility,
 //     CLOCK: 50
 //   }
 
-var decade_frequency = 0;
-var configElements;
-client.onConfig((config) => {
-    configElements = config;
 
-    let movement_duration = configElements.MOVEMENT_DURATION;
-    let parcel_decading_interval = configElements.PARCEL_DECADING_INTERVAL;
-
-    if (parcel_decading_interval == "infinite") {
-        parcel_decading_interval = Number.MAX_VALUE;
-    } else {
-        parcel_decading_interval = parseInt(parcel_decading_interval.slice(0, -1)) * 1000;
-    }
-
-    decade_frequency = movement_duration / parcel_decading_interval;
-});
 
 
 function findBestOption(options, id = "undefined") {
@@ -179,97 +163,7 @@ function calculate_putdown_utility() {
     return [nearest_delivery, utility];
 }
 
-// Define global variables
-const beliefset = new Map();
 
-// Function to update beliefset when agents are sensed
-
-client.onAgentsSensing(agents => {
-    // Update beliefset with new agent information
-    for (let a of agents) {
-        beliefset.set(a.id, a);
-    }
-});
-
-// function manhattan({ x: x1, y: y1 }, { x: x2, y: y2 }) {
-//     const dx = Math.abs(Math.round(x1) - Math.round(x2))
-//     const dy = Math.abs(Math.round(y1) - Math.round(y2))
-//     return dx + dy;
-// }
-
-function distanceBFS({ x: x, y: y }) {
-    return findPath_BFS(x, y).length;
-}
-
-function distanceBFS_notMe({ x: startX, y: startY }, { x: endX, y: endY }) {
-    return findPath_BFS_notMe(startX, startY, endX, endY).length;
-}
-
-export function from_json_to_matrix(width, height, tiles, map) {
-    var map = [];
-    for (let i = 0; i < width; i++) {
-        map[i] = [];
-        for (let j = 0; j < height; j++) {
-            map[i][j] = 0;                                       // '0' are blocked tiles (empty or not_tile)
-            for (let k = 0; k < tiles.length; k++) {
-                if (tiles[k].x == i && tiles[k].y == j) {
-                    map[i][j] = 1;                               // '1' are walkable non-spawning tiles 
-                    if (tiles[k].parcelSpawner) map[i][j] = 3;   // '3' are walkable spawning tiles  
-                    if (tiles[k].delivery) map[i][j] = 2;        // '2' are delivery tiles
-                }
-            }
-        }
-    }
-    return map;
-}
-
-
-client.onYou(({ id, name, x, y, score }) => {
-    MyData.id = id
-    MyData.name = name
-    MyData.pos.x = Math.round(x);
-    MyData.pos.y = Math.round(y);
-    MyData.score = score
-})
-
-
-
-// var parcels = new Map()
-client.onParcelsSensing(async (perceived_parcels) => {
-    MyData.parcels = []
-    for (let p of perceived_parcels) {
-        MyData.parcels.push(p)
-    }
-})
-
-var map = [];
-var deliveryCoordinates = [];
-client.onMap((width, height, tiles) => {
-    // console.log("Map received: ", width, height, tiles.length)
-    map = from_json_to_matrix(width, height, tiles, map);
-    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
-});
-
-//* Find nearest delivery 
-function find_nearest_delivery(ignoreCoordinates = undefined) {
-
-    let min_distance = Number.MAX_VALUE;
-    let nearest_delivery = { x: -1, y: -1 };
-    for (var i = 0; i < deliveryCoordinates.length; i++) {
-        if (distanceBFS(deliveryCoordinates[i]) < min_distance) {
-
-            if (ignoreCoordinates != undefined && deliveryCoordinates[i].x == ignoreCoordinates.x && deliveryCoordinates[i].y == ignoreCoordinates.y) continue;
-
-            min_distance = distanceBFS(deliveryCoordinates[i]);
-            nearest_delivery = deliveryCoordinates[i];
-        }
-    }
-
-    // console.log("nearest_delivery: ", nearest_delivery, "(I'm on x: ", me.x, " y: ", me.y, ")");
-    return nearest_delivery;
-}
-
-//* Find random delivery 
 function find_random_delivery() {
 
     let random_delivery = deliveryCoordinates[Math.floor(Math.random() * deliveryCoordinates.length)];
