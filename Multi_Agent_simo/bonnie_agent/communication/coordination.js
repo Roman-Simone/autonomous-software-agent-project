@@ -32,7 +32,6 @@ async function handshake() {
         // wait for the first message and read it
         let receivedMSG = ""
         await getMessage(client).then(receivedMsg => {
-            console.log("Received message for handshake: ", receivedMsg);
             receivedMSG = receivedMsg
         });
 
@@ -47,7 +46,6 @@ async function handshake() {
             MyData.id = client.id;
             MyData.role = "SLAVE";
             CollaboratorData.role = "MASTER";
-            console.log("Friend id: ", CollaboratorData.id);
             await client.say(CollaboratorData.id, {
                 hello: '[HANDSHAKE] ' + client.name + ' ack',
                 iam: client.name,
@@ -76,14 +74,12 @@ async function handshake() {
 async function slaveStateMessage(){
 
     // MyData.printParcels();
-    console.log("MyData: ", MyData);
     let reply = await client.ask(CollaboratorData.id, {
         hello: "[INFORM]",
         data: MyData,
         time: Date.now()
     });
 
-    console.log("---------------------> Received reply: ", reply);
 
     MyData.copy(reply);
 
@@ -98,7 +94,6 @@ function masterRevision() {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
             try {
-                // console.log(MyData.role + " has received the msg: ", msg);
                 if (msg.data != undefined){
                     console.log("msg.data: ", msg.data);
                     // msg.data.printParcels();

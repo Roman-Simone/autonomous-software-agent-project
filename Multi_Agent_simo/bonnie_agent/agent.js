@@ -16,7 +16,7 @@ class Agent {
         var tot_score = 0;
         for (let parcelInMind of this.parcelsInMind) {
             for (let parcel of MyData.parcels) {
-                if (parcelInMind === id) {
+                if (parcelInMind === parcel.id) {
                     if (parcel.reward <= 1) {
                         this.parcelsInMind = this.parcelsInMind.filter(parcel => parcel !== parcelInMind);
                     }
