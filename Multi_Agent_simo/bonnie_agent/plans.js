@@ -1,6 +1,6 @@
 
 import { Intention } from './intention.js';
-import { findPath_BFS, deliveryCoordinates, find_nearest_delivery, find_random_delivery } from './utils.js';
+import { findPath_BFS, deliveryCoordinates } from './utils.js';
 import { MyData  } from "./communication/coordination.js";
 import { client } from "./config.js"
 export { plans, Plan };
@@ -136,29 +136,29 @@ class GoToBFS extends Plan {
             let status_x = false;
             let status_y = false;
 
-            if (next_x == MyData.x + 1) {
+            if (next_x == MyData.pos.x + 1) {
                 status_x = await client.move('right');
             }
-            else if (next_x == MyData.x - 1) {
+            else if (next_x == MyData.pos.x - 1) {
                 status_x = await client.move('left');
             }
             if (status_x) {
-                MyData.x = status_x.x;
-                MyData.y = status_x.y;
+                MyData.pos.x = status_x.x;
+                MyData.pos.y = status_x.y;
                 check_tile(next_x, next_y)
             }
             if (this.stopped) throw ['stopped']; // if stopped then quit
 
-            if (next_y == MyData.y + 1) {
+            if (next_y == MyData.pos.y + 1) {
                 status_y = await client.move('up');
             }
-            else if (next_y == MyData.y - 1) {
+            else if (next_y == MyData.pos.y - 1) {
                 status_y = await client.move('down');
             }
 
             if (status_y) {
-                MyData.x = status_y.x;
-                MyData.y = status_y.y;
+                MyData.pos.x = status_y.x;
+                MyData.pos.y = status_y.y;
                 check_tile(next_x, next_y)
             }
 

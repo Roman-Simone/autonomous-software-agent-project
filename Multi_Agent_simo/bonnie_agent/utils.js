@@ -1,6 +1,6 @@
 import { myAgent } from "./index.js";
 import { client } from "./config.js";
-import { CollaboratorData, MyData  } from "./communication/coordination.js";
+import { CollaboratorData, MyData } from "./communication/coordination.js";
 export { computeBestOption, calculate_pickup_utility, calculate_putdown_utility, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
 
 
@@ -41,7 +41,7 @@ client.onConfig((config) => {
 });
 
 
-function findBestOption(options, id="undefined"){
+function findBestOption(options, id = "undefined") {
     let bestUtility = -1.0;
     let best_option = [];
     for (const option of options) {
@@ -49,35 +49,35 @@ function findBestOption(options, id="undefined"){
         if (current_utility > bestUtility) {
             if (option[3] != id) {
                 best_option = option
-                bestUtility = current_utility    
+                bestUtility = current_utility
             }
-        } 
+        }
     }
     return best_option;
 }
 
-function computeBestOption(){
+function computeBestOption() {
 
-    for (let s_elem of CollaboratorData.options){
+    for (let s_elem of CollaboratorData.options) {
         let found = false;
-        for (let m_elem of MyData.options){
-            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+        for (let m_elem of MyData.options) {
+            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up") {
                 found = true;
-            }            
+            }
         }
-        if (!found && s_elem[0] == "go_pick_up"){
+        if (!found && s_elem[0] == "go_pick_up") {
             let parcel = CollaboratorData.getParcelById(s_elem[3]);
             MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
         }
     }
-    for (let m_elem of MyData.options){
+    for (let m_elem of MyData.options) {
         let found = false;
-        for (let s_elem of CollaboratorData.options){
-            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+        for (let s_elem of CollaboratorData.options) {
+            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up") {
                 found = true;
-            }            
+            }
         }
-        if (!found && m_elem[0] == "go_pick_up"){
+        if (!found && m_elem[0] == "go_pick_up") {
             let parcel = MyData.getParcelById(m_elem[3])
             CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, CollaboratorData.pos)]);
         }
@@ -87,19 +87,26 @@ function computeBestOption(){
 
     CollaboratorData.best_option = findBestOption(CollaboratorData.options)
 
-    if(MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery"){}
-    else if(MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down"){
-        if (MyData.best_option[0] == "go_put_down" && CollaboratorData.best_option[0] == "go_put_down"){
-            if(MyData.best_option[1] == CollaboratorData.best_option[1] && MyData.best_option[2] == CollaboratorData.best_option[2]){
-                
+    if (MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery") { }
+
+    else if (MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down") {
+        if (MyData.best_option[0] == "go_put_down" && CollaboratorData.best_option[0] == "go_put_down") {
+            if (MyData.best_option[1] == CollaboratorData.best_option[1] && MyData.best_option[2] == CollaboratorData.best_option[2]) {
+                if (MyData.best_option[4] >= CollaboratorData.best_option[4]) {
+                    let newDelivery = find_nearest_delivery({ x: CollaboratorData.best_option[1], y: CollaboratorData.best_option[2] })
+                    CollaboratorData.best_option = ['go_put_down', newDelivery.x, newDelivery.y, "", CollaboratorData.best_option[4]]
+                } else {
+                    let newDelivery = find_nearest_delivery({ x: MyData.best_option[1], y: MyData.best_option[2] })
+                    MyData.best_option = ['go_put_down', newDelivery.x, newDelivery.y, "", MyData.best_option[4]]
+                }
             }
         }
-    } 
+    }
     else {
-        if(MyData.best_option[3] === CollaboratorData.best_option[3]){
-            if (MyData.best_option[4] >= CollaboratorData.best_option[4]){
+        if (MyData.best_option[3] === CollaboratorData.best_option[3]) {
+            if (MyData.best_option[4] >= CollaboratorData.best_option[4]) {
                 CollaboratorData.best_option = findBestOption(CollaboratorData.options, CollaboratorData.best_option[3])
-            }else{
+            } else {
                 MyData.best_option = findBestOption(MyData.options, MyData.best_option[3])
             }
         }
@@ -108,13 +115,13 @@ function computeBestOption(){
     return true;
 }
 
-function calculate_pickup_utility(parcel, slavePos=null) {
+function calculate_pickup_utility(parcel, slavePos = null) {
     let scoreParcel = parcel.reward;
     MyData.scoreInMind = myAgent.get_inmind_score();
     let numParcelInMind = myAgent.parcelsInMind.length
 
     // let distance_parcel = 0;
-    if (slavePos == null){
+    if (slavePos == null) {
         var distance_parcel = distanceBFS(parcel);
     } else {
         var distance_parcel = distanceBFS_notMe(slavePos, parcel)
@@ -219,8 +226,8 @@ export function from_json_to_matrix(width, height, tiles, map) {
 client.onYou(({ id, name, x, y, score }) => {
     MyData.id = id
     MyData.name = name
-    MyData.x = Math.round(x);
-    MyData.y = Math.round(y);
+    MyData.pos.x = Math.round(x);
+    MyData.pos.y = Math.round(y);
     MyData.score = score
 })
 
@@ -243,12 +250,15 @@ client.onMap((width, height, tiles) => {
 });
 
 //* Find nearest delivery 
-function find_nearest_delivery() {
+function find_nearest_delivery(ignoreCoordinates = undefined) {
 
     let min_distance = Number.MAX_VALUE;
     let nearest_delivery = { x: -1, y: -1 };
     for (var i = 0; i < deliveryCoordinates.length; i++) {
         if (distanceBFS(deliveryCoordinates[i]) < min_distance) {
+
+            if (ignoreCoordinates != undefined && deliveryCoordinates[i].x == ignoreCoordinates.x && deliveryCoordinates[i].y == ignoreCoordinates.y) continue;
+
             min_distance = distanceBFS(deliveryCoordinates[i]);
             nearest_delivery = deliveryCoordinates[i];
         }
@@ -305,8 +315,8 @@ function findPath_BFS(endX, endY) {
     const queue = [];
 
 
-    var startX = MyData.x;
-    var startY = MyData.y;
+    var startX = MyData.pos.x;
+    var startY = MyData.pos.y;
 
     queue.push({ x: startX, y: startY, pathSoFar: [] });
     visited.add(`${startX},${startY}`);
