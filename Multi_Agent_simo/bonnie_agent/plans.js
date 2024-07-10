@@ -1,27 +1,11 @@
-
-import { Intention } from './intention.js';
-import { findPath_BFS, deliveryCoordinates } from './utils.js';
-import { MyData  } from "./communication/coordination.js";
+import fs from 'fs';
 import { client } from "./config.js"
+import { Intention } from './intention.js';
+import { MyData } from "./communication/coordination.js";
+import { PddlProblem, onlineSolver, Beliefset } from "@unitn-asa/pddl-client";
 export { plans, Plan };
 
-/**
- * Plan library
- */
 
-async function check_tile(x, y){
-    for(let parcel of MyData.parcels){
-        if(x == parcel.x && y == parcel.y){
-            await client.pickup()
-        }
-    }
-
-    for(let del of deliveryCoordinates){
-        if(x == del.x && y == del.y){
-            await client.putdown()
-        }
-    }
-}
 
 class Plan {
 
@@ -65,40 +49,370 @@ class Plan {
 
 }
 
-class GoPickUp extends Plan {
 
-    static isApplicableTo(go_pick_up, x, y, id, score) {
-        return go_pick_up == 'go_pick_up';
+function readFile(path) {
+
+    return new Promise((res, rej) => {
+
+        fs.readFile(path, 'utf8', (err, data) => {
+            if (err) rej(err)
+            else res(data)
+        })
+
+    })
+
+}
+
+const myBeliefset = new Beliefset();
+client.onMap((width, height, tiles) => {
+
+    for (let { x, y, delivery } of tiles) {
+        myBeliefset.declare('tile t' + x + '_' + y);
+        if (delivery) {
+            myBeliefset.declare('delivery t' + x + '_' + y);
+        }
+
+
+        // Find the tile to the right
+        let right = tiles.find(tile => tile.x === x + 1 && tile.y === y);
+        if (right) {
+            myBeliefset.declare('right t' + x + '_' + y + ' t' + right.x + '_' + right.y);
+        }
+
+        // Find the tile to the left
+        let left = tiles.find(tile => tile.x === x - 1 && tile.y === y);
+        if (left) {
+            myBeliefset.declare('left t' + x + '_' + y + ' t' + left.x + '_' + left.y);
+        }
+
+        // Find the tile above
+        let up = tiles.find(tile => tile.x === x && tile.y === y - 1);
+        if (up) {
+            myBeliefset.declare('up t' + x + '_' + y + ' t' + up.x + '_' + up.y);
+        }
+
+        // Find the tile below
+        let down = tiles.find(tile => tile.x === x && tile.y === y + 1);
+        if (down) {
+            myBeliefset.declare('down t' + x + '_' + y + ' t' + down.x + '_' + down.y);
+        }
+    }
+});
+
+
+let domain = await readFile('./domain.pddl');
+
+
+class PddlMove extends Plan {
+
+    static isApplicableTo(go_to, x, y) {
+        return go_to == 'go_to';
+
     }
 
-    async execute(go_pick_up, x, y) {
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        await this.subIntention(['go_to_BFS', x, y]);
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        await client.pickup()
-        if (this.stopped) throw ['stopped']; // if stopped then quit
+    async execute(go_to, x, y) {
+
+
+        // Define the PDDL goal
+        let goal = 'at ' + MyData.name + ' ' + 't' + x + '_' + y;
+
+        // Create the PDDL problem
+        var pddlProblem = new PddlProblem(
+            'deliveroo',
+            myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            goal
+        );
+
+        let problem = pddlProblem.toPddlString();
+        // Get the plan from the online solver
+        var plan = await onlineSolver(domain, problem);
+
+
+        let path = []
+        plan.forEach(action => {
+            let end = action.args[2].split('_');
+            path.push({
+                x: parseInt(end[0].substring(1)),
+                y: parseInt(end[1])
+            });
+        });
+
+        let countStacked = 3
+
+
+        while (MyData.pos.x != x || MyData.pos.y != y) {
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            let coordinate = path.shift()
+            let status_x = false;
+            let status_y = false;
+
+            if (coordinate.x == MyData.pos.x && coordinate.y == MyData.pos.y) {
+                continue;
+            }
+
+            if (coordinate.x > MyData.pos.x)
+                status_x = await client.move('right')
+            // status_x = await this.subIntention( 'go_to', {x: me.x+1, y: me.y} );
+            else if (coordinate.x < MyData.pos.x)
+                status_x = await client.move('left')
+            // status_x = await this.subIntention( 'go_to', {x: me.x-1, y: me.y} );
+
+            if (status_x) {
+                MyData.pos.x = status_x.x;
+                MyData.pos.y = status_x.y;
+            }
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            if (coordinate.y > MyData.pos.y)
+                status_y = await client.move('up')
+            // status_x = await this.subIntention( 'go_to', {x: me.x, y: me.y+1} );
+            else if (coordinate.y < MyData.pos.y)
+                status_y = await client.move('down')
+            // status_x = await this.subIntention( 'go_to', {x: me.x, y: me.y-1} );
+
+            if (status_y) {
+                MyData.pos.x = status_y.x;
+                MyData.pos.y = status_y.y;
+            }
+
+            if (!status_x && !status_y) {
+                this.log('stucked ', countStacked);
+                //await this.subIntention( 'go_to', {x: x, y: y} );
+                await timeout(1000)
+                if (countStacked <= 0) {
+                    throw 'stopped';
+                } else {
+                    countStacked -= 1;
+                }
+
+            } else if (MyData.pos.x == x && MyData.pos.y == y) {
+                // this.log('target reached');
+            }
+        }
         return true;
     }
 }
 
-class GoPutDown extends Plan {
-
-    static isApplicableTo(go_put_down, x, y, id, utility) {
-        return go_put_down == 'go_put_down';
+class PddlPickUp extends Plan {
+    static isApplicableTo(go_to, x, y) {
+        return go_to == 'go_pick_up';
     }
 
-    async execute(go_put_down, x, y) {
+    async execute(go_to, x, y) {
 
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        await this.subIntention(['go_to_BFS', x, y]);
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        await client.putdown()
-        if (this.stopped) throw ['stopped']; // if stopped then quit
+
+        // Find the parcel at the destination
+        let parcel = Array.from(MyData.parcels.values()).find(p => p.x === x && p.y === y);
+        if (!parcel) {
+            throw new Error('No parcel found at the destination');
+        }
+
+        // Define the PDDL goal
+        let goal = 'holding ' + MyData.name + ' ' + parcel.id;
+
+        // Create the PDDL problem
+        var pddlProblem = new PddlProblem(
+            'deliveroo',
+            myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
+            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
+            goal
+        );
+
+        let problem = pddlProblem.toPddlString();
+        // Get the plan from the online solver
+        var plan = await onlineSolver(domain, problem);
+
+        let path = [];
+        plan.forEach(action => {
+
+            if (action.action == 'PICK-UP') {
+                path.push({
+                    x: x,
+                    y: y,
+                    info: "Pickup"
+                })
+            }
+
+            else {
+                let end = action.args[2].split('_');
+                path.push({
+                    x: parseInt(end[0].substring(1)),
+                    y: parseInt(end[1]),
+                    info: "Move"
+                });
+            }
+        });
+
+        let countStacked = 3;
+        var pick_up_flag = false;
+
+
+        while (MyData.pos.x != x || MyData.pos.y != y || pick_up_flag != true) {
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            let coordinate = path.shift()
+            let status_x = false;
+            let status_y = false;
+
+            if (coordinate.info == "Pickup") {
+
+                await client.pickup()
+                pick_up_flag = true;
+            }
+
+            if (coordinate.x == MyData.pos.x && coordinate.y == MyData.pos.y) {
+                continue;
+            }
+
+            if (coordinate.x > MyData.pos.x)
+                status_x = await client.move('right')
+            // status_x = await this.subIntention( 'go_to', {x: me.x+1, y: me.y} );
+            else if (coordinate.x < MyData.pos.x)
+                status_x = await client.move('left')
+            // status_x = await this.subIntention( 'go_to', {x: me.x-1, y: me.y} );
+
+            if (status_x) {
+                MyData.pos.x = status_x.x;
+                MyData.pos.y = status_x.y;
+            }
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            if (coordinate.y > MyData.pos.y)
+                status_y = await client.move('up')
+            // status_x = await this.subIntention( 'go_to', {x: me.x, y: me.y+1} );
+            else if (coordinate.y < MyData.pos.y)
+                status_y = await client.move('down')
+            // status_x = await this.subIntention( 'go_to', {x: me.x, y: me.y-1} );
+
+            if (status_y) {
+                MyData.pos.x = status_y.x;
+                MyData.pos.y = status_y.y;
+            }
+
+            if (!status_x && !status_y) {
+                this.log('stucked ', countStacked);
+                //await this.subIntention( 'go_to', {x: x, y: y} );
+                await timeout(1000)
+                if (countStacked <= 0) {
+                    throw 'stopped';
+                } else {
+                    countStacked -= 1;
+                }
+
+            } else if (MyData.pos.x == x && MyData.pos.y == y) {
+                // this.log('target reached');
+            }
+        }
         return true;
-        
+    }
+}
+
+
+class PddlPutDown extends Plan {
+    static isApplicableTo(go_to, x, y) {
+        return go_to == 'go_put_down';
     }
 
+    async execute(go_to, x, y) {
+        // Define the PDDL goal
+        let goal = 'posing ' + 't' + x + '_' + y;
 
+        // Create the PDDL problem
+        var pddlProblem = new PddlProblem(
+            'deliveroo',
+            myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            goal
+        );
+
+        let problem = pddlProblem.toPddlString();
+        // Get the plan from the online solver
+        var plan = await onlineSolver(domain, problem);
+
+        let path = [];
+        plan.forEach(action => {
+
+            if (action.action == 'PUT-DOWN') {
+                path.push({
+                    x: x,
+                    y: y,
+                    info: "Deliver"
+                })
+            }
+
+            else {
+                let end = action.args[2].split('_');
+                path.push({
+                    x: parseInt(end[0].substring(1)),
+                    y: parseInt(end[1]),
+                    info: "Move"
+                });
+            }
+        });
+
+        let countStacked = 3;
+        var deliver_flag = false;
+
+        while (MyData.pos.x != x || MyData.pos.y != y || deliver_flag != true) {
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            let coordinate = path.shift();
+            let status_x = false;
+            let status_y = false;
+
+            if (coordinate.info == "Deliver") {
+                await client.putdown();
+                deliver_flag = true;
+            }
+
+            if (coordinate.x == MyData.pos.x && coordinate.y == MyData.pos.y) {
+                continue;
+            }
+
+            if (coordinate.x > MyData.pos.x)
+                status_x = await client.move('right');
+            else if (coordinate.x < MyData.pos.x)
+                status_x = await client.move('left');
+
+            if (status_x) {
+                MyData.pos.x = status_x.x;
+                MyData.pos.y = status_x.y;
+            }
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            if (coordinate.y > MyData.pos.y)
+                status_y = await client.move('up');
+            else if (coordinate.y < MyData.pos.y)
+                status_y = await client.move('down');
+
+            if (status_y) {
+                MyData.pos.x = status_y.x;
+                MyData.pos.y = status_y.y;
+            }
+
+            if (!status_x && !status_y) {
+                this.log('stucked ', countStacked);
+                await timeout(1000);
+                if (countStacked <= 0) {
+                    throw 'stopped';
+                } else {
+                    countStacked -= 1;
+                }
+
+            } else if (MyData.pos.x == x && MyData.pos.y == y) {
+                // this.log('target reached');
+            }
+        }
+        return true;
+    }
 }
 
 class GoRandomDelivery extends Plan {
@@ -109,7 +423,7 @@ class GoRandomDelivery extends Plan {
     async execute(go_random_delivery, x, y) {
 
         if (this.stopped) throw ['stopped']; // if stopped then quit
-        await this.subIntention(['go_to_BFS', x, y]);
+        await this.subIntention(['go_to', x, y]);
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await client.putdown()
         if (this.stopped) throw ['stopped']; // if stopped then quit
@@ -117,62 +431,19 @@ class GoRandomDelivery extends Plan {
     }
 }
 
-class GoToBFS extends Plan {
-    static isApplicableTo(go_to_BFS, x, y, id, utility) {
-        return go_to_BFS == 'go_to_BFS';
-    }
 
-    async execute(go_to_BFS, x, y) {
-        var path = findPath_BFS(x, y);
 
-        for (var i = 1; i < path.length; i++) {
-            if (this.stopped) throw ['stopped']; // if stopped then quit
-            await client.pickup()
-            if (this.stopped) throw ['stopped']; // if stopped then quit
-
-            var next_x = path[i].x;
-            var next_y = path[i].y;
-
-            let status_x = false;
-            let status_y = false;
-
-            if (next_x == MyData.pos.x + 1) {
-                status_x = await client.move('right');
-            }
-            else if (next_x == MyData.pos.x - 1) {
-                status_x = await client.move('left');
-            }
-            if (status_x) {
-                MyData.pos.x = status_x.x;
-                MyData.pos.y = status_x.y;
-                check_tile(next_x, next_y)
-            }
-            if (this.stopped) throw ['stopped']; // if stopped then quit
-
-            if (next_y == MyData.pos.y + 1) {
-                status_y = await client.move('up');
-            }
-            else if (next_y == MyData.pos.y - 1) {
-                status_y = await client.move('down');
-            }
-
-            if (status_y) {
-                MyData.pos.x = status_y.x;
-                MyData.pos.y = status_y.y;
-                check_tile(next_x, next_y)
-            }
-
-            if (!status_x && !status_y) {
-                console.log('Failed moving')
-                throw 'stucked';
-            }
-        }
-    }
+function timeout(mseconds) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, mseconds);
+    });
 }
 
 const plans = [];
 
-plans.push(GoPickUp)
-plans.push(GoPutDown)
+plans.push(PddlMove)
+plans.push(PddlPickUp)
+plans.push(PddlPutDown)
 plans.push(GoRandomDelivery)
-plans.push(GoToBFS)

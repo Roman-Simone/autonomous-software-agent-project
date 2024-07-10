@@ -262,8 +262,8 @@ class PddlMove extends Plan{
         );
 
         let problem = pddlProblem.toPddlString();
-        // console.log('------------------problem------------------');
-        // console.log(problem);
+        console.log('------------------problem------------------');
+        console.log(problem);
         // Get the plan from the online solver
         var plan = await onlineSolver(domain, problem);
         // console.log('------------------plan------------------');

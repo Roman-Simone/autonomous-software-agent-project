@@ -1,6 +1,6 @@
 import { Agent } from "./agent.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery } from "./utils.js";
-import { handshake, slaveStateMessage, masterRevision, MyData  } from "./communication/coordination.js";
+import { handshake, slaveStateMessage, masterRevision, MyData } from "./communication/coordination.js";
 
 
 async function agentLoop() {
@@ -26,17 +26,17 @@ async function agentLoop() {
     MyData.options.push(['go_random_delivery', random_delivery.x, random_delivery.y, "", u]);
 
 
-    if(MyData.role == "SLAVE"){
+    if (MyData.role == "SLAVE") {
         await slaveStateMessage();
-    } else if (MyData.role == "MASTER"){
+    } else if (MyData.role == "MASTER") {
         await masterRevision();
-    } 
+    }
 
     myAgent.push(MyData.best_option);
 }
 
 console.log("[INFO] ", "Waiting other agents to connect...\n")
-if(await handshake()){
+if (await handshake()) {
     console.log("[INFO] ", "Handshake done, my role is: ", MyData.role, "\n")
 }
 
