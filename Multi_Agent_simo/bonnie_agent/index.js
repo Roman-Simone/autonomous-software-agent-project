@@ -1,6 +1,6 @@
 // import { friend } from "../bonnie_agent/utils.js";
 import { Agent } from "./agent.js";
-import { calculate_pickup_utility, calculate_putdown_utility, parcels, friend_id, me, updateMyData } from "./utils.js";
+import { calculate_pickup_utility, calculate_putdown_utility, friend_id, me, updateMyData } from "./utils.js";
 import { handshake, slaveStateMessage, masterRevision, CollaboratorData, MyData  } from "./communication/coordination.js";
 import { client, friend_name } from "./config.js";
 export { myAgent };
@@ -47,27 +47,26 @@ async function agentLoop() {
     updateMyData(); 
 
     if(MyData.role == "SLAVE"){
-        console.log("sto facendo parte: SLAVE");
+        // console.log("sto facendo parte: SLAVE");
         await slaveStateMessage();
     } else if (MyData.role == "MASTER"){
-        console.log("sto facendo parte: MASTER");
-        let ok = await masterRevision();
+        // console.log("sto facendo parte: MASTER");
+        await masterRevision();
         
-        if(ok)
-        console.log("returned best_option_master: ", MyData.best_option)
-        console.log("returned best_option_slave: ", CollaboratorData.best_option)
+        // console.log("returned best_option_master: ", MyData.best_option)
+        // console.log("returned best_option_slave: ", CollaboratorData.best_option)
 
     } 
 
-    console.log("Correctly exchanged data between agents!");
+    // console.log("Correctly exchanged data between agents!");
 
     myAgent.push(MyData.best_option);
 }
 
-// Call agentLoop every 2 seconds
-setInterval(agentLoop, 2000);
+// Call agentLoop every 1 second
+setInterval(agentLoop, 1000);
 
-client.onParcelsSensing(agentLoop);
+// client.onParcelsSensing(agentLoop);
 
 // Function to trigger agentLoop when parcels are sensed
 

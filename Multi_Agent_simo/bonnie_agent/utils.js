@@ -1,7 +1,7 @@
 import { myAgent } from "./index.js";
 import { client, friend_name } from "./config.js";
 import { CollaboratorData, MyData  } from "./communication/coordination.js";
-export { computeBestOption, updateMyData, calculate_pickup_utility, calculate_putdown_utility, me, parcels, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
+export { computeBestOption, updateMyData, calculate_pickup_utility, calculate_putdown_utility, me, friend_id, distanceBFS_notMe, findPath_BFS, find_nearest_delivery, map, find_random_delivery, deliveryCoordinates, distanceBFS, beliefset }
 
 // BONNIE
 
@@ -74,15 +74,15 @@ function computeBestOption(){
 
     // dobbiamo confrontare COllaboratorData.options e MyData.options 
 
-    console.log("------------------------- MASTER PRIMA -------------------------")
-    for (let elem of MyData.options){
-        console.log(elem)
-    }
+    // console.log("------------------------- MASTER PRIMA -------------------------")
+    // for (let elem of MyData.options){
+    //     console.log(elem)
+    // }
 
-    console.log("------------------------- SLAVE PRIMA -------------------------")
-    for (let elem of CollaboratorData.options){
-        console.log(elem)
-    }
+    // console.log("------------------------- SLAVE PRIMA -------------------------")
+    // for (let elem of CollaboratorData.options){
+    //     console.log(elem)
+    // }
 
 
     for (let s_elem of CollaboratorData.options){
@@ -93,10 +93,7 @@ function computeBestOption(){
             }            
         }
         if (!found && s_elem[0] == "go_pick_up"){
-            console.log("s_elem: ", s_elem[3]);
             let parcel = CollaboratorData.getParcelById(s_elem[3]);
-            console.log("RETURNED: ", parcel)
-            console.log("parcel: ", parcel.x, "-", parcel.y);
             MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
         }
     }
@@ -114,12 +111,12 @@ function computeBestOption(){
     }
     console.log("---------- OPTIONS MASTER AFTER ----------")
     for (let elem of MyData.options){
-        console.log("Master options: ", elem);
+        console.log(elem);
     }
     
     console.log("---------- OPTIONS SLAVE AFTER ----------")
     for (let elem of CollaboratorData.options){
-        console.log("Slave options: ", elem);
+        console.log(elem);
     }
 
     MyData.best_option = findBestOption(MyData.options)
@@ -129,12 +126,9 @@ function computeBestOption(){
     console.log("-----------> BEST MASTER: ", MyData.best_option)
     console.log("-----------> BEST SLAVE: ", CollaboratorData.best_option)
 
-    if(MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery"){
-
-    }
-    else if(MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down"){
-    
-    } else {
+    if(MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery"){}
+    else if(MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down"){} 
+    else {
         if(MyData.best_option[3] === CollaboratorData.best_option[3]){
             if (MyData.best_option[4] >= CollaboratorData.best_option[4]){
                 CollaboratorData.best_option = findBestOption(CollaboratorData.options, CollaboratorData.best_option[3])
@@ -219,11 +213,11 @@ client.onAgentsSensing(agents => {
     // Update beliefset with new agent information
     for (let a of agents) {
         beliefset.set(a.id, a);
-        console.log("Agent: ", a.name, " - id: ", a.id);
+        // console.log("Agent: ", a.name, " - id: ", a.id);
         // console.log("friend: ", friend_name, " - current: ", a.name)
         if(friend_name != "" && a.name == friend_name && friend_id == ""){
             friend_id = a.id;
-            console.log("Friend name: ", friend_name, " - id: ", friend_id);
+            // console.log("Friend name: ", friend_name, " - id: ", friend_id);
         } 
     }
 });
@@ -271,7 +265,7 @@ await client.onYou(({ id, name, x, y, score }) => {
 
 
 
-var parcels = new Map()
+// var parcels = new Map()
 client.onParcelsSensing(async (perceived_parcels) => {
     MyData.parcels = []
     for (let p of perceived_parcels) {
@@ -282,7 +276,7 @@ client.onParcelsSensing(async (perceived_parcels) => {
 var map = [];
 var deliveryCoordinates = [];
 await client.onMap((width, height, tiles) => {
-    console.log("Map received: ", width, height, tiles.length)
+    // console.log("Map received: ", width, height, tiles.length)
     map = from_json_to_matrix(width, height, tiles, map);
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 });

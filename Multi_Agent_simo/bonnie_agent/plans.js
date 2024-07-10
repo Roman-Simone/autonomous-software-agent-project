@@ -1,9 +1,8 @@
 
 import { Intention } from './intention.js';
-import { me, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery, friend_id } from './utils.js';
-import { CollaboratorData, MyData  } from "./communication/coordination.js";
+import { me, findPath_BFS, deliveryCoordinates, find_nearest_delivery, find_random_delivery } from './utils.js';
+import { MyData  } from "./communication/coordination.js";
 import { client } from "./config.js"
-// import { client } from './communication/communication.js';
 export { plans, Plan };
 
 /**
@@ -11,7 +10,6 @@ export { plans, Plan };
  */
 
 async function check_tile(x, y){
-    console.log("parcels: ", MyData.printParcels());
     for(let parcel of MyData.parcels){
         if(x == parcel.x && y == parcel.y){
             await client.pickup()

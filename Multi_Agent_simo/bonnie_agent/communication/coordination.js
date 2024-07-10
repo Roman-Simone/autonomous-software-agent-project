@@ -1,6 +1,6 @@
 import { client, friend_name } from "../config.js";
 import { CommunicationData } from "./communication_data.js";
-import { computeBestOption, parcels } from "../utils.js"
+import { computeBestOption } from "../utils.js"
 
 var CollaboratorData = new CommunicationData();
 var MyData = new CommunicationData();
@@ -80,7 +80,6 @@ async function slaveStateMessage(){
         time: Date.now()
     });
 
-
     MyData.copy(reply);
 
     return reply;
@@ -95,17 +94,13 @@ function masterRevision() {
         client.onMsg((id, name, msg, reply) => {
             try {
                 if (msg.data != undefined){
-                    console.log("msg.data: ", msg.data);
                     // msg.data.printParcels();
                     CollaboratorData.copy(msg.data);
                     CollaboratorData.printParcels();
-                    console.log("CollaboratorData: ", CollaboratorData);
                 }
 
                 if(computeBestOption())
-                console.log("my best_option_master: ", MyData.best_option);
-                console.log("my best_option_slave: ", CollaboratorData.best_option);
-                
+
                 if (reply) {
                     reply(CollaboratorData);
                 }

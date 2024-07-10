@@ -45,7 +45,7 @@ class Agent {
                     // Catch eventual error and continue
                     .catch(error => {
 
-                        console.log( 'Failed intention', ...intention.predicate);
+                        // console.log( 'Failed intention', ...intention.predicate);
                         this.remove(intention.predicate);
 
                     });
