@@ -1,9 +1,11 @@
-import fs from 'fs';
-import { client } from "./config.js"
-import { Intention } from './intention.js';
-import { MyData } from "./communication/coordination.js";
+import { client } from "../config.js"
+import { readFile } from "./utils_planner.js";
+import { Intention } from '../intention.js';
+import { MyData } from "../communication/coordination.js";
 import { PddlProblem, onlineSolver, Beliefset } from "@unitn-asa/pddl-client";
-export { plans, Plan };
+export { plans };
+
+let domain = await readFile('./planners/domain.pddl');
 
 
 
@@ -50,18 +52,6 @@ class Plan {
 }
 
 
-function readFile(path) {
-
-    return new Promise((res, rej) => {
-
-        fs.readFile(path, 'utf8', (err, data) => {
-            if (err) rej(err)
-            else res(data)
-        })
-
-    })
-
-}
 
 const myBeliefset = new Beliefset();
 client.onMap((width, height, tiles) => {
@@ -100,7 +90,7 @@ client.onMap((width, height, tiles) => {
 });
 
 
-let domain = await readFile('./domain.pddl');
+
 
 
 class PddlMove extends Plan {
@@ -440,6 +430,7 @@ function timeout(mseconds) {
         }, mseconds);
     });
 }
+
 
 const plans = [];
 

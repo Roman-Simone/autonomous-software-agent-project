@@ -1,5 +1,5 @@
 
-import { plans } from './plans.js';
+import { plans } from './planners/plans.js';
 export { Intention };
 
 /**
