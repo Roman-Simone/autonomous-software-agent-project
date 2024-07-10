@@ -45,7 +45,7 @@ class Agent {
                     // Catch eventual error and continue
                     .catch(error => {
 
-                        // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                        console.log( 'Failed intention', ...intention.predicate);
                         this.remove(intention.predicate);
 
                     });
@@ -59,8 +59,8 @@ class Agent {
                         this.parcelsInMind = [];
                     }
                 }
-                // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
+
                 this.remove(intention.predicate);
             }
             // Postpone next iteration at setImmediate

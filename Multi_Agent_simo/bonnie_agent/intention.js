@@ -60,11 +60,11 @@ class Intention {
 
         // print('-----------------> Intention achieve', this.predicate)
 
-        await client.say( friend_id, {
-            hello: '[INT] ' + this.predicate,
-            iam: client.name,
-            id: client.id
-        } );
+        // await client.say( friend_id, {
+        //     hello: '[INT] ' + this.predicate,
+        //     iam: client.name,
+        //     id: client.id
+        // } );
 
         if (this.#started)
             return this;

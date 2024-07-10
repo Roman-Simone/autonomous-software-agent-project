@@ -38,16 +38,16 @@ class CommunicationData{
         this.parcels = data.parcels;
     }
 
-    getParcelgivenId(idToFind){
+    getParcelById(idToFind){
 
-        for (const [id, parcel] of this.parcels.entries()) {
-            console.log("idToFind: ", idToFind);
-            console.log("parcel.id: ", parcel.id);
+        for (let parcel of this.parcels) {
+            // console.log("idToFind: ", idToFind);
+            // console.log("parcel.id: ", parcel.id);
             if (idToFind == parcel.id){
                 return parcel;
             }
         }
-        return false
+        return false;
     }
 
     

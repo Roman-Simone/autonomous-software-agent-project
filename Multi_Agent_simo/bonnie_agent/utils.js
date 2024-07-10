@@ -21,7 +21,7 @@ var friend_id = "";
 //     MOVEMENT_STEPS: 1,
 //     MOVEMENT_DURATION: 500,
 //     AGENTS_OBSERVATION_DISTANCE: 5,
-//     PARCELS_OBSERVATION_DISTANCE: 5,
+//     PARCELS_OBSERVATION_DISTANCE:. 5,
 //     AGENT_TIMEOUT: 10000,
 //     PARCEL_REWARD_AVG: 50,
 //     PARCEL_REWARD_VARIANCE: 10,
@@ -50,33 +50,23 @@ client.onConfig((config) => {
 
 function updateMyData(){
     MyData.pos = {x: me.x, y: me.y};
-    
-    // MyData.parcels = new Map();
 
-    // for (let value of parcels) {
-    //     MyData.parcels.; 
-    // }
-
-    
     MyData.inmind = myAgent.get_inmind_score();
-    // console.log("---------------------> ", MyData.parcels)
 }
 
-function getParcelById(DataStruct, idToFind) {
-    // if(DataStruct.parcels.length !== 0){
-    //     if (DataStruct.parcels.has(idToFind)) {
-    //         return DataStruct.parcels.get(idToFind);
-    //     } else {
-    //         return null; // Restituisce null se la parcella non viene trovata
-    //     }    
-    // }
-    // console.log("parcels length ------> ", DataStruct.parcels.length)
-    console.log("------------------> ", typeof DataStruct.parcels)
-    for (const [id, parcel] of DataStruct.parcels) {
-        if (idToFind === id){
-            return parcel;
-        }
+function findBestOption(options, id="undefined"){
+    let bestUtility = -1.0;
+    let best_option = [];
+    for (const option of options) {
+        let current_utility = option[4];
+        if (current_utility > bestUtility) {
+            if (option[3] != id) {
+                best_option = option
+                bestUtility = current_utility    
+            }
+        } 
     }
+    return best_option;
 }
 
 function computeBestOption(){
@@ -84,73 +74,77 @@ function computeBestOption(){
 
     // dobbiamo confrontare COllaboratorData.options e MyData.options 
 
-    var master_options = [];
-    var slave_options = [];
+    console.log("------------------------- MASTER PRIMA -------------------------")
+    for (let elem of MyData.options){
+        console.log(elem)
+    }
 
-    console.log("MyData parcels: ")
-    MyData.print();
-    console.log("CollaboratorData parcels: ")
-    CollaboratorData.print();
+    console.log("------------------------- SLAVE PRIMA -------------------------")
+    for (let elem of CollaboratorData.options){
+        console.log(elem)
+    }
+
+
+    for (let s_elem of CollaboratorData.options){
+        let found = false;
+        for (let m_elem of MyData.options){
+            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+                found = true;
+            }            
+        }
+        if (!found && s_elem[0] == "go_pick_up"){
+            console.log("s_elem: ", s_elem[3]);
+            let parcel = CollaboratorData.getParcelById(s_elem[3]);
+            console.log("RETURNED: ", parcel)
+            console.log("parcel: ", parcel.x, "-", parcel.y);
+            MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
+        }
+    }
+    for (let m_elem of MyData.options){
+        let found = false;
+        for (let s_elem of CollaboratorData.options){
+            if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
+                found = true;
+            }            
+        }
+        if (!found && m_elem[0] == "go_pick_up"){
+            let parcel = MyData.getParcelById(m_elem[3])
+            CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, CollaboratorData.pos)]);
+        }
+    }
+    console.log("---------- OPTIONS MASTER AFTER ----------")
+    for (let elem of MyData.options){
+        console.log("Master options: ", elem);
+    }
     
+    console.log("---------- OPTIONS SLAVE AFTER ----------")
+    for (let elem of CollaboratorData.options){
+        console.log("Slave options: ", elem);
+    }
 
-    // MyData.options.push(['go_pick_up', parcel.x, parcel.y, id, util]);
-    // MyData.options.push(['go_put_down', "", "", "", calculate_putdown_utility()])
-    // MyData.options.push(['go_random_delivery', "", "", "", u]);
+    MyData.best_option = findBestOption(MyData.options)
 
-    // console.log("------------------------- MASTER PRIMA -------------------------")
-    // for (let elem of MyData.options){
-    //     master_options.push(elem);
-    //     console.log(elem)
-    // }
+    CollaboratorData.best_option = findBestOption(CollaboratorData.options)
 
-    // console.log("------------------------- SLAVE PRIMA -------------------------")
-    // for (let elem of CollaboratorData.options){
-    //     slave_options.push(elem);
-    //     console.log(elem)
-    // }
+    console.log("-----------> BEST MASTER: ", MyData.best_option)
+    console.log("-----------> BEST SLAVE: ", CollaboratorData.best_option)
 
+    if(MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery"){
 
-    // for (let s_elem of CollaboratorData.options){
-    //     let found = false;
-    //     for (let m_elem of MyData.options){
-    //         if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
-    //             found = true;
-    //         }            
-    //         if (!found && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
-    //             console.log("s_elem: ", s_elem[3]);
-    //             let parcel = getParcelById(CollaboratorData, s_elem[3]);
-    //             console.log("RETURNED: ", parcel)
-    //             console.log("parcel: ", parcel.x, "-", parcel.y);
-    //             master_options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
-    //         }
-    //     }
-    // }
-    // for (let m_elem of MyData.options){
-    //     let found = false;
-    //     for (let s_elem of CollaboratorData.options){
-    //         if (s_elem[3] == m_elem[3] && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
-    //             found = true;
-    //         }            
-    //         if (!found && s_elem[0] == "go_pick_up" && m_elem[0] == "go_pick_up"){
-    //             let parcel = getParcelById(MyData, m_elem[3])
-    //             slave_options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, slavePos=CollaboratorData.pos)]);
-    //         }
-    //     }
-    // }
-    // console.log("---------- OPTIONS MASTER AFTER ----------")
-    // for (let elem of master_options){
-    //     console.log("Master options: ", elem);
-    // }
+    }
+    else if(MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down"){
     
-    // console.log("---------- OPTIONS SLAVE AFTER ----------")
-    // for (let elem of slave_options){
-    //     console.log("Slave options: ", elem);
-    // }
-
-    
-
-    // MyData.best_option = ["best_option_master"];
-    // CollaboratorData.best_option = ["best_option_slave"];
+    } else {
+        if(MyData.best_option[3] === CollaboratorData.best_option[3]){
+            if (MyData.best_option[4] >= CollaboratorData.best_option[4]){
+                CollaboratorData.best_option = findBestOption(CollaboratorData.options, CollaboratorData.best_option[3])
+                console.log("[BEST_OPTIONS_UGUALI] ---> ho cambiato la bets_option dello SLAVE")
+            }else{
+                MyData.best_option = findBestOption(MyData.options, MyData.best_option[3])
+                console.log("[BEST_OPTIONS_UGUALI] ---> ho cambiato la bets_option del MASTER")
+            }
+        }
+    }
 
     return true;
 }

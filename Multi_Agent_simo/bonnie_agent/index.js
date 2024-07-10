@@ -62,7 +62,6 @@ async function agentLoop() {
     console.log("Correctly exchanged data between agents!");
 
     myAgent.push(MyData.best_option);
-
 }
 
 // Call agentLoop every 2 seconds
