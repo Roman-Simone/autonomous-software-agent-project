@@ -64,7 +64,6 @@ async function handshake() {
             CollaboratorData.role = "SLAVE";
         }
     }
-
     return true
 }
 
@@ -94,7 +93,6 @@ function masterRevision() {
             try {
                 if (msg.data != undefined){
                     CollaboratorData.copy(msg.data);
-                    CollaboratorData.printParcels();
                 }
                 if(computeBestOption())
                 if (reply) {

@@ -88,7 +88,13 @@ function computeBestOption(){
     CollaboratorData.best_option = findBestOption(CollaboratorData.options)
 
     if(MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery"){}
-    else if(MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down"){} 
+    else if(MyData.best_option[0] == "go_put_down" || CollaboratorData.best_option[0] == "go_put_down"){
+        if (MyData.best_option[0] == "go_put_down" && CollaboratorData.best_option[0] == "go_put_down"){
+            if(MyData.best_option[1] == CollaboratorData.best_option[1] && MyData.best_option[2] == CollaboratorData.best_option[2]){
+                
+            }
+        }
+    } 
     else {
         if(MyData.best_option[3] === CollaboratorData.best_option[3]){
             if (MyData.best_option[4] >= CollaboratorData.best_option[4]){
@@ -149,7 +155,9 @@ function calculate_pickup_utility(parcel, slavePos=null) {
 
 function calculate_putdown_utility() {
     MyData.inmind = myAgent.get_inmind_score();
-    let distanceDelivery = distanceBFS(find_nearest_delivery());
+
+    let nearest_delivery = find_nearest_delivery()
+    let distanceDelivery = distanceBFS(nearest_delivery);
     let numParcelInMind = myAgent.parcelsInMind.length
 
     for (let parcelInMind of myAgent.parcelsInMind) {
@@ -160,7 +168,7 @@ function calculate_putdown_utility() {
     }
 
     var utility = MyData.scoreInMind - ((decade_frequency * distanceDelivery) * numParcelInMind);
-    return utility;
+    return [nearest_delivery, utility];
 }
 
 // Define global variables
@@ -208,7 +216,7 @@ export function from_json_to_matrix(width, height, tiles, map) {
 }
 
 
-await client.onYou(({ id, name, x, y, score }) => {
+client.onYou(({ id, name, x, y, score }) => {
     MyData.id = id
     MyData.name = name
     MyData.x = Math.round(x);
@@ -228,7 +236,7 @@ client.onParcelsSensing(async (perceived_parcels) => {
 
 var map = [];
 var deliveryCoordinates = [];
-await client.onMap((width, height, tiles) => {
+client.onMap((width, height, tiles) => {
     // console.log("Map received: ", width, height, tiles.length)
     map = from_json_to_matrix(width, height, tiles, map);
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));

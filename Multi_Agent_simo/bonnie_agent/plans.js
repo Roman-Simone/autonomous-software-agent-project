@@ -78,7 +78,6 @@ class GoPickUp extends Plan {
         await client.pickup()
         if (this.stopped) throw ['stopped']; // if stopped then quit
         return true;
-        // await this.subIntention( 'go_put_down');
     }
 }
 
@@ -89,13 +88,6 @@ class GoPutDown extends Plan {
     }
 
     async execute(go_put_down, x, y) {
-        let nearest_delivery = { x: -1, y: -1 };
-        var x = -1;
-        var y = -1;
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        nearest_delivery = find_nearest_delivery();
-        x = nearest_delivery.x;
-        y = nearest_delivery.y;
 
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await this.subIntention(['go_to_BFS', x, y]);
@@ -103,7 +95,7 @@ class GoPutDown extends Plan {
         await client.putdown()
         if (this.stopped) throw ['stopped']; // if stopped then quit
         return true;
-
+        
     }
 
 
@@ -115,13 +107,6 @@ class GoRandomDelivery extends Plan {
     }
 
     async execute(go_random_delivery, x, y) {
-        let nearest_delivery = { x: -1, y: -1 };
-        var x = -1;
-        var y = -1;
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        nearest_delivery = find_random_delivery();
-        x = nearest_delivery.x;
-        y = nearest_delivery.y;
 
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await this.subIntention(['go_to_BFS', x, y]);

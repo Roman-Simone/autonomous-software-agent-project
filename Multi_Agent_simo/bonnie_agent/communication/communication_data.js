@@ -13,6 +13,7 @@ class CommunicationData{
     options = [];
     best_option = [];
     
+    
     constructor(){
         this.name = "";
         this.id = "";

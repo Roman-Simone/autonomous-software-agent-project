@@ -1,5 +1,5 @@
 import { Agent } from "./agent.js";
-import { calculate_pickup_utility, calculate_putdown_utility } from "./utils.js";
+import { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery } from "./utils.js";
 import { handshake, slaveStateMessage, masterRevision, MyData  } from "./communication/coordination.js";
 
 
@@ -12,30 +12,19 @@ async function agentLoop() {
     for (let parcel of MyData.parcels) {
         if (!parcel.carriedBy && parcel.reward > 3) {
             // Check if parcel is not carried by any agent
-            let util = calculate_pickup_utility(parcel);                    // se == 0 intrinsic_score < 0 --> non ne vale la pena
+            let util = calculate_pickup_utility(parcel);                    // if == 0 intrinsic_score < 0 --> non ne vale la pena
             if (util) {
                 MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, util]);
             }
         }
     }
-    MyData.options.push(['go_put_down', "", "", "", calculate_putdown_utility()])
+
+    let putDownInfo = calculate_putdown_utility()
+    MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
     let u = 2
-    MyData.options.push(['go_random_delivery', "", "", "", u]);
+    let random_delivery = find_random_delivery();
+    MyData.options.push(['go_random_delivery', random_delivery.x, random_delivery.y, "", u]);
 
-    /**
-     * Select best intention from available options
-     */
-    
-    let best_option;
-    let bestUtility = -1.0;
-    for (const option of MyData.options) {
-        let current_utility = option[4];
-        if (current_utility > bestUtility) {
-
-            best_option = option
-            bestUtility = current_utility
-        }
-    }
 
     if(MyData.role == "SLAVE"){
         await slaveStateMessage();
@@ -45,7 +34,6 @@ async function agentLoop() {
 
     myAgent.push(MyData.best_option);
 }
-
 
 console.log("[INFO] ", "Waiting other agents to connect...\n")
 if(await handshake()){
