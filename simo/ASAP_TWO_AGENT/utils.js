@@ -1,6 +1,6 @@
 import { myAgent } from "./index.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "./planners/utils_planner.js";
-import { decade_frequency, beliefset } from "./belief/belief.js";
+import { decade_frequency } from "./belief/belief.js";
 import { CollaboratorData, MyData } from "./belief/belief.js";
 export { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery, computeBestOption};
 
@@ -128,7 +128,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
 
     let min_distance_parcel_agent = Number.MAX_VALUE;
     let nearest_agent = "";
-    for (let a of beliefset.values()) {
+    for (let a of MyData.adversaryAgents) {
         if (distanceBFS_notMe(parcel, a) < min_distance_parcel_agent) {
             min_distance_parcel_agent = distanceBFS_notMe(parcel, a);
             nearest_agent = a.name;

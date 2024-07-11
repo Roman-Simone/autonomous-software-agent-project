@@ -16,6 +16,7 @@ class AgentData {
     map = [];
     deliveryCoordinates = [];
     myBeliefset = new Beliefset();
+    adversaryAgents = [];
 
 
     constructor() {
@@ -31,6 +32,7 @@ class AgentData {
         this.map = [];
         this.deliveryCoordinates = [];
         this.myBeliefset = new Beliefset();
+        this.adversaryAgents = [];
     }
 
     // Copy the data from another CommunicationData object
@@ -46,7 +48,8 @@ class AgentData {
         this.best_option = data.best_option;
         this.map = data.map;
         this.deliveryCoordinates = data.deliveryCoordinates;
-        // this.myBeliefset = data.myBeliefset;
+        this.adversaryAgents = data.adversaryAgents;
+        // this.myBeliefset = data.myBeliefset;       //With this doesn't work
     }
 
 

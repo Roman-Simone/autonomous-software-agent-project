@@ -2,19 +2,17 @@ import { client } from "../config.js";
 import { AgentData } from "./agentData.js";
 import { from_json_to_matrix } from "./utils.js";
 
-export { beliefset, configElements, decade_frequency, CollaboratorData, MyData};
+export { decade_frequency, CollaboratorData, MyData};
 
 
 var CollaboratorData = new AgentData();
 var MyData = new AgentData();
 
 
-// Define global variables
-const beliefset = new Map();
-// Function to update beliefset when agents are sensed
+// Function to update the beliefset of the agent
 client.onAgentsSensing(agents => {
     for (let a of agents) {
-        beliefset.set(a.id, a);
+        MyData.adversaryAgents.push(a);
     }
 });
 
@@ -42,12 +40,10 @@ client.onMap((width, height, tiles) => {
 
 
 var decade_frequency = 0;
-var configElements;
 client.onConfig((config) => {
-    configElements = config;
 
-    let movement_duration = configElements.MOVEMENT_DURATION;
-    let parcel_decading_interval = configElements.PARCEL_DECADING_INTERVAL;
+    let movement_duration = config.MOVEMENT_DURATION;
+    let parcel_decading_interval = config.PARCEL_DECADING_INTERVAL;
 
     if (parcel_decading_interval == "infinite") {
         parcel_decading_interval = Number.MAX_VALUE;
