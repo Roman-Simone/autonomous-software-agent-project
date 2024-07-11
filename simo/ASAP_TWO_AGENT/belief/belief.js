@@ -2,7 +2,7 @@ import { client } from "../config.js";
 import { AgentData } from "./agentData.js";
 import { from_json_to_matrix } from "./utils.js";
 
-export { beliefset, map, deliveryCoordinates, configElements, decade_frequency, CollaboratorData, MyData};
+export { beliefset, configElements, decade_frequency, CollaboratorData, MyData};
 
 
 var CollaboratorData = new AgentData();
@@ -33,11 +33,11 @@ client.onParcelsSensing(async (perceived_parcels) => {
     }
 })
 
-var map = [];
-var deliveryCoordinates = [];
+
 client.onMap((width, height, tiles) => {
-    map = from_json_to_matrix(width, height, tiles, map);
-    deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
+    MyData.map = from_json_to_matrix(width, height, tiles);
+    MyData.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
+    MyData.updateBeliefset();
 });
 
 

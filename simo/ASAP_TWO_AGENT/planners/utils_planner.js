@@ -1,6 +1,5 @@
 import fs from 'fs';
-import { map } from "../belief/belief.js";
-import { deliveryCoordinates, MyData } from "../belief/belief.js";
+import { MyData } from "../belief/belief.js";
 export { readFile , findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
 
 function readFile(path) {
@@ -42,10 +41,10 @@ function getNeighbors(x, y) {
 function isValidPosition(x, y) {
     x = Math.round(x);
     y = Math.round(y);
-    const width = map.length;
-    const height = map[0].length;
+    const width = MyData.map.length;
+    const height = MyData.map[0].length;
 
-    return x >= 0 && x < width && y >= 0 && y < height && map[x][y] !== 0;
+    return x >= 0 && x < width && y >= 0 && y < height && MyData.map[x][y] !== 0;
 }
 
 function findPath_BFS(endX, endY) {
@@ -119,13 +118,13 @@ function find_nearest_delivery(ignoreCoordinates = undefined) {
 
     let min_distance = Number.MAX_VALUE;
     let nearest_delivery = { x: -1, y: -1 };
-    for (var i = 0; i < deliveryCoordinates.length; i++) {
-        if (distanceBFS(deliveryCoordinates[i]) < min_distance) {
+    for (var i = 0; i < MyData.deliveryCoordinates.length; i++) {
+        if (distanceBFS(MyData.deliveryCoordinates[i]) < min_distance) {
 
-            if (ignoreCoordinates != undefined && deliveryCoordinates[i].x == ignoreCoordinates.x && deliveryCoordinates[i].y == ignoreCoordinates.y) continue;
+            if (ignoreCoordinates != undefined && MyData.deliveryCoordinates[i].x == ignoreCoordinates.x && MyData.deliveryCoordinates[i].y == ignoreCoordinates.y) continue;
 
-            min_distance = distanceBFS(deliveryCoordinates[i]);
-            nearest_delivery = deliveryCoordinates[i];
+            min_distance = distanceBFS(MyData.deliveryCoordinates[i]);
+            nearest_delivery = MyData.deliveryCoordinates[i];
         }
     }
 

@@ -53,41 +53,42 @@ class Plan {
 
 
 
-const myBeliefset = new Beliefset();
-client.onMap((width, height, tiles) => {
+// const myBeliefset = new Beliefset();
+// client.onMap((width, height, tiles) => {
 
-    for (let { x, y, delivery } of tiles) {
-        myBeliefset.declare('tile t' + x + '_' + y);
-        if (delivery) {
-            myBeliefset.declare('delivery t' + x + '_' + y);
-        }
+//     for (let { x, y, delivery } of tiles) {
+//         console.log('tile', x, y, delivery);
+//         myBeliefset.declare('tile t' + x + '_' + y);
+//         if (delivery) {
+//             myBeliefset.declare('delivery t' + x + '_' + y);
+//         }
 
 
-        // Find the tile to the right
-        let right = tiles.find(tile => tile.x === x + 1 && tile.y === y);
-        if (right) {
-            myBeliefset.declare('right t' + x + '_' + y + ' t' + right.x + '_' + right.y);
-        }
+//         // Find the tile to the right
+//         let right = tiles.find(tile => tile.x === x + 1 && tile.y === y);
+//         if (right) {
+//             myBeliefset.declare('right t' + x + '_' + y + ' t' + right.x + '_' + right.y);
+//         }
 
-        // Find the tile to the left
-        let left = tiles.find(tile => tile.x === x - 1 && tile.y === y);
-        if (left) {
-            myBeliefset.declare('left t' + x + '_' + y + ' t' + left.x + '_' + left.y);
-        }
+//         // Find the tile to the left
+//         let left = tiles.find(tile => tile.x === x - 1 && tile.y === y);
+//         if (left) {
+//             myBeliefset.declare('left t' + x + '_' + y + ' t' + left.x + '_' + left.y);
+//         }
 
-        // Find the tile above
-        let up = tiles.find(tile => tile.x === x && tile.y === y - 1);
-        if (up) {
-            myBeliefset.declare('up t' + x + '_' + y + ' t' + up.x + '_' + up.y);
-        }
+//         // Find the tile above
+//         let up = tiles.find(tile => tile.x === x && tile.y === y - 1);
+//         if (up) {
+//             myBeliefset.declare('up t' + x + '_' + y + ' t' + up.x + '_' + up.y);
+//         }
 
-        // Find the tile below
-        let down = tiles.find(tile => tile.x === x && tile.y === y + 1);
-        if (down) {
-            myBeliefset.declare('down t' + x + '_' + y + ' t' + down.x + '_' + down.y);
-        }
-    }
-});
+//         // Find the tile below
+//         let down = tiles.find(tile => tile.x === x && tile.y === y + 1);
+//         if (down) {
+//             myBeliefset.declare('down t' + x + '_' + y + ' t' + down.x + '_' + down.y);
+//         }
+//     }
+// });
 
 
 
@@ -109,8 +110,8 @@ class PddlMove extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 
@@ -207,8 +208,8 @@ class PddlPickUp extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
-            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
+            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
+            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
             goal
         );
 
@@ -316,8 +317,8 @@ class PddlPutDown extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 

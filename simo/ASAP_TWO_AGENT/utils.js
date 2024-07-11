@@ -1,6 +1,6 @@
 import { myAgent } from "./index.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "./planners/utils_planner.js";
-import { decade_frequency, deliveryCoordinates, beliefset } from "./belief/belief.js";
+import { decade_frequency, beliefset } from "./belief/belief.js";
 import { CollaboratorData, MyData } from "./belief/belief.js";
 export { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery, computeBestOption};
 
@@ -166,7 +166,7 @@ function calculate_putdown_utility() {
 
 function find_random_delivery() {
 
-    let random_delivery = deliveryCoordinates[Math.floor(Math.random() * deliveryCoordinates.length)];
+    let random_delivery = MyData.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
 
     let delivery_coordinates = { x: random_delivery.x, y: random_delivery.y };
 

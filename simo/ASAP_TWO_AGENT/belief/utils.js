@@ -1,6 +1,6 @@
 export { from_json_to_matrix };
 
-function from_json_to_matrix(width, height, tiles, map) {
+function from_json_to_matrix(width, height, tiles) {
     var map = [];
     for (let i = 0; i < width; i++) {
         map[i] = [];
