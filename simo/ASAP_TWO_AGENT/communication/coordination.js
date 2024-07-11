@@ -1,9 +1,6 @@
 import { client, friend_name } from "../config.js";
-import { CommunicationData } from "./communication_data.js";
 import { computeBestOption } from "../utils.js"
-
-var CollaboratorData = new CommunicationData();
-var MyData = new CommunicationData();
+import { CollaboratorData, MyData } from "../belief/belief.js";
 
 function getMessage(client) {
     return new Promise((resolve, reject) => {
@@ -107,4 +104,4 @@ function masterRevision() {
     });
 }
 
-export { handshake, slaveStateMessage, masterRevision, CollaboratorData, MyData };
+export { handshake, slaveStateMessage, masterRevision };

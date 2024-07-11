@@ -1,7 +1,7 @@
 import { client } from "../config.js"
 import { readFile } from "./utils_planner.js";
 import { Intention } from '../intention&revision/intention.js';
-import { MyData } from "../communication/coordination.js";
+import { MyData } from "../belief/belief.js";
 import { PddlProblem, onlineSolver, Beliefset } from "@unitn-asa/pddl-client";
 export { plans };
 

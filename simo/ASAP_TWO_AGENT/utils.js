@@ -1,7 +1,7 @@
 import { myAgent } from "./index.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "./planners/utils_planner.js";
 import { decade_frequency, deliveryCoordinates, beliefset } from "./belief/belief.js";
-import { CollaboratorData, MyData } from "./communication/coordination.js";
+import { CollaboratorData, MyData } from "./belief/belief.js";
 export { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery, computeBestOption};
 
 // Function to update the configuration of elements

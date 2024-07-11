@@ -1,7 +1,6 @@
-import { MyData } from "../communication/coordination.js";
 import fs from 'fs';
 import { map } from "../belief/belief.js";
-import { deliveryCoordinates } from "../belief/belief.js";
+import { deliveryCoordinates, MyData } from "../belief/belief.js";
 export { readFile , findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
 
 function readFile(path) {

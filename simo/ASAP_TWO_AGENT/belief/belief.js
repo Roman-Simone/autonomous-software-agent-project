@@ -1,14 +1,18 @@
 import { client } from "../config.js";
-import { MyData } from "../communication/coordination.js";
+import { AgentData } from "./agentData.js";
 import { from_json_to_matrix } from "./utils.js";
 
-export { beliefset, map, deliveryCoordinates, configElements, decade_frequency };
+export { beliefset, map, deliveryCoordinates, configElements, decade_frequency, CollaboratorData, MyData};
+
+
+var CollaboratorData = new AgentData();
+var MyData = new AgentData();
+
 
 // Define global variables
 const beliefset = new Map();
 // Function to update beliefset when agents are sensed
 client.onAgentsSensing(agents => {
-    // Update beliefset with new agent information
     for (let a of agents) {
         beliefset.set(a.id, a);
     }
@@ -32,7 +36,6 @@ client.onParcelsSensing(async (perceived_parcels) => {
 var map = [];
 var deliveryCoordinates = [];
 client.onMap((width, height, tiles) => {
-    // console.log("Map received: ", width, height, tiles.length)
     map = from_json_to_matrix(width, height, tiles, map);
     deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 });

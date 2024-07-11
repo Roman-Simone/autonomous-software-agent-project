@@ -1,6 +1,6 @@
-export { CommunicationData }
+export { AgentData }
 
-class CommunicationData{
+class AgentData{
 
     //INFORMATION ABOUT THE AGENT
     name = ""

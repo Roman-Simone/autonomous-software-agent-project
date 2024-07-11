@@ -1,5 +1,6 @@
 import { Agent } from './intention&revision/agent.js';
-import { MyData, handshake, slaveStateMessage, masterRevision  } from "./communication/coordination.js";
+import { handshake, slaveStateMessage, masterRevision  } from "./communication/coordination.js";
+import { MyData } from "./belief/belief.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery } from "./utils.js";
 
 
