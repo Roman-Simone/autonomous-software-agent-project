@@ -53,6 +53,9 @@ class AgentData {
     }
 
 
+   
+
+    // Update the beliefset based on the map
     updateBeliefset() {
         let width = this.map.length;
         let height = this.map[0].length;
@@ -62,28 +65,35 @@ class AgentData {
                 if (this.map[x][y] == 0) {
                     continue;
                 }
+    
+                this.myBeliefset.declare('tile t' + x + '_' + y);
+    
                 if (this.map[x][y] == 2) {
                     this.myBeliefset.declare('delivery t' + x + '_' + y);
                 }
-                this.myBeliefset.declare('tile t' + x + '_' + y);
     
+                // Find the tile to the right
                 if ((x + 1) < width && this.map[x + 1][y] > 0) {
                     this.myBeliefset.declare('right t' + x + '_' + y + ' t' + (x + 1) + '_' + y);
                 }
     
+                // Find the tile to the left
                 if ((x - 1) >= 0 && this.map[x - 1][y] > 0) {
                     this.myBeliefset.declare('left t' + x + '_' + y + ' t' + (x - 1) + '_' + y);
                 }
     
-                if ((y + 1) < height && this.map[x][y + 1] > 0) {
-                    this.myBeliefset.declare('up t' + x + '_' + y + ' t' + x + '_' + (y + 1));
+                // Find the tile above
+                if ((y - 1) >= 0 && this.map[x][y - 1] > 0) {
+                    this.myBeliefset.declare('up t' + x + '_' + y + ' t' + x + '_' + (y - 1));
                 }
     
-                if ((y - 1) >= 0 && this.map[x][y - 1] > 0) {
-                    this.myBeliefset.declare('down t' + x + '_' + y + ' t' + x + '_' + (y - 1));
+                // Find the tile below
+                if ((y + 1) < height && this.map[x][y + 1] > 0) {
+                    this.myBeliefset.declare('down t' + x + '_' + y + ' t' + x + '_' + (y + 1));
                 }
             }
         }
+   
     }
 
     // Search for a parcel by id

@@ -32,7 +32,7 @@ async function agentLoop() {
     } else if (MyData.role == "MASTER") {
         await masterRevision();
     }
-
+    console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
     myAgent.push(MyData.best_option);
 }
 

@@ -69,16 +69,14 @@ class Agent {
     }
 
     async remove(predicate) {
-        // if (predicate[0] == "go_put_down") {
-        //     return;
-        // }
+
         for (let i = 0; i < this.intention_queue.length; i++) {
             if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
                 this.intention_queue.splice(i, 1);
                 return true;
             }
         }
-        console.log("Predicate not found in queue");
+        console.log("Predicate not found in queue", predicate);
         return false;
     }
 

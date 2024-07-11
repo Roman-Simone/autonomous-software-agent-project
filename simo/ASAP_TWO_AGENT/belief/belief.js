@@ -39,6 +39,7 @@ client.onMap((width, height, tiles) => {
 });
 
 
+
 var decade_frequency = 0;
 client.onConfig((config) => {
 

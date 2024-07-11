@@ -44,7 +44,7 @@ function isValidPosition(x, y) {
     const width = MyData.map.length;
     const height = MyData.map[0].length;
 
-    return x >= 0 && x < width && y >= 0 && y < height && MyData.map[x][y] !== 0;
+    return x >= 0 && x < width && y >= 0 && y < height && MyData.map[x][y] > 0;
 }
 
 function findPath_BFS(endX, endY) {
