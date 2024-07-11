@@ -54,42 +54,42 @@ class Plan {
 
 
 
-const myBeliefset = new Beliefset();
-client.onMap((width, height, tiles) => {
+// const myBeliefset = new Beliefset();
+// client.onMap((width, height, tiles) => {
 
-    for (let { x, y, delivery } of tiles) {
-        myBeliefset.declare('tile t' + x + '_' + y);
-        if (delivery) {
-            myBeliefset.declare('delivery t' + x + '_' + y);
-        }
+//     for (let { x, y, delivery } of tiles) {
+//         myBeliefset.declare('tile t' + x + '_' + y);
+//         if (delivery) {
+//             myBeliefset.declare('delivery t' + x + '_' + y);
+//         }
 
 
-        // Find the tile to the right
-        let right = tiles.find(tile => tile.x === x + 1 && tile.y === y);
-        if (right) {
-            myBeliefset.declare('right t' + x + '_' + y + ' t' + right.x + '_' + right.y);
-        }
+//         // Find the tile to the right
+//         let right = tiles.find(tile => tile.x === x + 1 && tile.y === y);
+//         if (right) {
+//             myBeliefset.declare('right t' + x + '_' + y + ' t' + right.x + '_' + right.y);
+//         }
 
-        // Find the tile to the left
-        let left = tiles.find(tile => tile.x === x - 1 && tile.y === y);
-        if (left) {
-            myBeliefset.declare('left t' + x + '_' + y + ' t' + left.x + '_' + left.y);
-        }
+//         // Find the tile to the left
+//         let left = tiles.find(tile => tile.x === x - 1 && tile.y === y);
+//         if (left) {
+//             myBeliefset.declare('left t' + x + '_' + y + ' t' + left.x + '_' + left.y);
+//         }
 
-        // Find the tile above
-        let up = tiles.find(tile => tile.x === x && tile.y === y + 1);
-        if (up) {
-            myBeliefset.declare('up t' + x + '_' + y + ' t' + up.x + '_' + up.y);
-        }
+//         // Find the tile above
+//         let up = tiles.find(tile => tile.x === x && tile.y === y + 1);
+//         if (up) {
+//             myBeliefset.declare('up t' + x + '_' + y + ' t' + up.x + '_' + up.y);
+//         }
 
-        // Find the tile below
-        let down = tiles.find(tile => tile.x === x && tile.y === y - 1);
-        if (down) {
-            myBeliefset.declare('down t' + x + '_' + y + ' t' + down.x + '_' + down.y);
-        }
-    }
-    // console.log('PLANNNN BELIEFSET\n', myBeliefset.toPddlString());
-});
+//         // Find the tile below
+//         let down = tiles.find(tile => tile.x === x && tile.y === y - 1);
+//         if (down) {
+//             myBeliefset.declare('down t' + x + '_' + y + ' t' + down.x + '_' + down.y);
+//         }
+//     }
+//     // console.log('PLANNNN BELIEFSET\n', myBeliefset.toPddlString());
+// });
 
 
 
@@ -111,8 +111,8 @@ class PddlMove extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 
@@ -196,33 +196,23 @@ class PddlPickUp extends Plan {
 
     async execute(go_pick_up, x, y) {
 
-        console.log("PICKUP---> 1");
         // Find the parcel at the destination
         let parcel = Array.from(MyData.parcels.values()).find(p => p.x === x && p.y === y);
-
-        console.log("PICKUP---> 2");
-
         if (!parcel) {
             throw new Error('No parcel found at the destination');
         }
 
-        console.log("PICKUP---> 3");
-
         // Define the PDDL goal
         let goal = 'holding ' + MyData.name + ' ' + parcel.id;
 
-        console.log("PICKUP---> 4");
 
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
-            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
+            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
+            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
             goal
         );
-
-
-        console.log("PICKUP---> 5");
 
         let problem = pddlProblem.toPddlString();
         // console.log("PICKUP---> PROBLEM\n\n", problem);
@@ -231,7 +221,6 @@ class PddlPickUp extends Plan {
         var plan = await onlineSolver(domain, problem);
 
 
-        console.log("PICKUP---> 6");
 
         let path = [];
         plan.forEach(action => {
@@ -333,8 +322,8 @@ class PddlPutDown extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 
