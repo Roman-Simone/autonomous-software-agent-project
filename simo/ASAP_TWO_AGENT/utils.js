@@ -1,8 +1,7 @@
-import { myAgent } from "./index.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "./planners/utils_planner.js";
 import { decade_frequency } from "./belief/belief.js";
 import { CollaboratorData, MyData } from "./belief/belief.js";
-export { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery, computeBestOption};
+export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, computeBestOption};
 
 // Function to update the configuration of elements
 //!CONFIGURATION
@@ -22,8 +21,6 @@ export { calculate_pickup_utility, calculate_putdown_utility, find_random_delive
 //     RANDOM_AGENT_SPEED: '2s',
 //     CLOCK: 50
 //   }
-
-
 
 
 function findBestOption(options, id = "undefined") {
@@ -102,8 +99,8 @@ function computeBestOption() {
 
 function calculate_pickup_utility(parcel, slavePos = null) {
     let scoreParcel = parcel.reward;
-    MyData.scoreInMind = myAgent.get_inmind_score();
-    let numParcelInMind = myAgent.parcelsInMind.length
+    MyData.scoreInMind = MyData.get_inmind_score();
+    let numParcelInMind = MyData.parcelsInMind.length
 
     // let distance_parcel = 0;
     if (slavePos == null) {
@@ -114,7 +111,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
 
     let distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
 
-    for (let parcelInMind of myAgent.parcelsInMind) {
+    for (let parcelInMind of MyData.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - decade_frequency * (distance_parcel + distance_delivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
@@ -122,7 +119,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     }
 
     let RewardParcel = scoreParcel - decade_frequency * distance_parcel;
-    let RewardInMind = MyData.scoreInMind - ((decade_frequency * distance_parcel) * numParcelInMind);
+    let RewardInMind = MyData.get_inmind_score() - ((decade_frequency * distance_parcel) * numParcelInMind);
     let utility = (RewardParcel + RewardInMind) - (decade_frequency * distance_delivery) * (numParcelInMind + 1);
 
 
@@ -145,30 +142,45 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     return utility;
 }
 
-function calculate_putdown_utility() {
-    MyData.inmind = myAgent.get_inmind_score();
 
+function calculate_putdown_utility() {
     let nearest_delivery = find_nearest_delivery()
     let distanceDelivery = distanceBFS(nearest_delivery);
-    let numParcelInMind = myAgent.parcelsInMind.length
+    let numParcelInMind = MyData.parcelsInMind.length
 
-    for (let parcelInMind of myAgent.parcelsInMind) {
+    for (let parcelInMind of MyData.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - (decade_frequency * distanceDelivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
         }
     }
 
-    var utility = MyData.scoreInMind - ((decade_frequency * distanceDelivery) * numParcelInMind);
+    var utility = MyData.get_inmind_score() - ((decade_frequency * distanceDelivery) * numParcelInMind);
     return [nearest_delivery, utility];
 }
 
 
-function find_random_delivery() {
+function find_random_deliveryFarFromOther() {
 
-    let random_delivery = MyData.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
+    let del_pos = { x: -1, y: -1 };
+    
+    if (MyData.role == "SLAVE") {       // SLAVE fa quello che vuole, va in una random a caso
+        var random_delivery = MyData.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
+        del_pos = { x: random_delivery.x, y: random_delivery.y };
+        // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", dels);
+    } else {                                            // MASTER va nella cella di delivery più lontana dallo SLAVE
+        MyData.deliveryCoordinates.sort((a, b) => {
+            const distanceA = distanceBFS_notMe(a, CollaboratorData.pos);
+            const distanceB = distanceBFS_notMe(b, CollaboratorData.pos);
+            return distanceB - distanceA;
+        });
+        
+        if(MyData.pos.x == MyData.deliveryCoordinates[0].x && MyData.pos.y == MyData.deliveryCoordinates[0].y){
+            del_pos = MyData.deliveryCoordinates[1];
+        } else {
+            del_pos = MyData.deliveryCoordinates[0];
+        }
+    }
 
-    let delivery_coordinates = { x: random_delivery.x, y: random_delivery.y };
-
-    return delivery_coordinates;
+    return del_pos;
 }

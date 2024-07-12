@@ -1,7 +1,7 @@
 import { Agent } from './intention&revision/agent.js';
 import { handshake, slaveStateMessage, masterRevision  } from "./communication/coordination.js";
 import { MyData } from "./belief/belief.js";
-import { calculate_pickup_utility, calculate_putdown_utility, find_random_delivery } from "./utils.js";
+import { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther } from "./utils.js";
 
 
 async function agentLoop() {
@@ -19,20 +19,22 @@ async function agentLoop() {
             }
         }
     }
-
     let putDownInfo = calculate_putdown_utility()
     MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
     let u = 2
-    let random_delivery = find_random_delivery();
+    let random_delivery = find_random_deliveryFarFromOther();
     MyData.options.push(['go_random_delivery', random_delivery.x, random_delivery.y, "", u]);
 
+    // console.log("[INFO] ", "Options: ", MyData.options, "\n")
 
     if (MyData.role == "SLAVE") {
         await slaveStateMessage();
     } else if (MyData.role == "MASTER") {
         await masterRevision();
     }
-    console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+
+    // console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+
     myAgent.push(MyData.best_option);
 }
 
@@ -47,7 +49,7 @@ const myAgent = new Agent();
 myAgent.intentionLoop();
 
 // Call agentLoop every 1 second
-setInterval(agentLoop, 1000);
+setInterval(agentLoop, 2000);
 
 
 export { myAgent };
