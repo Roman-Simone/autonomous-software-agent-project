@@ -1,27 +1,31 @@
-import { client } from "../config.js";
+import { client } from "../socketConnection.js";
 import { AgentData } from "./agentData.js";
-import { from_json_to_matrix, deepCopyMap } from "./utils.js";
+import { from_json_to_matrix } from "./utilsBelief.js";
+import { Map } from "./map.js";
 
-export { decade_frequency, CollaboratorData, MyData};
-
+export { decade_frequency, CollaboratorData, MyData, MyMap};
 
 var CollaboratorData = new AgentData();
 var MyData = new AgentData();
-
+var MyMap = new Map();
 
 // Function to update the beliefset of the agent
 client.onAgentsSensing(agents => {
 
-    MyData.map = deepCopyMap(MyData.original_map);
+    MyMap.deepCopyMap();
 
     for (let a of agents) {
         MyData.adversaryAgents.push(a);
         
-        console.log("Adversary agent: ", a.id, a.name, a.x, a.y);
+        // console.log("-------------> agent: ", a.id, a.name, a.x, a.y);
 
-        MyData.map[a.x][a.y] = -1;
+        MyMap.updateMap(a.x, a.y, -1);
     }
+
+    // MyData.printMapAsTable();
+    MyMap.updateBeliefset();
 });
+
 
 client.onYou(({ id, name, x, y, score }) => {
     MyData.id = id
@@ -38,18 +42,12 @@ client.onParcelsSensing(async (perceived_parcels) => {
     }
 })
 
-
 client.onMap((width, height, tiles) => {
-    MyData.original_map = from_json_to_matrix(width, height, tiles);
-    MyData.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
-    MyData.map = deepCopyMap(MyData.original_map);
-
-    MyData.printOriginalMapAsTable();
-    MyData.printMapAsTable();
-
-    MyData.updateBeliefset();
+    MyMap.original_map = from_json_to_matrix(width, height, tiles);
+    MyMap.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
+    MyMap.deepCopyMap();
+    MyMap.updateBeliefset();
 });
-
 
 
 var decade_frequency = 0;

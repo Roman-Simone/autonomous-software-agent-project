@@ -1,4 +1,4 @@
-export { from_json_to_matrix,deepCopyMap };
+export { from_json_to_matrix };
 
 function from_json_to_matrix(width, height, tiles) {
     var map = [];
@@ -18,13 +18,3 @@ function from_json_to_matrix(width, height, tiles) {
     return map;
 }
 
-function deepCopyMap(original) {
-    const copy = [];
-    for (let i = 0; i < original.length; i++) {
-        copy[i] = [];
-        for (let j = 0; j < original[i].length; j++) {
-            copy[i][j] = original[i][j];
-        }
-    }
-    return copy;
-}

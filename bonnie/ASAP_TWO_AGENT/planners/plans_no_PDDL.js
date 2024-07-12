@@ -1,7 +1,7 @@
 import { Intention } from '../intention.js';
-import { findPath_BFS, deliveryCoordinates } from '../utils.js';
+import { findPath_BFS, deliveryCoordinates } from '../intention&revision/utilsOptions.js';
 import { MyData } from "../belief/belief.js";
-import { client } from "../config.js"
+import { client } from "../socketConnection.js"
 
 // export { plans}
 

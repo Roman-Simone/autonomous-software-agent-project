@@ -1,14 +1,11 @@
-import { client } from "../config.js"
+import { client } from "../socketConnection.js"
 import { readFile } from "./utils_planner.js";
 import { Intention } from '../intention&revision/intention.js';
-import { MyData } from "../belief/belief.js";
+import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 import { PddlProblem, onlineSolver, Beliefset } from "@unitn-asa/pddl-client";
 
 
 let domain = await readFile('./planners/domain.pddl');
-
-
-
 
 class Plan {
 
@@ -28,6 +25,7 @@ class Plan {
     /**
      * #parent refers to caller
      */
+
     #parent;
 
     constructor(parent) {
@@ -53,70 +51,26 @@ class Plan {
 }
 
 
-
-// const myBeliefset = new Beliefset();
-// client.onMap((width, height, tiles) => {
-
-//     for (let { x, y, delivery } of tiles) {
-//         myBeliefset.declare('tile t' + x + '_' + y);
-//         if (delivery) {
-//             myBeliefset.declare('delivery t' + x + '_' + y);
-//         }
-
-
-//         // Find the tile to the right
-//         let right = tiles.find(tile => tile.x === x + 1 && tile.y === y);
-//         if (right) {
-//             myBeliefset.declare('right t' + x + '_' + y + ' t' + right.x + '_' + right.y);
-//         }
-
-//         // Find the tile to the left
-//         let left = tiles.find(tile => tile.x === x - 1 && tile.y === y);
-//         if (left) {
-//             myBeliefset.declare('left t' + x + '_' + y + ' t' + left.x + '_' + left.y);
-//         }
-
-//         // Find the tile above
-//         let up = tiles.find(tile => tile.x === x && tile.y === y + 1);
-//         if (up) {
-//             myBeliefset.declare('up t' + x + '_' + y + ' t' + up.x + '_' + up.y);
-//         }
-
-//         // Find the tile below
-//         let down = tiles.find(tile => tile.x === x && tile.y === y - 1);
-//         if (down) {
-//             myBeliefset.declare('down t' + x + '_' + y + ' t' + down.x + '_' + down.y);
-//         }
-//     }
-//     // console.log('PLANNNN BELIEFSET\n', myBeliefset.toPddlString());
-// });
-
-
-
-
-
 class PddlMove extends Plan {
 
     static isApplicableTo(go_to, x, y) {
         return go_to == 'go_to';
-
     }
 
     async execute(go_to, x, y) {
-
-
         // Define the PDDL goal
         let goal = 'at ' + MyData.name + ' ' + 't' + x + '_' + y;
 
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyMap.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyMap.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 
         let problem = pddlProblem.toPddlString();
+
         // Get the plan from the online solver
         var plan = await onlineSolver(domain, problem);
 
@@ -196,8 +150,12 @@ class PddlPickUp extends Plan {
 
     async execute(go_pick_up, x, y) {
 
+
         // Find the parcel at the destination
         let parcel = Array.from(MyData.parcels.values()).find(p => p.x === x && p.y === y);
+        if (!parcel) {
+            parcel = Array.from(CollaboratorData.parcels.values()).find(p => p.x === x && p.y === y);
+        }
         if (!parcel) {
             throw new Error('No parcel found at the destination');
         }
@@ -206,21 +164,25 @@ class PddlPickUp extends Plan {
         let goal = 'holding ' + MyData.name + ' ' + parcel.id;
 
 
+
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
-            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
+            MyMap.myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
+            MyMap.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
             goal
         );
+        
 
         let problem = pddlProblem.toPddlString();
-        // console.log("PICKUP---> PROBLEM\n\n", problem);
+
+
+        // console.log("map: ", MyData.printMapAsTable())
+        // console.log("problem: ", MyData.myBeliefset.toPddlString())
 
         // Get the plan from the online solver
         var plan = await onlineSolver(domain, problem);
-
-
+        console.log("PICKUP---> 5");
 
         let path = [];
         plan.forEach(action => {
@@ -276,7 +238,6 @@ class PddlPickUp extends Plan {
                 MyData.pos.x = status_x.x;
                 MyData.pos.y = status_x.y;
             }
-
             if (this.stopped) throw ['stopped']; // if stopped then quit
 
             if (coordinate.y > MyData.pos.y)
@@ -322,8 +283,8 @@ class PddlPutDown extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyMap.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyMap.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 
@@ -426,7 +387,6 @@ class GoRandomDelivery extends Plan {
         return true;
     }
 }
-
 
 
 function timeout(mseconds) {

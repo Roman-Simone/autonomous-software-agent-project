@@ -1,4 +1,3 @@
-import { Beliefset } from "@unitn-asa/pddl-client";
 export { AgentData }
 
 class AgentData {
@@ -13,27 +12,19 @@ class AgentData {
     inmind = 0;
     options = [];
     best_option = [];
-    map = [];
-    original_map = [];
-    deliveryCoordinates = [];
-    myBeliefset = new Beliefset();
     adversaryAgents = [];
-
+    parcelsInMind = [];
 
     constructor() {
         this.name = "";
         this.id = "";
         this.pos = { x: -1, y: -1 };
         this.score = 0;
-        this.role = "";
+        this.role = "NOTHING";
         this.parcels = [];
         this.inmind = 0;
         this.options = [];
         this.best_option = [];
-        this.map = [];
-        this.original_map = [];
-        this.deliveryCoordinates = [];
-        this.myBeliefset = new Beliefset();
         this.adversaryAgents = [];
     }
 
@@ -48,87 +39,29 @@ class AgentData {
         this.inmind = data.inmind;
         this.options = data.options;
         this.best_option = data.best_option;
-        this.map = data.map;
-        this.original_map = data.original_map;
-        this.deliveryCoordinates = data.deliveryCoordinates;
         this.adversaryAgents = data.adversaryAgents;
         // this.myBeliefset = data.myBeliefset;       //With this doesn't work
     }
 
-    printOriginalMapAsTable() {
-        if (this.original_map.length === 0) {
-            console.log("The matrix is empty.");
-            return;
-        }
     
-        // Create the table string
-        let table = "";
-        for (const row of this.original_map) {
-            table += row.join("\t") + "\n";
-        }
-    
-        // Print the table
-        console.log(table);
-    }
-
-    printMapAsTable() {
-        if (this.map.length === 0) {
-            console.log("The matrix is empty.");
-            return;
-        }
-    
-        // Create the table string
-        let table = "";
-        for (const row of this.map) {
-            table += row.join("\t") + "\n";
-        }
-    
-        // Print the table
-        console.log(table);
-    }
-
-    
-
-    // Update the beliefset based on the map
-    updateBeliefset() {
-        let width = this.map.length;
-        let height = this.map[0].length;
-
-        for (let x = 0; x < width; x++) {
-            for (let y = 0; y < height; y++) {
-                if (this.map[x][y] == 0) {
-                    continue;
-                }
-
-                this.myBeliefset.declare('tile t' + x + '_' + y);
-
-                if (this.map[x][y] == 2) {
-                    this.myBeliefset.declare('delivery t' + x + '_' + y);
-                }
-
-                // Find the tile to the right
-                if ((x + 1) < width && this.map[x + 1][y] > 0) {
-                    this.myBeliefset.declare('right t' + x + '_' + y + ' t' + (x + 1) + '_' + y);
-                }
-
-                // Find the tile to the left
-                if ((x - 1) >= 0 && this.map[x - 1][y] > 0) {
-                    this.myBeliefset.declare('left t' + x + '_' + y + ' t' + (x - 1) + '_' + y);
-                }
-
-                // Find the tile above
-                if ((y + 1) < height && this.map[x][y + 1] > 0) {
-                    this.myBeliefset.declare('up t' + x + '_' + y + ' t' + x + '_' + (y + 1));
-                }
-
-                // Find the tile below
-                if ((y - 1) >= 0 && this.map[x][y - 1] > 0) {
-                    this.myBeliefset.declare('down t' + x + '_' + y + ' t' + x + '_' + (y - 1));
+    get_inmind_score() {
+        var tot_score = 0;
+        for (let parcelInMind of this.parcelsInMind) {
+            for (let parcel of this.parcels) {
+                if (parcelInMind === parcel.id) {
+                    if (parcel.reward <= 1) {
+                        this.parcelsInMind = this.parcelsInMind.filter(parcel => parcel !== parcelInMind);
+                    }
+                    else {
+                        tot_score += parcel.reward;
+                    }
                 }
             }
         }
 
-    }
+        this.inmind = tot_score;
+        return tot_score;
+    }    
 
     // Search for a parcel by id
     getParcelById(idToFind) {
