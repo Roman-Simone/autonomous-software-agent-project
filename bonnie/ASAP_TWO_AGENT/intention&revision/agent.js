@@ -10,26 +10,6 @@ export { Agent };
 class Agent {
 
     intention_queue = new Array();
-    parcelsInMind = [];
-
-    get_inmind_score() {
-        var tot_score = 0;
-        for (let parcelInMind of this.parcelsInMind) {
-            for (let parcel of MyData.parcels) {
-                if (parcelInMind === parcel.id) {
-                    if (parcel.reward <= 1) {
-                        this.parcelsInMind = this.parcelsInMind.filter(parcel => parcel !== parcelInMind);
-                    }
-                    else {
-                        tot_score += parcel.reward;
-                    }
-                }
-            }
-        }
-
-        return tot_score;
-    }
-
     async intentionLoop() {
 
         while (true) {
@@ -47,20 +27,20 @@ class Agent {
 
                         // console.log( 'Failed intention', ...intention.predicate);
                         this.remove(intention.predicate);
+            
 
                     });
 
                 if (ret == true) {
                     if (intention.predicate[0] == "go_pick_up") {
                         let entry = intention.predicate[3]
-                        this.parcelsInMind.push(entry);
+                        MyData.parcelsInMind.push(entry);
                     }
                     else if (intention.predicate[0] == "go_put_down") {
-                        this.parcelsInMind = [];
+                        MyData.parcelsInMind = [];
                     }
                 }
                 // Remove from the queue
-
                 this.remove(intention.predicate);
             }
             // Postpone next iteration at setImmediate
@@ -70,13 +50,14 @@ class Agent {
 
     async remove(predicate) {
 
+
         for (let i = 0; i < this.intention_queue.length; i++) {
             if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
                 this.intention_queue.splice(i, 1);
                 return true;
             }
         }
-        console.log("Predicate not found in queue", predicate);
+        // console.log("Predicate not found in queue", predicate);
         return false;
     }
 
@@ -95,6 +76,7 @@ class Agent {
         }
 
         if (!update) {
+            console.log("[INFO] ", "NEW intention ->", predicate)
             const current = new Intention(this, predicate)
             this.intention_queue.push(current);
         }
