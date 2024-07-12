@@ -21,7 +21,9 @@ var friend_name = "";
 const args = process.argv.slice(2);
 
 // Nome dell'agente corrente ottenuto dagli argomenti.
-const my_name = args[0];
+const mode = args[0];
+const my_name = args[1];
+
 
 // Stampa il nome dell'agente e il token ottenuto.
 console.log('AGENT: ', my_name, '\nTOKEN: ', getToken(my_name) + '\n');
@@ -35,4 +37,4 @@ client.onConnect( () => console.log( "socket", client.socket.id ) );
 client.onDisconnect( () => console.log( "disconnected", client.socket.id ) );
 
 // Esporta il client e il nome dell'amico per l'uso in altri moduli.
-export { client, friend_name };
+export { client, friend_name, mode };

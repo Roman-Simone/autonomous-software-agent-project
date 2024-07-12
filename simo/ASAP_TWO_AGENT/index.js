@@ -2,13 +2,16 @@ import { Agent } from './intention&revision/agent.js';
 import { handshake } from "./communication/coordination.js";
 import { MyData } from "./belief/belief.js";
 import { optionsLoop } from './intention&revision/options.js'
-
+import { mode } from "./socketConnection.js";
 export { myAgent }
 
-console.log("[INFO] ", "Waiting other agents to connect...\n")
-if (await handshake()) {
-    console.log("[INFO] ", "Handshake done, my role is: ", MyData.role, "\n")
+if( mode == 'TWO'){
+    console.log("[INFO] ", "Waiting other agents to connect...\n")
+    if (await handshake()) {
+        console.log("[INFO] ", "Handshake done, my role is: ", MyData.role, "\n")
+    }
 }
+
 
 // Create an instance of Agent
 const myAgent = new Agent();
