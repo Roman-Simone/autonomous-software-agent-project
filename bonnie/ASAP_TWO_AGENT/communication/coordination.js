@@ -1,9 +1,6 @@
 import { client, friend_name } from "../config.js";
-import { CommunicationData } from "./communication_data.js";
 import { computeBestOption } from "../utils.js"
-
-var CollaboratorData = new CommunicationData();
-var MyData = new CommunicationData();
+import { CollaboratorData, MyData } from "../belief/belief.js";
 
 function getMessage(client) {
     return new Promise((resolve, reject) => {
@@ -32,7 +29,6 @@ async function handshake() {
         // wait for the first message and read it
         let receivedMSG = ""
         await getMessage(client).then(receivedMsg => {
-            console.log("Received message for handshake: ", receivedMsg);
             receivedMSG = receivedMsg
         });
 
@@ -47,7 +43,6 @@ async function handshake() {
             MyData.id = client.id;
             MyData.role = "SLAVE";
             CollaboratorData.role = "MASTER";
-            console.log("Friend id: ", CollaboratorData.id);
             await client.say(CollaboratorData.id, {
                 hello: '[HANDSHAKE] ' + client.name + ' ack',
                 iam: client.name,
@@ -66,21 +61,22 @@ async function handshake() {
             CollaboratorData.role = "SLAVE";
         }
     }
-
-    console.log("Handshake completed");
+    return true
 }
 
 
 // SLAVE manda options e attende un ordine dal master
-
 async function slaveStateMessage(){
+
+    // MyData.printParcels();
     let reply = await client.ask(CollaboratorData.id, {
         hello: "[INFORM]",
         data: MyData,
         time: Date.now()
     });
 
-    console.log("Received reply: ", reply);
+    MyData.copy(reply);
+
     return reply;
 }
 
@@ -92,18 +88,13 @@ function masterRevision() {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
             try {
-                console.log(MyData.role + " has received the msg: ", msg);
-                
-                CollaboratorData = msg.data;
-
-                if(computeBestOption())
-                console.log("my best_option_master: ", MyData.best_option);
-                console.log("my best_option_slave: ", CollaboratorData.best_option);
-                
-                if (reply) {
-                    reply(CollaboratorData.best_option);
+                if (msg.data != undefined){
+                    CollaboratorData.copy(msg.data);
                 }
-                
+                if(computeBestOption())
+                if (reply) {
+                    reply(CollaboratorData);
+                }
                 resolve(true); // Resolve the promise with the answer
             } catch (error) {
                 console.error(error);
@@ -113,4 +104,4 @@ function masterRevision() {
     });
 }
 
-export { handshake, slaveStateMessage, masterRevision, CollaboratorData, MyData };
+export { handshake, slaveStateMessage, masterRevision };

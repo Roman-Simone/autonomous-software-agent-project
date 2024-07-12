@@ -283,7 +283,7 @@ function find_random_deliveryFarFromOther() {
 
             var distance = distanceBFS_notMe(del, CollaboratorData.pos);
 
-            // console.log("del: ", del, " - other agent: ", CollaboratorData.pos);
+            console.log("del: ", del, " - other agent: ", CollaboratorData.pos);
             if (distance > max_distance){
                 if (CollaboratorData.best_option[0] == "go_random_delivery" && CollaboratorData.best_option[1] == del.x && CollaboratorData.best_option[2] == del.y) {
                     continue;
