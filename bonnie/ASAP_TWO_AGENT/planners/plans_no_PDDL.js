@@ -1,21 +1,24 @@
+import { Intention } from '../intention.js';
+import { findPath_BFS, deliveryCoordinates } from '../utils.js';
+import { MyData } from "../belief/belief.js";
+import { client } from "../config.js"
 
-import { Intention } from './intention.js';
-import { me, client, findPath_BFS, deliveryCoordinates, find_nearest_delivery, parcels, find_random_delivery } from './utils.js';
-export { plans, Plan }; 
+// export { plans}
+
 
 /**
  * Plan library
  */
 
-async function check_tile(x, y){
-    for(let parcel of parcels){
-        if(x == parcel.x && y == parcel.y){
+async function check_tile(x, y) {
+    for (let parcel of MyData.parcels) {
+        if (x == parcel.x && y == parcel.y) {
             await client.pickup()
         }
     }
 
-    for(let del of deliveryCoordinates){
-        if(x == del.x && y == del.y){
+    for (let del of deliveryCoordinates) {
+        if (x == del.x && y == del.y) {
             await client.putdown()
         }
     }
@@ -76,7 +79,6 @@ class GoPickUp extends Plan {
         await client.pickup()
         if (this.stopped) throw ['stopped']; // if stopped then quit
         return true;
-        // await this.subIntention( 'go_put_down');
     }
 }
 
@@ -87,13 +89,6 @@ class GoPutDown extends Plan {
     }
 
     async execute(go_put_down, x, y) {
-        let nearest_delivery = { x: -1, y: -1 };
-        var x = -1;
-        var y = -1;
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        nearest_delivery = find_nearest_delivery();
-        x = nearest_delivery.x;
-        y = nearest_delivery.y;
 
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await this.subIntention(['go_to_BFS', x, y]);
@@ -113,13 +108,6 @@ class GoRandomDelivery extends Plan {
     }
 
     async execute(go_random_delivery, x, y) {
-        let nearest_delivery = { x: -1, y: -1 };
-        var x = -1;
-        var y = -1;
-        if (this.stopped) throw ['stopped']; // if stopped then quit
-        nearest_delivery = find_random_delivery();
-        x = nearest_delivery.x;
-        y = nearest_delivery.y;
 
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await this.subIntention(['go_to_BFS', x, y]);
@@ -149,35 +137,29 @@ class GoToBFS extends Plan {
             let status_x = false;
             let status_y = false;
 
-            if (next_x == me.x + 1) {
+            if (next_x == MyData.pos.x + 1) {
                 status_x = await client.move('right');
-                await client.say( '09fd649e76e', {
-                    hello: 'moving right',
-                    iam: client.name,
-                    id: client.id
-                } );
             }
-            else if (next_x == me.x - 1) {
+            else if (next_x == MyData.pos.x - 1) {
                 status_x = await client.move('left');
             }
-
             if (status_x) {
-                me.x = status_x.x;
-                me.y = status_x.y;
+                MyData.pos.x = status_x.x;
+                MyData.pos.y = status_x.y;
                 check_tile(next_x, next_y)
             }
             if (this.stopped) throw ['stopped']; // if stopped then quit
 
-            if (next_y == me.y + 1) {
+            if (next_y == MyData.pos.y + 1) {
                 status_y = await client.move('up');
             }
-            else if (next_y == me.y - 1) {
+            else if (next_y == MyData.pos.y - 1) {
                 status_y = await client.move('down');
             }
 
             if (status_y) {
-                me.x = status_y.x;
-                me.y = status_y.y;
+                MyData.pos.x = status_y.x;
+                MyData.pos.y = status_y.y;
                 check_tile(next_x, next_y)
             }
 

@@ -1,5 +1,5 @@
 import { Intention } from './intention.js';
-import { parcels } from './utils.js';
+import { MyData } from "../belief/belief.js";
 export { Agent };
 
 //try
@@ -15,8 +15,8 @@ class Agent {
     get_inmind_score() {
         var tot_score = 0;
         for (let parcelInMind of this.parcelsInMind) {
-            for (const [id, parcel] of parcels.entries()) {
-                if (parcelInMind === id) {
+            for (let parcel of MyData.parcels) {
+                if (parcelInMind === parcel.id) {
                     if (parcel.reward <= 1) {
                         this.parcelsInMind = this.parcelsInMind.filter(parcel => parcel !== parcelInMind);
                     }
@@ -45,7 +45,7 @@ class Agent {
                     // Catch eventual error and continue
                     .catch(error => {
 
-                        // console.log( 'Failed intention', ...intention.predicate, 'with error:', ...error )
+                        // console.log( 'Failed intention', ...intention.predicate);
                         this.remove(intention.predicate);
 
                     });
@@ -59,8 +59,8 @@ class Agent {
                         this.parcelsInMind = [];
                     }
                 }
-                // console.log("inmind", this.parcelsInMind);
                 // Remove from the queue
+
                 this.remove(intention.predicate);
             }
             // Postpone next iteration at setImmediate
@@ -69,16 +69,14 @@ class Agent {
     }
 
     async remove(predicate) {
-        // if (predicate[0] == "go_put_down") {
-        //     return;
-        // }
+
         for (let i = 0; i < this.intention_queue.length; i++) {
             if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
                 this.intention_queue.splice(i, 1);
                 return true;
             }
         }
-        console.log("Predicate not found in queue");
+        console.log("Predicate not found in queue", predicate);
         return false;
     }
 

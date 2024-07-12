@@ -1,8 +1,6 @@
-import { myAgent } from './index.js';
-import { client } from "./config.js";
-import { plans, Plan } from './plans.js';
+
+import { plans } from '../planners/plans.js';
 export { Intention };
-import { friend_id } from './utils.js';
 
 /**
  * Intention
@@ -55,16 +53,6 @@ class Intention {
      */
     async achieve() {
         // Cannot start twice
-        
-        // with this message say to his friend that he is achieving the intention
-
-        // print('-----------------> Intention achieve', this.predicate)
-
-        await client.say( friend_id, {
-            hello: '[INT] ' + this.predicate,
-            iam: client.name,
-            id: client.id
-        } );
 
         if (this.#started)
             return this;
