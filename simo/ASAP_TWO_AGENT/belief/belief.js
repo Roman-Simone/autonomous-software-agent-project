@@ -1,9 +1,8 @@
-import { client } from "../config.js";
+import { client } from "../socketConnection.js";
 import { AgentData } from "./agentData.js";
-import { from_json_to_matrix, deepCopyMap, updateMap } from "./utils.js";
+import { from_json_to_matrix, deepCopyMap, updateMap } from "./utilsBelief.js";
 
 export { decade_frequency, CollaboratorData, MyData};
-
 
 var CollaboratorData = new AgentData();
 var MyData = new AgentData();

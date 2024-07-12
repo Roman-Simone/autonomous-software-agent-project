@@ -1,5 +1,5 @@
-import { client, friend_name } from "../config.js";
-import { computeBestOption } from "../utils.js"
+import { client, friend_name } from "../socketConnection.js";
+import { computeBestOption } from "../intention&revision/utilsOptions.js"
 import { CollaboratorData, MyData } from "../belief/belief.js";
 
 function getMessage(client) {

@@ -1,4 +1,4 @@
-import { client } from "../config.js"
+import { client } from "../socketConnection.js"
 import { readFile } from "./utils_planner.js";
 import { Intention } from '../intention&revision/intention.js';
 import { CollaboratorData, MyData } from "../belief/belief.js";
