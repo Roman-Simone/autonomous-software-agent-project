@@ -162,11 +162,11 @@ function calculate_putdown_utility() {
 
 function find_random_deliveryFarFromOther() {
 
-    let del_pos = { x: -1, y: -1 };
+    let delivery_pos = { x: -1, y: -1 };
     
-    if (MyData.role == "SLAVE") {       // SLAVE fa quello che vuole, va in una random a caso
+    if (MyData.role == "SLAVE" && MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
         var random_delivery = MyData.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
-        del_pos = { x: random_delivery.x, y: random_delivery.y };
+        delivery_pos = { x: random_delivery.x, y: random_delivery.y };
         // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", dels);
     } else {                                            // MASTER va nella cella di delivery più lontana dallo SLAVE
         MyData.deliveryCoordinates.sort((a, b) => {
@@ -176,11 +176,11 @@ function find_random_deliveryFarFromOther() {
         });
         
         if(MyData.pos.x == MyData.deliveryCoordinates[0].x && MyData.pos.y == MyData.deliveryCoordinates[0].y){
-            del_pos = MyData.deliveryCoordinates[1];
+            delivery_pos = MyData.deliveryCoordinates[1];
         } else {
-            del_pos = MyData.deliveryCoordinates[0];
+            delivery_pos = MyData.deliveryCoordinates[0];
         }
     }
 
-    return del_pos;
+    return delivery_pos;
 }

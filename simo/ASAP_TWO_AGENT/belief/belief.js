@@ -15,13 +15,9 @@ client.onAgentsSensing(agents => {
 
     for (let a of agents) {
         MyData.adversaryAgents.push(a);
-        
-        // console.log("-------------> agent: ", a.id, a.name, a.x, a.y);
-
         updateMap(a.x, a.y, -1);
     }
-
-    MyData.printMapAsTable();
+    
     MyData.updateBeliefset();
 });
 
@@ -45,9 +41,6 @@ client.onMap((width, height, tiles) => {
     MyData.original_map = from_json_to_matrix(width, height, tiles);
     MyData.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
     MyData.map = deepCopyMap(MyData.original_map);
-
-    // MyData.printOriginalMapAsTable();
-    // MyData.printMapAsTable();
 
     MyData.updateBeliefset();
 });

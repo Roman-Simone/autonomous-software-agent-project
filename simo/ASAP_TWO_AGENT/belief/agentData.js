@@ -25,7 +25,7 @@ class AgentData {
         this.id = "";
         this.pos = { x: -1, y: -1 };
         this.score = 0;
-        this.role = "";
+        this.role = "NOTHING";
         this.parcels = [];
         this.inmind = 0;
         this.options = [];
