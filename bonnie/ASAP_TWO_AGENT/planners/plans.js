@@ -91,8 +91,14 @@ class PddlMove extends Plan {
 
         while (MyData.pos.x != x || MyData.pos.y != y) {
 
-            if (this.stopped) throw ['stopped']; // if stopped then quit
-
+            for (let del of MyMap.deliveryCoordinates) {
+                if(del.x == MyData.pos.x && del.y == MyData.pos.y){
+                    if (this.stopped) throw ['stopped']; // if stopped then quit
+                    await client.putdown()
+                    if (this.stopped) throw ['stopped']; // if stopped then quit
+                }
+            }
+            
             let coordinate = path.shift()
             let status_x = false;
             let status_y = false;
