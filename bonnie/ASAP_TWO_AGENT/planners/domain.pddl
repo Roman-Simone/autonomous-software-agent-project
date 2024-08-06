@@ -2,94 +2,43 @@
 (define (domain default)
     (:requirements :strips)
     (:predicates
-        (tile ?t)
-        (delivery ?t)
-        (agent ?a)
-        (parcel ?p)
-        (me ?a)
-        (at ?agentOrParcel ?tile)
-        (right ?t1 ?t2)
-        (left ?t1 ?t2)
-        (up ?t1 ?t2)
-        (down ?t1 ?t2)
-        (holding ?a ?p)
-        (posing ?t)
-    )
-    
-    (:action move-right
-        :parameters (?me ?from ?to)
-        :precondition (and
-            (me ?me)
-            (at ?me ?from)
-            (right ?from ?to)
-        )
-        :effect (and
-            (at ?me ?to)
-            (not (at ?me ?from))
-        )
-    )
-
-    (:action move-left
-        :parameters (?me ?from ?to)
-        :precondition (and
-            (me ?me)
-            (at ?me ?from)
-            (left ?from ?to)
-        )
-        :effect (and
-            (at ?me ?to)
-            (not (at ?me ?from))
-        )
-    )
-
-    (:action move-up
-        :parameters (?me ?from ?to)
-        :precondition (and
-            (me ?me)
-            (at ?me ?from)
-            (up ?from ?to)
-        )
-        :effect (and
-            (at ?me ?to)
-            (not (at ?me ?from))
-        )
+        (down ?tile1 ?tile2)
+        (up ?tile1 ?tile2)
+        (left ?tile1 ?tile2)
+        (right ?tile1 ?tile2)
+        (at ?tile)
+        (parcel_at ?p ?tile)
+        (carrying ?p)
     )
 
     (:action move-down
-        :parameters (?me ?from ?to)
-        :precondition (and
-            (me ?me)
-            (at ?me ?from)
-            (down ?from ?to)
-        )
-        :effect (and
-            (at ?me ?to)
-            (not (at ?me ?from))
-        )
+        :parameters (?tile1 ?tile2)
+        :precondition (and (at ?tile1) (down ?tile2 ?tile1))
+        :effect (and (at ?tile2) (not (at ?tile1)))
     )
-
+    (:action move-up
+        :parameters (?tile1 ?tile2)
+        :precondition (and (at ?tile1) (up ?tile2 ?tile1))
+        :effect (and (at ?tile2) (not (at ?tile1)))
+    )
+    (:action move-left
+        :parameters (?tile1 ?tile2)
+        :precondition (and(at ?tile1) (left ?tile2 ?tile1))
+        :effect (and (at ?tile2) (not (at ?tile1)))
+    )
+    (:action move-right
+        :parameters (?tile1 ?tile2)
+        :precondition (and (at ?tile1) (right ?tile2 ?tile1))
+        :effect (and (at ?tile2) (not (at ?tile1)))
+    )
     (:action pick-up
-        :parameters (?me ?p ?t)
-        :precondition (and
-            (me ?me)
-            (parcel ?p)
-            (at ?me ?t)
-            (at ?p ?t)
-        )
-        :effect (and
-            (holding ?me ?p)
-            (not (at ?p ?t))
-        )
+        :parameters (?p ?tile)
+        :precondition (and (parcel_at ?p ?tile) (at ?tile) (not (carrying ?p)))
+        :effect (and (carrying ?p) (not(parcel_at ?p ?tile)))
     )
-
     (:action put-down
-        :parameters (?me ?p ?t)
-        :precondition (and
-            (me ?me)
-            (at ?me ?t)
-        )
-        :effect (and
-            (posing ?t)
-        )
+        :parameters (?p ?tile)
+        :precondition (and (at ?tile)(carrying ?p))
+        :effect (and (parcel_at ?p ?tile) (not(carrying ?p)))
     )
 )
