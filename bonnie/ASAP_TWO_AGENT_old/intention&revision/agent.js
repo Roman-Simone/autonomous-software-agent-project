@@ -27,6 +27,7 @@ class Agent {
 
                         // console.log( 'Failed intention', ...intention.predicate);
                         this.remove(intention.predicate);
+            
 
                     });
 

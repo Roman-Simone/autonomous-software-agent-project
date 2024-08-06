@@ -2,7 +2,7 @@ import { client } from "../socketConnection.js"
 import { readFile } from "./utils_planner.js";
 import { Intention } from '../intention&revision/intention.js';
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
-import { PddlProblem, onlineSolver } from "@unitn-asa/pddl-client";
+import { PddlProblem, onlineSolver, Beliefset } from "@unitn-asa/pddl-client";
 
 
 let domain = await readFile('./planners/domain.pddl');
@@ -21,7 +21,7 @@ class Plan {
     get stopped() {
         return this.#stopped;
     }
-
+    
     /**
      * #parent refers to caller
      */
@@ -47,7 +47,7 @@ class Plan {
         this.#sub_intentions.push(sub_intention);
         return await sub_intention.achieve();
     }
-
+    
 }
 
 
@@ -70,6 +70,7 @@ class PddlMove extends Plan {
         );
 
         let problem = pddlProblem.toPddlString();
+
         // Get the plan from the online solver
         var plan = await onlineSolver(domain, problem);
 
@@ -87,6 +88,14 @@ class PddlMove extends Plan {
 
 
         while (MyData.pos.x != x || MyData.pos.y != y) {
+            if (MyMap[MyData.pos.x][MyData.pos.y] == 2){
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+                    await client.putdown();
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+            }
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+                await client.pickup()
 
             if (this.stopped) throw ['stopped']; // if stopped then quit
 
@@ -149,7 +158,6 @@ class PddlPickUp extends Plan {
 
     async execute(go_pick_up, x, y) {
 
-
         // Find the parcel at the destination
         let parcel = Array.from(MyData.parcels.values()).find(p => p.x === x && p.y === y);
         if (!parcel) {
@@ -174,6 +182,10 @@ class PddlPickUp extends Plan {
         
 
         let problem = pddlProblem.toPddlString();
+
+
+        // console.log("map: ", MyData.printMapAsTable())
+        // console.log("problem: ", MyData.myBeliefset.toPddlString())
 
         // Get the plan from the online solver
         var plan = await onlineSolver(domain, problem);
@@ -206,6 +218,14 @@ class PddlPickUp extends Plan {
 
         while (MyData.pos.x != x || MyData.pos.y != y || pick_up_flag != true) {
 
+            if (MyMap[MyData.pos.x][MyData.pos.y] == 2){
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+                    await client.putdown();
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+            }
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+                await client.pickup()
             if (this.stopped) throw ['stopped']; // if stopped then quit
 
             let coordinate = path.shift()
@@ -313,6 +333,14 @@ class PddlPutDown extends Plan {
 
         while (MyData.pos.x != x || MyData.pos.y != y || deliver_flag != true) {
 
+            if (MyMap[MyData.pos.x][MyData.pos.y] == 2){
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+                    await client.putdown();
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+            }
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+                await client.pickup()
             if (this.stopped) throw ['stopped']; // if stopped then quit
 
             let coordinate = path.shift();
