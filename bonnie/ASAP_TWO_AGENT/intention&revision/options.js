@@ -1,8 +1,10 @@
 import { slaveStateMessage, masterRevision  } from "../communication/coordination.js";
-import { MyData } from "../belief/belief.js";
+import { MyData, CollaboratorData, MyMap } from "../belief/belief.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOption } from "./utilsOptions.js";
 import { myAgent } from "../index.js";
 import { mode } from "../socketConnection.js";
+
+var count = 0;
 
 async function optionsLoop() {
 
@@ -31,19 +33,36 @@ async function optionsLoop() {
 
     // console.log("[INFO] ", "Options: ", MyData.options, "\n")
 
+
     if ( mode == 'TWO' ){
         if (MyData.role == "SLAVE") {
             await slaveStateMessage();
+
+            // MyData.print()
+            if(MyData.best_option != undefined){
+                console.log(count, " [SLAVE] ", "SLAVE new best_option: ", MyData.best_option, "\n")
+            }
+
+            // console.log(count, " [INFO] ", "Slave state message sent and received back")
+            count += 1;
         } else if (MyData.role == "MASTER") {
             await masterRevision();
+
+            // CollaboratorData.print()
+            if(CollaboratorData.best_option != undefined){
+                console.log(count, " [MASTER] ", "MASTER new best_option: ", MyData.best_option, "\n")
+            }
+            // console.log(count, " [INFO] ", "Master revision done\n")
+            count += 1;
         }
     }
     else{
         MyData.best_option = findBestOption(MyData.options)
+        // console.log("\nBeliefset: ", MyMap.myBeliefset.toPddlString(), "\n");
     }
     
 
-    // console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+    console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
 
     myAgent.push(MyData.best_option);
 }

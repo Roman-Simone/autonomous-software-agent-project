@@ -75,7 +75,7 @@ class Agent {
         }
 
         if (!update) {
-            console.log("[INFO] ", "NEW intention ->", predicate)
+            // console.log("[INFO] ", "NEW intention ->", predicate)
             const current = new Intention(this, predicate)
             this.intention_queue.push(current);
         }
