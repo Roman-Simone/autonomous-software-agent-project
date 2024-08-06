@@ -1,4 +1,3 @@
-import { Beliefset } from "@unitn-asa/pddl-client";
 export { AgentData }
 
 class AgentData {
@@ -7,7 +6,7 @@ class AgentData {
     name = ""
     id = ""
     pos = { x: -1, y: -1 };
-    score = 0
+    // score = 0
     role = ""
     parcels = [];
     inmind = 0;
@@ -43,6 +42,7 @@ class AgentData {
         this.adversaryAgents = data.adversaryAgents;
         // this.myBeliefset = data.myBeliefset;       //With this doesn't work
     }
+
     
     get_inmind_score() {
         var tot_score = 0;
@@ -62,6 +62,8 @@ class AgentData {
         this.inmind = tot_score;
         return tot_score;
     }    
+
+
 
     // Search for a parcel by id
     getParcelById(idToFind) {

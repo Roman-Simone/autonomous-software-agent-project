@@ -17,3 +17,4 @@ function from_json_to_matrix(width, height, tiles) {
     }
     return map;
 }
+

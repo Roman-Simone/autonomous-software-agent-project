@@ -1,6 +1,7 @@
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "../planners/utils_planner.js";
 import { decade_frequency } from "../belief/belief.js";
-import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
+import { CollaboratorData, MyData } from "../belief/belief.js";
+import { MyMap } from "../belief/belief.js";
 export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, computeBestOption, findBestOption};
 
 // Function to update the configuration of elements
@@ -21,7 +22,6 @@ export { calculate_pickup_utility, calculate_putdown_utility, find_random_delive
 //     RANDOM_AGENT_SPEED: '2s',
 //     CLOCK: 50
 //   }
-
 
 function findBestOption(options, id = "undefined") {
     let bestUtility = -1.0;
@@ -102,11 +102,15 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     MyData.scoreInMind = MyData.get_inmind_score();
     let numParcelInMind = MyData.parcelsInMind.length
 
-    // let distance_parcel = 0;
-    if (slavePos == null) {
-        var distance_parcel = distanceBFS(parcel);
-    } else {
-        var distance_parcel = distanceBFS_notMe(slavePos, parcel)
+    // map[x][y] == -1 means that there is an agent
+    if (MyMap.map[parcel.x][parcel.y] == -1) {             // if a parcel has the same position as an agent, we want to give it a very low utility, so distance --> infty 
+        var distance_parcel = Number.MAX_VALUE;
+    }else{
+        if (slavePos == null) {
+            var distance_parcel = distanceBFS(parcel);
+        } else {
+            var distance_parcel = distanceBFS_notMe(slavePos, parcel)
+        }
     }
 
     let distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
@@ -144,9 +148,19 @@ function calculate_pickup_utility(parcel, slavePos = null) {
 
 
 function calculate_putdown_utility() {
+    
     let nearest_delivery = find_nearest_delivery()
+
+
+    // if the nearest delivery is occupied by an agent, we want to find the second nearest delivery
+    if (MyMap.map[nearest_delivery.x][nearest_delivery.y] == -1) {   // map[x][y] means that there is an agent in this location
+        nearest_delivery = find_nearest_delivery(nearest_delivery);
+    } 
+    
     let distanceDelivery = distanceBFS(nearest_delivery);
+
     let numParcelInMind = MyData.parcelsInMind.length
+
 
     for (let parcelInMind of MyData.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - (decade_frequency * distanceDelivery);
@@ -162,25 +176,32 @@ function calculate_putdown_utility() {
 
 function find_random_deliveryFarFromOther() {
 
-    let delivery_pos = { x: -1, y: -1 };
+    let del_pos = { x: -1, y: -1 };
     
-    if (MyData.role == "SLAVE" && MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
-        var random_delivery = MyMap.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
-        delivery_pos = { x: random_delivery.x, y: random_delivery.y };
+    if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
+        var random_delivery = MyMap.deliveryCoordinates[Math.floor(Math.random() * MyMap.deliveryCoordinates.length)];
+        del_pos = { x: random_delivery.x, y: random_delivery.y };
         // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", dels);
     } else {                                            // MASTER va nella cella di delivery più lontana dallo SLAVE
         MyMap.deliveryCoordinates.sort((a, b) => {
-            const distanceA = distanceBFS_notMe(a, CollaboratorData.pos);
-            const distanceB = distanceBFS_notMe(b, CollaboratorData.pos);
+            let distanceA = 0;
+            let distanceB = 0;
+            if (CollaboratorData.best_option[0] != undefined && CollaboratorData.best_option[1] != undefined){
+                distanceA = distanceBFS_notMe(a, (CollaboratorData.best_option[0], CollaboratorData.best_option[1]));
+                distanceB = distanceBFS_notMe(b, (CollaboratorData.best_option[0], CollaboratorData.best_option[1]));    
+            } else {
+                distanceA = distanceBFS_notMe(a, MyData.pos);
+                distanceB = distanceBFS_notMe(b, MyData.pos);
+            }
             return distanceB - distanceA;
         });
         
         if(MyData.pos.x == MyMap.deliveryCoordinates[0].x && MyData.pos.y == MyMap.deliveryCoordinates[0].y){
-            delivery_pos = MyMap.deliveryCoordinates[1];
+            del_pos = MyMap.deliveryCoordinates[1];
         } else {
-            delivery_pos = MyMap.deliveryCoordinates[0];
+            del_pos = MyMap.deliveryCoordinates[0];
         }
     }
 
-    return delivery_pos;
+    return del_pos;
 }

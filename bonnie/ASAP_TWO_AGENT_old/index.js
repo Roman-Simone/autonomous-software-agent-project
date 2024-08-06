@@ -12,11 +12,13 @@ if( mode == 'TWO'){
     }
 }
 
+
 // Create an instance of Agent
 const myAgent = new Agent();
 // Function to trigger agentLoop when parcels are sensed
 myAgent.intentionLoop();
 
+await new Promise(resolve => setTimeout(resolve, 500));
 // Call agentLoop every 1 second
 setInterval(optionsLoop, 2000);
 

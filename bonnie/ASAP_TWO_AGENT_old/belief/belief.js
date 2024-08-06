@@ -1,10 +1,9 @@
 import { client } from "../socketConnection.js";
 import { AgentData } from "./agentData.js";
+import { from_json_to_matrix } from "./utilsBelief.js";
 import { Map } from "./map.js";
-import { from_json_to_matrix} from "./utilsBelief.js";
 
-
-export { decade_frequency, CollaboratorData, MyData, MyMap };
+export { decade_frequency, CollaboratorData, MyData, MyMap};
 
 var CollaboratorData = new AgentData();
 var MyData = new AgentData();
@@ -17,9 +16,13 @@ client.onAgentsSensing(agents => {
 
     for (let a of agents) {
         MyData.adversaryAgents.push(a);
+        
+        // console.log("-------------> agent: ", a.id, a.name, a.x, a.y);
+
         MyMap.updateMap(a.x, a.y, -1);
     }
-    
+
+    // MyData.printMapAsTable();
     MyMap.updateBeliefset();
 });
 
@@ -41,14 +44,13 @@ client.onParcelsSensing(async (perceived_parcels) => {
 
 client.onMap((width, height, tiles) => {
 
-    // console.log("tiles: ", tiles)
+    console.log("tiles: ", tiles)
 
     MyMap.original_map = from_json_to_matrix(width, height, tiles);
     MyMap.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
     MyMap.deepCopyMap();
     MyMap.updateBeliefset();
 });
-
 
 
 var decade_frequency = 0;
