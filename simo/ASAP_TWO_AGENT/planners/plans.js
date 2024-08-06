@@ -1,8 +1,8 @@
 import { client } from "../socketConnection.js"
 import { readFile } from "./utils_planner.js";
 import { Intention } from '../intention&revision/intention.js';
-import { CollaboratorData, MyData } from "../belief/belief.js";
-import { PddlProblem, onlineSolver, Beliefset } from "@unitn-asa/pddl-client";
+import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
+import { PddlProblem, onlineSolver } from "@unitn-asa/pddl-client";
 
 
 let domain = await readFile('./planners/domain.pddl');
@@ -64,8 +64,8 @@ class PddlMove extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyMap.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyMap.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 
@@ -167,8 +167,8 @@ class PddlPickUp extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
-            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
+            MyMap.myBeliefset.objects.join(' ') + ' ' + MyData.name + ' ' + parcel.id,
+            MyMap.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')' + ' (parcel ' + parcel.id + ')' + ' (at ' + parcel.id + ' t' + x + '_' + y + ')',
             goal
         );
         
@@ -278,8 +278,8 @@ class PddlPutDown extends Plan {
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
-            MyData.myBeliefset.objects.join(' ') + ' ' + MyData.name,
-            MyData.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
+            MyMap.myBeliefset.objects.join(' ') + ' ' + MyData.name,
+            MyMap.myBeliefset.toPddlString() + ' ' + '(me ' + MyData.name + ')' + '(at ' + MyData.name + ' ' + 't' + MyData.pos.x + '_' + MyData.pos.y + ')',
             goal
         );
 

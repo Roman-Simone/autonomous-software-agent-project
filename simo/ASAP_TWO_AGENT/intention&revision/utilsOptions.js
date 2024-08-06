@@ -1,6 +1,6 @@
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "../planners/utils_planner.js";
 import { decade_frequency } from "../belief/belief.js";
-import { CollaboratorData, MyData } from "../belief/belief.js";
+import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, computeBestOption, findBestOption};
 
 // Function to update the configuration of elements
@@ -165,20 +165,20 @@ function find_random_deliveryFarFromOther() {
     let delivery_pos = { x: -1, y: -1 };
     
     if (MyData.role == "SLAVE" && MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
-        var random_delivery = MyData.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
+        var random_delivery = MyMap.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
         delivery_pos = { x: random_delivery.x, y: random_delivery.y };
         // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", dels);
     } else {                                            // MASTER va nella cella di delivery più lontana dallo SLAVE
-        MyData.deliveryCoordinates.sort((a, b) => {
+        MyMap.deliveryCoordinates.sort((a, b) => {
             const distanceA = distanceBFS_notMe(a, CollaboratorData.pos);
             const distanceB = distanceBFS_notMe(b, CollaboratorData.pos);
             return distanceB - distanceA;
         });
         
-        if(MyData.pos.x == MyData.deliveryCoordinates[0].x && MyData.pos.y == MyData.deliveryCoordinates[0].y){
-            delivery_pos = MyData.deliveryCoordinates[1];
+        if(MyData.pos.x == MyMap.deliveryCoordinates[0].x && MyData.pos.y == MyMap.deliveryCoordinates[0].y){
+            delivery_pos = MyMap.deliveryCoordinates[1];
         } else {
-            delivery_pos = MyData.deliveryCoordinates[0];
+            delivery_pos = MyMap.deliveryCoordinates[0];
         }
     }
 
