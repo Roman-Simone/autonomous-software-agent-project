@@ -73,6 +73,22 @@ class AgentData {
         return false;
     }
 
+    getParcelsInMindIds() {
+        var ids = [];
+
+        for (let parcelInMind of this.parcelsInMind) {
+            
+            for (let parcel of this.parcels) {
+                if (parcelInMind === parcel.id) {
+                    console.log("Parcel in mind: ", parcel.id);
+                    ids.push(parcel);
+                }
+            }
+        }
+
+        return ids;
+    }
+
     // Print all the parcels
     printParcels() {
         for (let elem of this.parcels) {
@@ -86,6 +102,6 @@ class AgentData {
         console.log("id: ", this.id);
         console.log("role: ", this.role);
         console.log("pos: ", this.pos);
-
+        console.log("best_option: ", this.best_option);
     }
 }

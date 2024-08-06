@@ -13,7 +13,7 @@ var MyMap = new Map();
 // Function to update the beliefset of the agent
 client.onAgentsSensing(agents => {
 
-    MyMap.deepCopyMap();
+    MyMap.resetMap();
 
     for (let a of agents) {
         MyData.adversaryAgents.push(a);
@@ -45,7 +45,7 @@ client.onMap((width, height, tiles) => {
 
     MyMap.original_map = from_json_to_matrix(width, height, tiles);
     MyMap.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
-    MyMap.deepCopyMap();
+    MyMap.resetMap();
     MyMap.updateBeliefset();
 });
 

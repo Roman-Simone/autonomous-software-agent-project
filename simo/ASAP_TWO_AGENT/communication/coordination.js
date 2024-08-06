@@ -88,6 +88,9 @@ function masterRevision() {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
             try {
+
+                // console.log("[INFO] ", "Received message from ", name, " at ", msg.time, "\n");
+
                 if (msg.data != undefined){
                     CollaboratorData.copy(msg.data);
                 }
@@ -98,6 +101,11 @@ function masterRevision() {
                 resolve(true); // Resolve the promise with the answer
             } catch (error) {
                 console.error(error);
+
+                if (reply) {
+                    reply(msg.data);            // to mantain sync, if error is catch we simply return the same state we received (arrangiati SLAVE)
+                }
+
                 reject(error); // Reject the promise if there's an error
             }
         });
