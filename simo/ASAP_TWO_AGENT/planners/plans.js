@@ -87,7 +87,7 @@ class PddlMove extends Plan {
 
         // console.log("\n\nPath: ", path, "\n\n");
 
-        let countStacked = 3
+        let countStacked = 1
 
         let deliveriesOnPath = [];
 

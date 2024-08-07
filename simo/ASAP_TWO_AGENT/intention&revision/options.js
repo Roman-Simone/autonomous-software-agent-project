@@ -84,8 +84,10 @@ async function optionsLoop() {
         // console.log("\nBeliefset: ", MyMap.myBeliefset.toPddlString(), "\n");
     }
     
-    console.log("[INFO] ", "Options: ", MyData.options, "\n\n")
+    // console.log("[INFO] ", "Options: ", MyData.options, "\n\n")
     console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+    if (MyData.adversaryAgents.length > 0)
+        console.log("[INFO] ", "Adversarial Agents: ", MyData.adversaryAgents[0].x, " " , MyData.adversaryAgents[0].y, " ", MyData.adversaryAgents.length, "\n")
 
     if(MyData.get_inmind_score() > MyMap.parcel_reward_avg * MULTIPLIER_THRESH_GO_PUT_DOWN){
         MyData.best_option = ['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]]

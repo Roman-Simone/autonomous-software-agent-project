@@ -1,4 +1,4 @@
-export { from_json_to_matrix };
+export { from_json_to_matrix, existAgentById };
 
 function from_json_to_matrix(width, height, tiles) {
     var map = [];
@@ -16,4 +16,8 @@ function from_json_to_matrix(width, height, tiles) {
         }
     }
     return map;
+}
+
+function existAgentById(id1, id2) {
+    return id1 === id2 
 }
