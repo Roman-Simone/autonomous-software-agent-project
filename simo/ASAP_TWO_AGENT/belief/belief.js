@@ -108,4 +108,5 @@ client.onConfig((config) => {
     }
 
     MyMap.decade_frequency = movement_duration / parcel_decading_interval;
+    console.log("MyMap.decade_frequency: ", MyMap.decade_frequency)
 });

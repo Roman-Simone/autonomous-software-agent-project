@@ -1,4 +1,3 @@
-import { MyData } from "./belief.js";
 import { Beliefset } from "@unitn-asa/pddl-client";
 export { Map }
 
@@ -158,7 +157,8 @@ class Map {
         if (x >= 0 && x < rows && y >= 0 && y < columns) {
             this.map[x][y] = value;
         } else {
-            console.log('Error: trying to set value out of bounds: (', x, ', ', y, ") while rows and columns: ", MyData.map.length, ', ', MyData.map[0].length);
+            //if agent is going in the direction of bound, this part is triggered
+            console.log('Error: trying to set value out of bounds: (', x, ', ', y, ") while rows and columns: ", this.map.length, ', ', this.map[0].length);
         }
     }
 

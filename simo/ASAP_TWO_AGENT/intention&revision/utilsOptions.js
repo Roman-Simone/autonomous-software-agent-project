@@ -1,5 +1,7 @@
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "../planners/utils_planner.js";
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
+import { positionsEqual } from "../planners/utils_planner.js";
+
 export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, computeBestOption, findBestOption};
 
 // Function to update the configuration of elements
@@ -20,7 +22,6 @@ export { calculate_pickup_utility, calculate_putdown_utility, find_random_delive
 //     RANDOM_AGENT_SPEED: '2s',
 //     CLOCK: 50
 //   }
-
 
 function findBestOption(options, id = "undefined") {
     let bestUtility = -1.0;
@@ -149,7 +150,7 @@ function calculate_putdown_utility() {
 
     let valueInMind = MyData.get_inmind_score();
 
-    let mult = 2*(valueInMind/distanceDelivery)
+    let mult = 0.5 * (valueInMind)
     
 
     for (let parcelInMind of MyData.parcelsInMind) {
@@ -176,23 +177,23 @@ function find_random_deliveryFarFromOther() {
 
     if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
 
-        // var random_spawning = MyMap.spawningCoordinates[Math.floor(Math.random() * MyMap.spawningCoordinates.length)];
-        // var random_delivery = MyMap.deliveryCoordinates[Math.floor(Math.random() * MyMap.deliveryCoordinates.length)];
-        
-
         let spawning_pos = MyMap.getBestSpawningCoordinates();
-        
-        
         random_pos = { x: spawning_pos.x, y: spawning_pos.y };
+
+        if (positionsEqual(spawning_pos, MyData.pos)){
+            random_pos = find_nearest_delivery(); 
+        }
+        
         // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", delivery_pos);
-    } else {                                            // MASTER va nella cella di delivery più lontana dallo SLAVE
+    } else {                                            // MASTER va nella cella di spawn piu' lontana dallo SLAVE
+        
         MyMap.spawningCoordinates.sort((a, b) => {
             const distanceA = distanceBFS_notMe(a, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
             const distanceB = distanceBFS_notMe(b, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
             return distanceB - distanceA;
         });
-        
-        if(MyData.pos.x == MyMap.spawningCoordinates[0].x && MyData.pos.y == MyMap.spawningCoordinates[0].y){
+
+        if(positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)){
             random_pos = {x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
         } else {
             random_pos = {x: MyMap.spawningCoordinates[0].x, y: MyMap.spawningCoordinates[0].y };

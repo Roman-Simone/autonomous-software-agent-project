@@ -45,7 +45,10 @@ async function optionsLoop() {
 
     // console.log("MyData.options: ", MyData.options.length, "\n")
 
-    if(MyMap.decade_frequency !== "infinite"){
+    
+    // if parcel_decading_interval is infinite decade_frequency is equal to 5.562684646268004e-307
+    if(MyMap.decade_frequency > 0.1){
+        console.log("SON QUI")
         let putDownInfo = calculate_putdown_utility()
         MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])    
     }
@@ -86,10 +89,11 @@ async function optionsLoop() {
     
     // console.log("[INFO] ", "Options: ", MyData.options, "\n\n")
     console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
-    if (MyData.adversaryAgents.length > 0)
-        console.log("[INFO] ", "Adversarial Agents: ", MyData.adversaryAgents[0].x, " " , MyData.adversaryAgents[0].y, " ", MyData.adversaryAgents.length, "\n")
+    // if (MyData.adversaryAgents.length > 0)
+    //     console.log("[INFO] ", "Adversarial Agents: ", MyData.adversaryAgents[0].x, " " , MyData.adversaryAgents[0].y, " ", MyData.adversaryAgents.length, "\n")
 
     if(MyData.get_inmind_score() > MyMap.parcel_reward_avg * MULTIPLIER_THRESH_GO_PUT_DOWN){
+        let putDownInfo = calculate_putdown_utility()
         MyData.best_option = ['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]]
     }
 
