@@ -45,8 +45,11 @@ async function optionsLoop() {
 
     // console.log("MyData.options: ", MyData.options.length, "\n")
 
-    let putDownInfo = calculate_putdown_utility()
-    MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
+    if(MyMap.decade_frequency !== "infinite"){
+        let putDownInfo = calculate_putdown_utility()
+        MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])    
+    }
+
     let u = 2
     let random_delivery = find_random_deliveryFarFromOther();
     MyData.options.push(['go_random_delivery', random_delivery.x, random_delivery.y, "", u]);
@@ -81,11 +84,10 @@ async function optionsLoop() {
         // console.log("\nBeliefset: ", MyMap.myBeliefset.toPddlString(), "\n");
     }
     
-
+    console.log("[INFO] ", "Options: ", MyData.options, "\n\n")
     console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
 
     if(MyData.get_inmind_score() > MyMap.parcel_reward_avg * MULTIPLIER_THRESH_GO_PUT_DOWN){
-        console.log("ENTRATO")
         MyData.best_option = ['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]]
     }
 

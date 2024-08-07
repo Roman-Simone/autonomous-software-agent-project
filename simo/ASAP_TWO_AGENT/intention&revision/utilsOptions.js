@@ -142,9 +142,15 @@ function calculate_pickup_utility(parcel, slavePos = null) {
 
 
 function calculate_putdown_utility() {
+    
     let nearest_delivery = find_nearest_delivery()
     let distanceDelivery = distanceBFS(nearest_delivery);
     let numParcelInMind = MyData.parcelsInMind.length
+
+    let valueInMind = MyData.get_inmind_score();
+
+    let mult = 2*(valueInMind/distanceDelivery)
+    
 
     for (let parcelInMind of MyData.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - (MyMap.decade_frequency * distanceDelivery);
@@ -152,8 +158,12 @@ function calculate_putdown_utility() {
             numParcelInMind = numParcelInMind - 1;
         }
     }
+    var utility = valueInMind - ((MyMap.decade_frequency * distanceDelivery) * numParcelInMind);
+    // console.log("\nPUTDOWN NORMAL -> ", utility)
+    utility = utility + mult;
+    // console.log("PUTDOWN WITH MULT -> ", utility, "\n\n")
 
-    var utility = MyData.get_inmind_score() - ((MyMap.decade_frequency * distanceDelivery) * numParcelInMind);
+    
     return [nearest_delivery, utility];
 }
 
@@ -165,11 +175,7 @@ function find_random_deliveryFarFromOther() {
     // console.log("\nI'm a ", MyData.role, " and I'm going to find a random delivery far from the other agent\n");
 
     if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
-        
-        
-        
-        
-        
+
         // var random_spawning = MyMap.spawningCoordinates[Math.floor(Math.random() * MyMap.spawningCoordinates.length)];
         // var random_delivery = MyMap.deliveryCoordinates[Math.floor(Math.random() * MyMap.deliveryCoordinates.length)];
         
