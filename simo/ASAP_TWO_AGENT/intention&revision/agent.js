@@ -48,8 +48,7 @@ class Agent {
     }
 
     async remove(predicate) {
-
-
+        
         for (let i = 0; i < this.intention_queue.length; i++) {
             if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
                 this.intention_queue.splice(i, 1);

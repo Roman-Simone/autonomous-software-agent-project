@@ -3,14 +3,12 @@ import { AgentData } from "./agentData.js";
 import { Map } from "./map.js";
 import { from_json_to_matrix} from "./utilsBelief.js";
 
-export { decade_frequency, parcel_reward_avg, parcel_observation_distance, CollaboratorData, MyData, MyMap };
+export { CollaboratorData, MyData, MyMap };
 
 var CollaboratorData = new AgentData();
 var MyData = new AgentData();
 var MyMap = new Map();
-var parcel_reward_avg;
-var parcel_observation_distance;
-var decade_frequency;
+
 
 // Function to update the beliefset of the agent
 client.onAgentsSensing(agents => {
@@ -68,15 +66,11 @@ client.onMap((width, height, tiles) => {
 
 client.onConfig((config) => {
 
-    console.log("ENTRATO config");
-
     let movement_duration = config.MOVEMENT_DURATION;
     let parcel_decading_interval = config.PARCEL_DECADING_INTERVAL;
-    parcel_observation_distance = config.PARCELS_OBSERVATION_DISTANCE;
+    MyMap.parcel_observation_distance = config.PARCELS_OBSERVATION_DISTANCE;
 
-    parcel_reward_avg = config.PARCEL_REWARD_AVG;
-
-    console.log("parcel_reward_avg: ", parcel_reward_avg)
+    MyMap.parcel_reward_avg = config.PARCEL_REWARD_AVG;
     
     if (parcel_decading_interval == "infinite") {
         parcel_decading_interval = Number.MAX_VALUE;
@@ -84,5 +78,5 @@ client.onConfig((config) => {
         parcel_decading_interval = parseInt(parcel_decading_interval.slice(0, -1)) * 1000;
     }
 
-    decade_frequency = movement_duration / parcel_decading_interval;
+    MyMap.decade_frequency = movement_duration / parcel_decading_interval;
 });

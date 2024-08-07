@@ -1,5 +1,4 @@
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "../planners/utils_planner.js";
-import { decade_frequency } from "../belief/belief.js";
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, computeBestOption, findBestOption};
 
@@ -111,15 +110,15 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     let distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
 
     for (let parcelInMind of MyData.parcelsInMind) {
-        let rewardAtEnd = parcelInMind.reward - decade_frequency * (distance_parcel + distance_delivery);
+        let rewardAtEnd = parcelInMind.reward - MyMap.decade_frequency * (distance_parcel + distance_delivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
         }
     }
 
-    let RewardParcel = scoreParcel - decade_frequency * distance_parcel;
-    let RewardInMind = MyData.scoreInMind - ((decade_frequency * distance_parcel) * numParcelInMind);
-    let utility = (RewardParcel + RewardInMind) - (decade_frequency * distance_delivery) * (numParcelInMind + 1);
+    let RewardParcel = scoreParcel - MyMap.decade_frequency * distance_parcel;
+    let RewardInMind = MyData.scoreInMind - ((MyMap.decade_frequency * distance_parcel) * numParcelInMind);
+    let utility = (RewardParcel + RewardInMind) - (MyMap.decade_frequency * distance_delivery) * (numParcelInMind + 1);
 
 
     let min_distance_parcel_agent = Number.MAX_VALUE;
@@ -148,13 +147,13 @@ function calculate_putdown_utility() {
     let numParcelInMind = MyData.parcelsInMind.length
 
     for (let parcelInMind of MyData.parcelsInMind) {
-        let rewardAtEnd = parcelInMind.reward - (decade_frequency * distanceDelivery);
+        let rewardAtEnd = parcelInMind.reward - (MyMap.decade_frequency * distanceDelivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
         }
     }
 
-    var utility = MyData.get_inmind_score() - ((decade_frequency * distanceDelivery) * numParcelInMind);
+    var utility = MyData.get_inmind_score() - ((MyMap.decade_frequency * distanceDelivery) * numParcelInMind);
     return [nearest_delivery, utility];
 }
 

@@ -1,4 +1,3 @@
-import { Beliefset } from "@unitn-asa/pddl-client";
 export { AgentData }
 
 class AgentData {

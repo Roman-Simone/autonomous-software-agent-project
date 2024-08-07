@@ -1,4 +1,4 @@
-import { MyData, parcel_observation_distance } from "./belief.js";
+import { MyData } from "./belief.js";
 import { Beliefset } from "@unitn-asa/pddl-client";
 export { Map }
 
@@ -10,6 +10,9 @@ class Map {
     myBeliefset = new Beliefset();
     width = 0;
     height = 0;
+    parcel_reward_avg = 0;
+    parcel_observation_distance;
+    decade_frequency;
     
     constructor() {
         this.map = []
@@ -18,6 +21,9 @@ class Map {
         this.myBeliefset = new Beliefset()
         this.width = 0
         this.height = 0
+        this.parcel_reward_avg = 0
+        this.parcel_observation_distance = 0
+        this.decade_frequency = 0
     }
 
     validateAndAdjustCorner(corner) {
@@ -36,10 +42,10 @@ class Map {
         this.width = this.original_map.length;
         this.height = this.original_map[0].length;
 
-        let left_upper_corner = { x: x - parcel_observation_distance, y: y + parcel_observation_distance };
-        let right_upper_corner = { x: x + parcel_observation_distance, y: y + parcel_observation_distance };
-        let left_lower_corner = { x: x - parcel_observation_distance, y: y - parcel_observation_distance };
-        let right_lower_corner = { x: x + parcel_observation_distance, y: y - parcel_observation_distance };
+        let left_upper_corner = { x: x - this.parcel_observation_distance, y: y + this.parcel_observation_distance };
+        let right_upper_corner = { x: x + this.parcel_observation_distance, y: y + this.parcel_observation_distance };
+        let left_lower_corner = { x: x - this.parcel_observation_distance, y: y - this.parcel_observation_distance };
+        let right_lower_corner = { x: x + this.parcel_observation_distance, y: y - this.parcel_observation_distance };
 
         left_lower_corner = this.validateAndAdjustCorner(left_lower_corner);
         right_lower_corner = this.validateAndAdjustCorner(right_lower_corner);
