@@ -15,6 +15,8 @@ client.onAgentsSensing(agents => {
 
     MyMap.resetMap();
 
+    MyData.adversaryAgents = [];
+
     for (let a of agents) {
         MyData.adversaryAgents.push(a);
         MyMap.updateMap(a.x, a.y, -1);

@@ -102,7 +102,9 @@ class PddlMove extends Plan {
 
         while (MyData.pos.x != x || MyData.pos.y != y) {
 
-            if(deliveriesOnPath.some(del => positionsEqual(del, MyData.pos))){
+            // console.log("PASSO EFFETTUATO")
+
+            if (deliveriesOnPath.some(del => positionsEqual(del, MyData.pos))) {
                 if (this.stopped) throw ['stopped']; // if stopped then quit
                 await client.putdown()
                 if (this.stopped) throw ['stopped']; // if stopped then quit
@@ -166,6 +168,14 @@ class PddlPickUp extends Plan {
     }
 
     async execute(go_pick_up, x, y) {
+
+        if (MyData.pos.x == x && MyData.pos.y == y) {
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+            await client.pickup()
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+            return true;
+        }
+
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await this.subIntention(['go_to', x, y]);
         if (this.stopped) throw ['stopped']; // if stopped then quit
@@ -184,6 +194,13 @@ class PddlPutDown extends Plan {
     }
 
     async execute(go_put_down, x, y) {
+
+        if (MyData.pos.x == x && MyData.pos.y == y) {
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+            await client.putdown()
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+            return true;
+        }
 
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await this.subIntention(['go_to', x, y]);

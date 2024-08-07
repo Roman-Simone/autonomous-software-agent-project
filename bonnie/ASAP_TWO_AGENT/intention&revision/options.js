@@ -15,19 +15,32 @@ async function optionsLoop() {
 
     // Iterate through available parcels
 
-    console.log("MyData.parcels: ", MyData.parcels.length, "\n")
+    // console.log("MyData.parcels: ", MyData.parcels.length, "\n")
+
+    var begin = new Date().getTime();
+
+    console.log("Entering into for loop  - time: ", begin, "\n");
+
+    MyData.scoreInMind = MyData.get_inmind_score();
 
     for (let parcel of MyData.parcels) {
         if (!parcel.carriedBy && parcel.reward > 3) {
-
-            // Check if parcel is not carried by any agent
             
             let util = calculate_pickup_utility(parcel);                    // if == 0 intrinsic_score < 0 --> non ne vale la pena
+            
             if (util) {
                 MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, util]);
             }
+
         }
     }
+
+    var end = new Date().getTime();
+
+    console.log("Exited from for loop - time: ", end - begin, "\n");
+
+
+    // console.log("MyData.options: ", MyData.options.length, "\n")
 
     let putDownInfo = calculate_putdown_utility()
     MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
