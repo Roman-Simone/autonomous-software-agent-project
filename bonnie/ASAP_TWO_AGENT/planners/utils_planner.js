@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { MyData, MyMap } from "../belief/belief.js";
-export { readFile , findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
+export { positionsEqual, readFile , findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
 
 function readFile(path) {
 
@@ -13,6 +13,10 @@ function readFile(path) {
 
     })
 
+}
+
+function positionsEqual(pos1, pos2) {
+    return pos1.x === pos2.x && pos1.y === pos2.y;
 }
 
 //* BFS

@@ -85,6 +85,7 @@ class Agent {
         // this.printQueue("push");
 
         if (this.checkSwitch(last)) {
+            console.log("[INFO] ", "Switching from " + this.createString(last.predicate) + " to " + this.createString(this.intention_queue[0].predicate));
             last.stop();
         }
     }

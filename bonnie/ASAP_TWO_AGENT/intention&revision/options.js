@@ -15,6 +15,8 @@ async function optionsLoop() {
 
     // Iterate through available parcels
 
+    console.log("MyData.parcels: ", MyData.parcels.length, "\n")
+
     for (let parcel of MyData.parcels) {
         if (!parcel.carriedBy && parcel.reward > 3) {
 
@@ -26,6 +28,7 @@ async function optionsLoop() {
             }
         }
     }
+
     let putDownInfo = calculate_putdown_utility()
     MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
     let u = 2
@@ -63,9 +66,9 @@ async function optionsLoop() {
     }
     
 
-    console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+    // console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
 
-    console.log("inmind score: ", MyData.get_inmind_score(), "\n")
+    // console.log("inmind score: ", MyData.get_inmind_score(), "\n")
 
     if(MyData.get_inmind_score() > THRESH_GO_PUT_DOWN){
         console.log("ENTRATO")

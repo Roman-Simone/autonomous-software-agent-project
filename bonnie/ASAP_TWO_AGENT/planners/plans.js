@@ -1,5 +1,5 @@
 import { client } from "../socketConnection.js"
-import { readFile } from "./utils_planner.js";
+import { positionsEqual, readFile } from "./utils_planner.js";
 import { Intention } from '../intention&revision/intention.js';
 import { MyData, MyMap } from "../belief/belief.js";
 import { PddlProblem, onlineSolver } from "@unitn-asa/pddl-client";
@@ -83,21 +83,31 @@ class PddlMove extends Plan {
             });
         });
 
+        console.log("\n\nPath: ", path.length, "\n\n");
+
         // console.log("\n\nPath: ", path, "\n\n");
 
         let countStacked = 3
 
+        let deliveriesOnPath = [];
+
+        for (let del of MyMap.deliveryCoordinates) {
+            for (let p of path) {
+                if (del.x == p.x && del.y == p.y) {
+                    deliveriesOnPath.push(del);
+                }
+            }
+        }
+
 
         while (MyData.pos.x != x || MyData.pos.y != y) {
 
-            for (let del of MyMap.deliveryCoordinates) {
-                if(del.x == MyData.pos.x && del.y == MyData.pos.y){
-                    if (this.stopped) throw ['stopped']; // if stopped then quit
-                    await client.putdown()
-                    if (this.stopped) throw ['stopped']; // if stopped then quit
-                }
+            if(deliveriesOnPath.some(del => positionsEqual(del, MyData.pos))){
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+                await client.putdown()
+                if (this.stopped) throw ['stopped']; // if stopped then quit
             }
-            
+
             let coordinate = path.shift()
             let status_x = false;
             let status_y = false;
@@ -170,7 +180,6 @@ class PddlPickUp extends Plan {
 class PddlPutDown extends Plan {
 
     static isApplicableTo(go_put_down, x, y) {
-        console.log("go_put_down");
         return go_put_down == 'go_put_down';
     }
 
