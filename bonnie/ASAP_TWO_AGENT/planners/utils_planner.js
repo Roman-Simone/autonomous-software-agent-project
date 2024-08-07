@@ -15,7 +15,6 @@ function readFile(path) {
 
 }
 
-
 //* BFS
 function getNeighbors(x, y) {
     const neighbors = [];
@@ -131,9 +130,6 @@ function find_nearest_delivery(ignoreCoordinates = undefined) {
     // console.log("nearest_delivery: ", nearest_delivery, "(I'm on x: ", me.x, " y: ", me.y, ")");
     return nearest_delivery;
 }
-
-
-
 
 function distanceBFS({ x: x, y: y }) {
     return findPath_BFS(x, y).length;

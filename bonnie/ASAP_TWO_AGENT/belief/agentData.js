@@ -80,7 +80,6 @@ class AgentData {
             
             for (let parcel of this.parcels) {
                 if (parcelInMind === parcel.id) {
-                    console.log("Parcel in mind: ", parcel.id);
                     ids.push(parcel);
                 }
             }

@@ -1,10 +1,11 @@
 import { slaveStateMessage, masterRevision  } from "../communication/coordination.js";
-import { MyData, CollaboratorData, MyMap } from "../belief/belief.js";
+import { MyData, CollaboratorData, parcel_reward_avg } from "../belief/belief.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOption } from "./utilsOptions.js";
 import { myAgent } from "../index.js";
 import { mode } from "../socketConnection.js";
 
 var count = 0;
+const THRESH_GO_PUT_DOWN = parcel_reward_avg * 10;                 // when it reach this inmind score, it goes to put down the parcels anyway
 
 async function optionsLoop() {
 
@@ -63,6 +64,13 @@ async function optionsLoop() {
     
 
     console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+
+    console.log("inmind score: ", MyData.get_inmind_score(), "\n")
+
+    if(MyData.get_inmind_score() > THRESH_GO_PUT_DOWN){
+        console.log("ENTRATO")
+        MyData.best_option = ['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]]
+    }
 
     myAgent.push(MyData.best_option);
 }
