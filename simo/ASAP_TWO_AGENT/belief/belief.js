@@ -3,17 +3,19 @@ import { AgentData } from "./agentData.js";
 import { Map } from "./map.js";
 import { from_json_to_matrix} from "./utilsBelief.js";
 
-
-export { decade_frequency, CollaboratorData, MyData, MyMap };
+export { decade_frequency, parcel_reward_avg, CollaboratorData, MyData, MyMap };
 
 var CollaboratorData = new AgentData();
 var MyData = new AgentData();
 var MyMap = new Map();
+var parcel_reward_avg;
 
 // Function to update the beliefset of the agent
 client.onAgentsSensing(agents => {
 
     MyMap.resetMap();
+
+    MyData.adversaryAgents = [];
 
     for (let a of agents) {
         MyData.adversaryAgents.push(a);
@@ -49,13 +51,13 @@ client.onMap((width, height, tiles) => {
     MyMap.updateBeliefset();
 });
 
-
-
 var decade_frequency = 0;
 client.onConfig((config) => {
 
     let movement_duration = config.MOVEMENT_DURATION;
     let parcel_decading_interval = config.PARCEL_DECADING_INTERVAL;
+
+    parcel_reward_avg = config.PARCEL_REWARD_AVG;
 
     if (parcel_decading_interval == "infinite") {
         parcel_decading_interval = Number.MAX_VALUE;

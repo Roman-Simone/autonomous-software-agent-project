@@ -36,5 +36,4 @@ const client = new DeliverooApi( config.host, token )
 client.onConnect( () => console.log( "socket", client.socket.id ) );
 client.onDisconnect( () => console.log( "disconnected", client.socket.id ) );
 
-// Esporta il client e il nome dell'amico per l'uso in altri moduli.
 export { client, friend_name, mode };

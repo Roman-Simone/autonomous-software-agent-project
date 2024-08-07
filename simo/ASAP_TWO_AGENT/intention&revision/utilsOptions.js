@@ -99,7 +99,6 @@ function computeBestOption() {
 
 function calculate_pickup_utility(parcel, slavePos = null) {
     let scoreParcel = parcel.reward;
-    MyData.scoreInMind = MyData.get_inmind_score();
     let numParcelInMind = MyData.parcelsInMind.length
 
     // let distance_parcel = 0;
@@ -119,7 +118,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     }
 
     let RewardParcel = scoreParcel - decade_frequency * distance_parcel;
-    let RewardInMind = MyData.get_inmind_score() - ((decade_frequency * distance_parcel) * numParcelInMind);
+    let RewardInMind = MyData.scoreInMind - ((decade_frequency * distance_parcel) * numParcelInMind);
     let utility = (RewardParcel + RewardInMind) - (decade_frequency * distance_delivery) * (numParcelInMind + 1);
 
 

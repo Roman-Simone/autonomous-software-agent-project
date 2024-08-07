@@ -1,10 +1,11 @@
 import { slaveStateMessage, masterRevision  } from "../communication/coordination.js";
-import { MyData, CollaboratorData, MyMap } from "../belief/belief.js";
+import { MyData, CollaboratorData, parcel_reward_avg } from "../belief/belief.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOption } from "./utilsOptions.js";
 import { myAgent } from "../index.js";
 import { mode } from "../socketConnection.js";
 
 var count = 0;
+const THRESH_GO_PUT_DOWN = parcel_reward_avg * 10;                 // when it reach this inmind score, it goes to put down the parcels anyway
 
 async function optionsLoop() {
 
@@ -14,17 +15,33 @@ async function optionsLoop() {
 
     // Iterate through available parcels
 
+    // console.log("MyData.parcels: ", MyData.parcels.length, "\n")
+
+    var begin = new Date().getTime();
+
+    console.log("Entering into for loop  - time: ", begin, "\n");
+
+    MyData.scoreInMind = MyData.get_inmind_score();
+
     for (let parcel of MyData.parcels) {
         if (!parcel.carriedBy && parcel.reward > 3) {
-
-            // Check if parcel is not carried by any agent
             
             let util = calculate_pickup_utility(parcel);                    // if == 0 intrinsic_score < 0 --> non ne vale la pena
+            
             if (util) {
                 MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, util]);
             }
+
         }
     }
+
+    var end = new Date().getTime();
+
+    console.log("Exited from for loop - time: ", end - begin, "\n");
+
+
+    // console.log("MyData.options: ", MyData.options.length, "\n")
+
     let putDownInfo = calculate_putdown_utility()
     MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
     let u = 2
@@ -62,7 +79,14 @@ async function optionsLoop() {
     }
     
 
-    console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+    // console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+
+    // console.log("inmind score: ", MyData.get_inmind_score(), "\n")
+
+    if(MyData.get_inmind_score() > THRESH_GO_PUT_DOWN){
+        console.log("ENTRATO")
+        MyData.best_option = ['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]]
+    }
 
     myAgent.push(MyData.best_option);
 }
