@@ -5,7 +5,7 @@ import { myAgent } from "../index.js";
 import { mode } from "../socketConnection.js";
 
 var count = 0;
-const THRESH_GO_PUT_DOWN = parcel_reward_avg * 10;                 // when it reach this inmind score, it goes to put down the parcels anyway
+var THRESH_GO_PUT_DOWN = parcel_reward_avg * 10;                 // when it reach this inmind score, it goes to put down the parcels anyway
 
 async function optionsLoop() {
 
@@ -17,9 +17,9 @@ async function optionsLoop() {
 
     // console.log("MyData.parcels: ", MyData.parcels.length, "\n")
 
-    var begin = new Date().getTime();
+    // var begin = new Date().getTime();
 
-    console.log("Entering into for loop  - time: ", begin, "\n");
+    // console.log("Entering into for loop  - time: ", begin, "\n");
 
     MyData.scoreInMind = MyData.get_inmind_score();
 
@@ -35,9 +35,11 @@ async function optionsLoop() {
         }
     }
 
-    var end = new Date().getTime();
+    // console.log("MyData.options: ", MyData.options.length, "\n")
 
-    console.log("Exited from for loop - time: ", end - begin, "\n");
+    // var end = new Date().getTime();
+
+    // console.log("Exited from for loop - time: ", end - begin, "\n");
 
 
     // console.log("MyData.options: ", MyData.options.length, "\n")
@@ -79,9 +81,9 @@ async function optionsLoop() {
     }
     
 
-    // console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
+    console.log("[INFO] ", "Best option: ", MyData.best_option, "\n")
 
-    // console.log("inmind score: ", MyData.get_inmind_score(), "\n")
+    console.log("inmind score: ", MyData.get_inmind_score(), "thresh: ", THRESH_GO_PUT_DOWN, "\n")
 
     if(MyData.get_inmind_score() > THRESH_GO_PUT_DOWN){
         console.log("ENTRATO")

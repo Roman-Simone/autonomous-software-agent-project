@@ -1,22 +1,79 @@
-import { MyData, MyMap } from "./belief.js";
+import { MyData, parcel_observation_distance } from "./belief.js";
 import { Beliefset } from "@unitn-asa/pddl-client";
-
 export { Map }
 
 class Map {
     map = [];
     original_map = [];
     deliveryCoordinates = [];
+    spawningCoordinates = [];
     myBeliefset = new Beliefset();
-
-
+    width = 0;
+    height = 0;
+    
     constructor() {
         this.map = []
         this.original_map = []
         this.deliveryCoordinates = []
         this.myBeliefset = new Beliefset()
+        this.width = 0
+        this.height = 0
     }
 
+    validateAndAdjustCorner(corner) {
+
+    
+        if (corner.x <= 0) corner.x = 0;
+        if (corner.y <= 0) corner.y = 0;
+        if (corner.x >= this.width) corner.x = this.width-1;
+        if (corner.y >= this.height) corner.y = this.height-1;
+    
+        return corner;
+    }
+
+    computeSpawningScore(x, y) {
+        let score = 0;
+        this.width = this.original_map.length;
+        this.height = this.original_map[0].length;
+
+        let left_upper_corner = { x: x - parcel_observation_distance, y: y + parcel_observation_distance };
+        let right_upper_corner = { x: x + parcel_observation_distance, y: y + parcel_observation_distance };
+        let left_lower_corner = { x: x - parcel_observation_distance, y: y - parcel_observation_distance };
+        let right_lower_corner = { x: x + parcel_observation_distance, y: y - parcel_observation_distance };
+
+        left_lower_corner = this.validateAndAdjustCorner(left_lower_corner);
+        right_lower_corner = this.validateAndAdjustCorner(right_lower_corner);
+        left_upper_corner = this.validateAndAdjustCorner(left_upper_corner);
+        right_upper_corner = this.validateAndAdjustCorner(right_lower_corner);
+
+        let minX = Math.min(left_upper_corner.x, left_lower_corner.x);
+        let maxX = Math.max(right_upper_corner.x, right_lower_corner.x);
+        let minY = Math.min(left_lower_corner.y, right_lower_corner.y);
+        let maxY = Math.max(left_upper_corner.y, right_upper_corner.y);
+
+        for (let i = minX; i <= maxX; i++) {
+            for (let j = minY; j <= maxY; j++) {
+
+                // console.log("i: ", i, " j: ", j, " this.width: ", this.width, " this.height: ", this.height)
+                if (this.map[i][j] === 3) {
+                    score += 1;
+                }
+            }
+        }
+
+        return score;
+    }
+
+    getBestSpawningCoordinates() {
+        let best = { x: 0, y: 0, score: 0 };
+        for (let c of this.spawningCoordinates) {
+            if (c.score > best.score) {
+                best = c;
+            }
+        }
+
+        return best;
+    }
 
     printOriginalMapAsTable() {
         if (this.original_map.length === 0) {
