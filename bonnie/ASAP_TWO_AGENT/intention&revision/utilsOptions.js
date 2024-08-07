@@ -161,25 +161,38 @@ function calculate_putdown_utility() {
 
 function find_random_deliveryFarFromOther() {
 
-    let delivery_pos = { x: -1, y: -1 };
+    let random_pos = { x: -1, y: -1 };
     
-    if (MyData.role == "SLAVE" && MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
-        var random_delivery = MyMap.deliveryCoordinates[Math.floor(Math.random() * MyData.deliveryCoordinates.length)];
-        delivery_pos = { x: random_delivery.x, y: random_delivery.y };
-        // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", dels);
+    // console.log("\nI'm a ", MyData.role, " and I'm going to find a random delivery far from the other agent\n");
+
+    if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
+        
+        
+        
+        
+        
+        // var random_spawning = MyMap.spawningCoordinates[Math.floor(Math.random() * MyMap.spawningCoordinates.length)];
+        // var random_delivery = MyMap.deliveryCoordinates[Math.floor(Math.random() * MyMap.deliveryCoordinates.length)];
+        
+
+        let spawning_pos = MyMap.getBestSpawningCoordinates();
+        
+        
+        random_pos = { x: spawning_pos.x, y: spawning_pos.y };
+        // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", delivery_pos);
     } else {                                            // MASTER va nella cella di delivery più lontana dallo SLAVE
-        MyMap.deliveryCoordinates.sort((a, b) => {
-            const distanceA = distanceBFS_notMe(a, CollaboratorData.pos);
-            const distanceB = distanceBFS_notMe(b, CollaboratorData.pos);
+        MyMap.spawningCoordinates.sort((a, b) => {
+            const distanceA = distanceBFS_notMe(a, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
+            const distanceB = distanceBFS_notMe(b, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
             return distanceB - distanceA;
         });
         
-        if(MyData.pos.x == MyMap.deliveryCoordinates[0].x && MyData.pos.y == MyMap.deliveryCoordinates[0].y){
-            delivery_pos = MyMap.deliveryCoordinates[1];
+        if(MyData.pos.x == MyMap.spawningCoordinates[0].x && MyData.pos.y == MyMap.spawningCoordinates[0].y){
+            random_pos = {x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
         } else {
-            delivery_pos = MyMap.deliveryCoordinates[0];
+            random_pos = {x: MyMap.spawningCoordinates[0].x, y: MyMap.spawningCoordinates[0].y };
         }
     }
 
-    return delivery_pos;
+    return random_pos;
 }

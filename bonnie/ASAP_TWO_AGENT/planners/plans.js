@@ -83,13 +83,15 @@ class PddlMove extends Plan {
             });
         });
 
-        console.log("\n\nPath: ", path.length, "\n\n");
+        // console.log("\n\nPath: ", path.length, "\n\n");
 
         // console.log("\n\nPath: ", path, "\n\n");
 
         let countStacked = 3
 
         let deliveriesOnPath = [];
+
+        let parcelsOnPath = [];
 
         for (let del of MyMap.deliveryCoordinates) {
             for (let p of path) {
@@ -99,14 +101,35 @@ class PddlMove extends Plan {
             }
         }
 
+        for (let par of MyData.parcels) {
+            for (let p of path) {
+                if (par.x == p.x && par.y == p.y) {
+                    parcelsOnPath.push(par);
+                }
+            }
+        }
+
 
         while (MyData.pos.x != x || MyData.pos.y != y) {
 
             // console.log("PASSO EFFETTUATO")
 
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
+            // await client.putdown()
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
+            // await client.pickup()
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
+
             if (deliveriesOnPath.some(del => positionsEqual(del, MyData.pos))) {
                 if (this.stopped) throw ['stopped']; // if stopped then quit
                 await client.putdown()
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+            }
+
+            if (parcelsOnPath.some(par => positionsEqual(par, MyData.pos))) {
+                if (this.stopped) throw ['stopped']; // if stopped then quit
+                await client.pickup();
+                MyData.parcelsInMind.push(par.id);
                 if (this.stopped) throw ['stopped']; // if stopped then quit
             }
 
