@@ -6,6 +6,7 @@ import { mode } from "../socketConnection.js";
 
 // var count = 0;
 const MULTIPLIER_THRESH_GO_PUT_DOWN = 10;                 // when it reach this inmind score, it goes to put down the parcels anyway
+const MIN_VAL_DECADE_FREQ = 5.562684646268004e-300;
 
 async function optionsLoop() {
 
@@ -32,7 +33,7 @@ async function optionsLoop() {
     }
 
     // if parcel_decading_interval is infinite decade_frequency is equal to 5.562684646268004e-307
-    if (MyMap.decade_frequency > 5.562684646268004e-300) {
+    if (MyMap.decade_frequency > MIN_VAL_DECADE_FREQ) {
         // console.log("SON QUI")
         let putDownInfo = calculate_putdown_utility()
         MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
@@ -88,7 +89,7 @@ async function optionsLoop() {
 
     var end = new Date().getTime();
 
-    console.log("[", MyData.role, "] ", "Best option: ", MyData.best_option, " in time : ", end - begin, " \n")
+    // console.log("[", MyData.role, "] ", "Best option: ", MyData.best_option, " in time : ", end - begin, " \n")
 
     myAgent.push(MyData.best_option);
 }

@@ -80,11 +80,25 @@ client.onMsg((id, name, msg, reply) => {
 
         if (MyData.role == "MASTER") {
 
+            console.log("\n\nMESSAGE DATA: ")
             CollaboratorData.copy(msg.data);
+            CollaboratorData.print();
+            console.log("\n\n")
+
+            
+
+            if (CollaboratorData.adversaryAgents.length > 0) {
+                MyData.updateEnemies(CollaboratorData.adversaryAgents);
+            }
+
+            if (MyData.adversaryAgents.length > 0) {
+                CollaboratorData.updateEnemies(MyData.adversaryAgents);
+            }
+
             if (computeBestOption()) {
                 sendMessage(CollaboratorData);
             }
-            
+
         }
         else if (MyData.role == "SLAVE") {
 

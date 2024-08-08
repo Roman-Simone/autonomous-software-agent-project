@@ -1,4 +1,6 @@
 import { Beliefset } from "@unitn-asa/pddl-client";
+import { findPath_BFS_notMe } from "../planners/utils_planner.js"
+
 export { Map }
 
 class Map {
@@ -69,6 +71,7 @@ class Map {
         return score;
     }
 
+
     getBestSpawningCoordinates() {
         let best = { x: 0, y: 0, score: 0 };
         for (let c of this.spawningCoordinates) {
@@ -136,12 +139,18 @@ class Map {
         console.log(table);
     }
 
-    resetMap() {
+    resetMap(val=None) {
         const copy = [];
         for (let i = 0; i < this.original_map.length; i++) {
             copy[i] = [];
             for (let j = 0; j < this.original_map[i].length; j++) {
-                copy[i][j] = this.original_map[i][j];
+                if (val = None) {
+                    copy[i][j] = this.original_map[i][j];
+                } else if (this.map[i][j] == - 2){
+                    copy[i][j] == this.original_map[i][j];
+                } else {
+                    copy[i][j] == this.map[i][j];
+                }
             }
         }
 
@@ -160,6 +169,21 @@ class Map {
             //if agent is going in the direction of bound, this part is triggered
             console.log('Error: trying to set value out of bounds: (', x, ', ', y, ") while rows and columns: ", this.map.length, ', ', this.map[0].length);
         }
+    }
+
+    masterUpdateMap(goal, pos) {
+        console.log("Master update map: ", goal, pos);
+        let path = findPath_BFS_notMe(goal.x, goal.y, pos.x, pos.y);
+        console.log("Path: ", path);
+        this.resetMap(val=-2) 
+
+        for (let p of path){
+            this.updateMap(p.x, p.y, -2);
+        }
+        this.updateBeliefset();
+
+        // this.printMapAsTable();
+
     }
 
     updateBeliefset() {
@@ -213,3 +237,6 @@ class Map {
 
     }
 }
+
+
+
