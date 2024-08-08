@@ -13,17 +13,17 @@ const start = Date.now();
 
 
 //[INFO] receve information when movo or when other agents move in my belief
-client.onAgentsSensing( ( agents ) => { 
+client.onAgentsSensing((agents) => {
 
     MyMap.resetMap();
 
     let timestamp = Date.now() - start;
 
-    for ( let a of agents) {
+    for (let a of agents) {
         a.timestamp = timestamp
         MyMap.updateMap(a.x, a.y, -1);
 
-        if (! MyData.adversaryAgents.some(agent => existAgentById(a.id, agent.id))) {
+        if (!MyData.adversaryAgents.some(agent => existAgentById(a.id, agent.id))) {
             a.direction = 'none';
             MyData.adversaryAgents.push(a)
         }
@@ -31,7 +31,7 @@ client.onAgentsSensing( ( agents ) => {
             let previousIndex = MyData.adversaryAgents.findIndex(agent => existAgentById(a.id, agent.id));
             let previous = MyData.adversaryAgents[previousIndex];
 
-            if (timestamp - previous.timestamp < movement_duration * 3){
+            if (timestamp - previous.timestamp < movement_duration * 3) {
                 if (previous.x < a.x) {
                     a.direction = 'right';
                     MyMap.updateMap(a.x + 1, a.y, -1);
@@ -53,7 +53,7 @@ client.onAgentsSensing( ( agents ) => {
     }
 
     MyMap.updateBeliefset();
-} )
+})
 
 client.onYou(({ id, name, x, y, score }) => {
     MyData.id = id
@@ -72,7 +72,7 @@ client.onParcelsSensing(async (perceived_parcels) => {
 
 client.onMap((width, height, tiles) => {
 
-    console.log("width: ", width, " height: ", height)
+    // console.log("width: ", width, " height: ", height)
 
     // console.log("tiles: ", tiles)
 
@@ -81,13 +81,13 @@ client.onMap((width, height, tiles) => {
 
     MyMap.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 
-    console.log("MyMap.deliveryCoordinates: ", MyMap.deliveryCoordinates)
+    // console.log("MyMap.deliveryCoordinates: ", MyMap.deliveryCoordinates)
 
     MyMap.spawningCoordinates = tiles.filter(t => t.parcelSpawner).map(t => ({ x: t.x, y: t.y, score: MyMap.computeSpawningScore(t.x, t.y) }));
-    
+
     // console.log("MyMap.spawningCoordinates: ", MyMap.spawningCoordinates)
 
-    
+
     // MyMap.printMapAsTable();
 
     MyMap.updateBeliefset();
@@ -100,7 +100,7 @@ client.onConfig((config) => {
     MyMap.parcel_observation_distance = config.PARCELS_OBSERVATION_DISTANCE;
 
     MyMap.parcel_reward_avg = config.PARCEL_REWARD_AVG;
-    
+
     if (parcel_decading_interval == "infinite") {
         parcel_decading_interval = Number.MAX_VALUE;
     } else {
@@ -108,5 +108,5 @@ client.onConfig((config) => {
     }
 
     MyMap.decade_frequency = movement_duration / parcel_decading_interval;
-    console.log("MyMap.decade_frequency: ", MyMap.decade_frequency)
+    // console.log("MyMap.decade_frequency: ", MyMap.decade_frequency)
 });

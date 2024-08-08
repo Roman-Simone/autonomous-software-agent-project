@@ -183,10 +183,18 @@ function find_random_deliveryFarFromOther() {
         if (positionsEqual(spawning_pos, MyData.pos)){
             random_pos = find_nearest_delivery(); 
         }
-        
         // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", delivery_pos);
-    } else {                                            // MASTER va nella cella di spawn piu' lontana dallo SLAVE
+    } else {   
         
+        // Initially no information about the best option
+        if (CollaboratorData.best_option.length == 0) {
+            random_pos = find_nearest_delivery(); 
+            return random_pos;
+        }
+
+        console.log("SONO QUI EVVAI")
+
+        // MASTER va nella cella di spawn piu' lontana dallo SLAVE
         MyMap.spawningCoordinates.sort((a, b) => {
             const distanceA = distanceBFS_notMe(a, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
             const distanceB = distanceBFS_notMe(b, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));

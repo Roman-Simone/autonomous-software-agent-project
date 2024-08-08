@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { MyData, MyMap } from "../belief/belief.js";
-export { positionsEqual, readFile , findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
+export { positionsEqual, readFile, findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
 
 function readFile(path) {
 

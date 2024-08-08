@@ -12,7 +12,7 @@ class Map {
     parcel_reward_avg = 0;
     parcel_observation_distance;
     decade_frequency;
-    
+
     constructor() {
         this.map = []
         this.original_map = []
@@ -27,12 +27,12 @@ class Map {
 
     validateAndAdjustCorner(corner) {
 
-    
+
         if (corner.x <= 0) corner.x = 0;
         if (corner.y <= 0) corner.y = 0;
-        if (corner.x >= this.width) corner.x = this.width-1;
-        if (corner.y >= this.height) corner.y = this.height-1;
-    
+        if (corner.x >= this.width) corner.x = this.width - 1;
+        if (corner.y >= this.height) corner.y = this.height - 1;
+
         return corner;
     }
 

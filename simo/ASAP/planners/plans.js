@@ -100,7 +100,7 @@ class PddlMove extends Plan {
                 }
             }
         }
-        
+
         for (let par of MyData.parcels) {
             for (let p of path) {
                 if (par.x == p.x && par.y == p.y && (p.x != x && p.y != y)) {
@@ -129,18 +129,18 @@ class PddlMove extends Plan {
 
             if (parcelsOnPath.some(par => positionsEqual(par, MyData.pos))) {
                 if (this.stopped) throw ['stopped']; // if stopped then quit
-                
+
                 // Pickup the parcel
                 await client.pickup();
                 if (this.stopped) throw ['stopped']; // if stopped then quit
-            
+
                 // Add parcels to MyData.parcelsInMind if they match the current position
                 parcelsOnPath.forEach(par => {
                     if (par.x === MyData.pos.x && par.y === MyData.pos.y) {
                         MyData.parcelsInMind.push(par.id);
                     }
                 });
-            
+
                 if (this.stopped) throw ['stopped']; // if stopped then quit
             }
 

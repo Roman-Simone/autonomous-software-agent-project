@@ -42,7 +42,7 @@ class AgentData {
         this.adversaryAgents = data.adversaryAgents;
         // this.myBeliefset = data.myBeliefset;       //With this doesn't work
     }
-    
+
     get_inmind_score() {
         var tot_score = 0;
         for (let parcelInMind of this.parcelsInMind) {
@@ -60,7 +60,7 @@ class AgentData {
 
         this.inmind = tot_score;
         return tot_score;
-    }    
+    }
 
     // Search for a parcel by id
     getParcelById(idToFind) {
@@ -76,7 +76,7 @@ class AgentData {
         var ids = [];
 
         for (let parcelInMind of this.parcelsInMind) {
-            
+
             for (let parcel of this.parcels) {
                 if (parcelInMind === parcel.id) {
                     ids.push(parcel);

@@ -19,5 +19,5 @@ function from_json_to_matrix(width, height, tiles) {
 }
 
 function existAgentById(id1, id2) {
-    return id1 === id2 
+    return id1 === id2
 }

@@ -24,8 +24,8 @@ async function handshake() {
 
     // Wait for the first message from the other agent
     let first_msg = false
-    while (!first_msg){
-        
+    while (!first_msg) {
+
         // wait for the first message and read it
         let receivedMSG = ""
         await getMessage(client).then(receivedMsg => {
@@ -34,7 +34,7 @@ async function handshake() {
 
         // if is the first agent read message and send ack (SLAVE)
         let splitMSG = receivedMSG.hello.split(" ");
-        if(receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "firstMessage"){
+        if (receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "firstMessage") {
             first_msg = true
             // SLAVE-SIDE
             CollaboratorData.id = receivedMSG.id;
@@ -50,7 +50,7 @@ async function handshake() {
             });
         }
         // if is the second agent read message 
-        else if ((receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "ack")){
+        else if ((receivedMSG.iam == friend_name && splitMSG[0] == "[HANDSHAKE]" && splitMSG[1] == friend_name && splitMSG[2] == "ack")) {
             first_msg = true
             // MASTER-SIDE 
             CollaboratorData.id = receivedMSG.id;
@@ -66,7 +66,7 @@ async function handshake() {
 
 
 // SLAVE manda options e attende un ordine dal master
-async function slaveStateMessage(){
+async function slaveStateMessage() {
 
     // MyData.printParcels();
     let reply = await client.ask(CollaboratorData.id, {
@@ -83,21 +83,20 @@ async function slaveStateMessage(){
 
 
 // MASTER riceve options e manda ordine allo slave
-
 function masterRevision() {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
             try {
 
-                // console.log("[INFO] ", "Received message from ", name, " at ", msg.time, "\n");
+                console.log("[", MyData.role, "] ", "Received message from ", name, " at ", msg.time, "\n");
 
-                if (msg.data != undefined){
+                if (msg.data != undefined) {
                     CollaboratorData.copy(msg.data);
                 }
-                if(computeBestOption())
-                if (reply) {
-                    reply(CollaboratorData);
-                }
+                if (computeBestOption())
+                    if (reply) {
+                        reply(CollaboratorData);
+                    }
                 resolve(true); // Resolve the promise with the answer
             } catch (error) {
                 console.error(error);
