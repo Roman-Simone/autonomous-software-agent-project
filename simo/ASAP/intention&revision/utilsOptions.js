@@ -192,8 +192,6 @@ function find_random_deliveryFarFromOther() {
             return random_pos;
         }
 
-        console.log("SONO QUI EVVAI")
-
         // MASTER va nella cella di spawn piu' lontana dallo SLAVE
         MyMap.spawningCoordinates.sort((a, b) => {
             const distanceA = distanceBFS_notMe(a, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));

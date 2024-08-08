@@ -18,6 +18,6 @@ const myAgent = new Agent();
 myAgent.intentionLoop();
 
 // Call agentLoop every 1 second
-setInterval(optionsLoop, 2000);
+setInterval(optionsLoop, 1000);
 
 

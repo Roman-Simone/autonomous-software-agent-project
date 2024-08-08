@@ -1,4 +1,4 @@
-import { slaveStateMessage, masterRevision } from "../communication/coordination.js";
+import { sendMessage } from "../communication/coordination.js";
 import { MyData, CollaboratorData, MyMap } from "../belief/belief.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOption } from "./utilsOptions.js";
 import { myAgent } from "../index.js";
@@ -9,6 +9,7 @@ const MULTIPLIER_THRESH_GO_PUT_DOWN = 10;                 // when it reach this 
 
 async function optionsLoop() {
 
+    var begin = new Date().getTime();
 
     // Array to store potential intention options
     MyData.options = [];
@@ -17,8 +18,9 @@ async function optionsLoop() {
     MyData.scoreInMind = MyData.get_inmind_score();
 
 
+    
     for (let parcel of MyData.parcels) {
-        if (!parcel.carriedBy && parcel.reward > 3) {
+        if (!parcel.carriedBy && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0) {
 
             let util = calculate_pickup_utility(parcel);                    // if == 0 intrinsic_score < 0 --> non ne vale la pena
 
@@ -46,7 +48,8 @@ async function optionsLoop() {
 
     if (mode == 'TWO') {
         if (MyData.role == "SLAVE") {
-            await slaveStateMessage();
+            await sendMessage(MyData)
+            // await slaveStateMessage();
 
             // MyData.print()
             // if(MyData.best_option != undefined){
@@ -55,18 +58,19 @@ async function optionsLoop() {
 
             // console.log(count, " [INFO] ", "Slave state message sent and received back")
             // count += 1;
-        } else if (MyData.role == "MASTER") {
-
-            await masterRevision();
-
-
-            // CollaboratorData.print()
-            // if(CollaboratorData.best_option != undefined){
-            //     console.log(count, " [MASTER] ", "MASTER new best_option: ", MyData.best_option, "\n")
-            // }
-            // console.log(count, " [INFO] ", "Master revision done\n")
-            // count += 1;
         }
+        // else if (MyData.role == "MASTER") {
+
+        // await masterRevision();
+
+
+        // CollaboratorData.print()
+        // if(CollaboratorData.best_option != undefined){
+        //     console.log(count, " [MASTER] ", "MASTER new best_option: ", MyData.best_option, "\n")
+        // }
+        // console.log(count, " [INFO] ", "Master revision done\n")
+        // count += 1;
+        // }
     }
     else {
         MyData.best_option = findBestOption(MyData.options)
@@ -82,7 +86,9 @@ async function optionsLoop() {
         MyData.best_option = ['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]]
     }
 
-    console.log("[", MyData.role, "] ", "Best option: ", MyData.best_option, "\n")
+    var end = new Date().getTime();
+
+    console.log("[", MyData.role, "] ", "Best option: ", MyData.best_option, " in time : ", end - begin, " \n")
 
     myAgent.push(MyData.best_option);
 }
