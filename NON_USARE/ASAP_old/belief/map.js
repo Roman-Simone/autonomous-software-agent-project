@@ -1,7 +1,4 @@
 import { Beliefset } from "@unitn-asa/pddl-client";
-import { findPath_BFS_notMe, findPath_BFS } from "../planners/utils_planner.js"
-import { MyData, CollaboratorData } from "./belief.js";
-
 export { Map }
 
 class Map {
@@ -61,6 +58,8 @@ class Map {
 
         for (let i = minX; i <= maxX; i++) {
             for (let j = minY; j <= maxY; j++) {
+
+                // console.log("i: ", i, " j: ", j, " this.width: ", this.width, " this.height: ", this.height)
                 if (this.map[i][j] === 3) {
                     score += 1;
                 }
@@ -69,7 +68,6 @@ class Map {
 
         return score;
     }
-
 
     getBestSpawningCoordinates() {
         let best = { x: 0, y: 0, score: 0 };
@@ -138,30 +136,15 @@ class Map {
         console.log(table);
     }
 
-
-    printValuesOfMap(val){
-        for (let i = 0; i < this.map[0].length; i++) {
-            for (let j = 0; j < this.map.length; j++) {
-                if(this.map[i][j] <= val){
-                    console.log("Value ", this.map[i][j], " at coordinates ", i, ", ", j)
-                }
-            }
-        }
-    }
-
-    resetMap(val) {
-        let copy = [];
+    resetMap() {
+        const copy = [];
         for (let i = 0; i < this.original_map.length; i++) {
             copy[i] = [];
             for (let j = 0; j < this.original_map[i].length; j++) {
-                // console.log("SONO QUI")
-                if (this.map[i][j] == val) {
-                    copy[i][j] = this.original_map[i][j];
-                } else {
-                    copy[i][j] = this.map[i][j];
-                }
+                copy[i][j] = this.original_map[i][j];
             }
         }
+
         this.map = copy;
     }
 
@@ -180,17 +163,30 @@ class Map {
     }
 
     updateBeliefset() {
+        let width = this.map.length;
+        let height = this.map[0].length;
+        let count = 0;
         this.myBeliefset = new Beliefset();
 
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                if (this.map[x][y] === 0 || this.map[x][y] === -1 ) {
-                    // console.log("Tile ", x, " ", y, " skipped  (val = ", this.map[x][y], ")")
+        for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+                if (this.map[x][y] === -1) {
+                    // console.log("\nCell at coordinates (" + x + ", " + y + ") has value -1\n");
+                    count += 1;
+                }
+
+            }
+
+        }
+
+        for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+                if (this.map[x][y] === 0 || this.map[x][y] === -1) {
                     continue;
                 }
 
                 // Find the tile to the right
-                if ((x + 1) < this.width && this.map[x + 1][y] > 0) {
+                if ((x + 1) < width && this.map[x + 1][y] > 0) {
                     this.myBeliefset.declare('right t' + x + '_' + y + ' t' + (x + 1) + '_' + y);
                 }
 
@@ -200,7 +196,7 @@ class Map {
                 }
 
                 // Find the tile above
-                if ((y + 1) < this.height && this.map[x][y + 1] > 0) {
+                if ((y + 1) < height && this.map[x][y + 1] > 0) {
                     this.myBeliefset.declare('up t' + x + '_' + y + ' t' + x + '_' + (y + 1));
                 }
 
@@ -211,8 +207,9 @@ class Map {
             }
         }
 
+        if (count !== 0) {
+            // console.log("\nBeliefset: ", this.myBeliefset.toPddlString(), "\n");
+        }
+
     }
 }
-
-
-

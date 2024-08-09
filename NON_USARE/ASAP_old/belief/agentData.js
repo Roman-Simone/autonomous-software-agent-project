@@ -1,4 +1,3 @@
-import { existAgentById } from "./utilsBelief.js"; 
 export { AgentData }
 
 class AgentData {
@@ -23,10 +22,10 @@ class AgentData {
         this.score = 0;
         this.role = "NOTHING";
         this.parcels = [];
+        this.inmind = 0;
         this.options = [];
         this.best_option = [];
         this.adversaryAgents = [];
-        this.parcelsInMind = [];
     }
 
     // Copy the data from another CommunicationData object
@@ -37,29 +36,11 @@ class AgentData {
         this.score = data.score;
         this.role = data.role;
         this.parcels = data.parcels;
+        this.inmind = data.inmind;
         this.options = data.options;
         this.best_option = data.best_option;
         this.adversaryAgents = data.adversaryAgents;
-        this.parcelsInMind = data.parcelsInMind;
-
-        // this.myBeliefset = data.myBeliefset;       // With this doesn't work
-    }
-
-    // ID out is the id of the agent MASTER or SLAVE because if there isn't problem with PDDL!!!!
-    updateEnemies(otherEnemies, idout) {
-        for (let a of otherEnemies) {
-            let now = new Date().getTime();
-            
-            if(now - a.timestamp > 10000){
-                this.adversaryAgents = this.adversaryAgents.filter(agent => agent.id !== a.id);
-            } 
-            else if(a.id !== idout){
-                if (!this.adversaryAgents.some(agent => existAgentById(a.id, agent.id))) {
-                    a.direction = 'none';
-                    this.adversaryAgents.push(a)
-                }
-            }
-        }
+        // this.myBeliefset = data.myBeliefset;       //With this doesn't work
     }
 
     get_inmind_score() {
@@ -77,6 +58,7 @@ class AgentData {
             }
         }
 
+        this.inmind = tot_score;
         return tot_score;
     }
 
@@ -119,6 +101,5 @@ class AgentData {
         console.log("role: ", this.role);
         console.log("pos: ", this.pos);
         console.log("best_option: ", this.best_option);
-        console.log
     }
 }

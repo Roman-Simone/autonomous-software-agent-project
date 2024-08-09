@@ -15,8 +15,7 @@ const start = Date.now();
 //[INFO] receve information when movo or when other agents move in my belief
 client.onAgentsSensing((agents) => {
 
-    MyMap.resetMap(-1);
-    // console.log("AFTER RESET MAP AGENTS -> ", MyMap.map)
+    MyMap.resetMap();
 
     let timestamp = Date.now() - start;
 
@@ -52,9 +51,8 @@ client.onAgentsSensing((agents) => {
             MyData.adversaryAgents.splice(previousIndex, 1, a);
         }
     }
-    for (let a of MyData.adversaryAgents) {
-        MyMap.updateMap(a.x, a.y, -1);
-    }
+
+    MyMap.updateBeliefset();
 })
 
 client.onYou(({ id, name, x, y, score }) => {
@@ -79,10 +77,7 @@ client.onMap((width, height, tiles) => {
     // console.log("tiles: ", tiles)
 
     MyMap.original_map = from_json_to_matrix(width, height, tiles);
-    MyMap.map = from_json_to_matrix(width, height, tiles);
-    // console.log("MAP in onMap: ", MyMap.map)
-
-    // MyMap.resetMap(-3);             // deepcopy completa map - original_map 
+    MyMap.resetMap();
 
     MyMap.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));
 
@@ -94,7 +89,8 @@ client.onMap((width, height, tiles) => {
 
 
     // MyMap.printMapAsTable();
-    // MyMap.updateBeliefset();
+
+    MyMap.updateBeliefset();
 });
 
 client.onConfig((config) => {
