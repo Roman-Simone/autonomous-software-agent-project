@@ -175,7 +175,7 @@ class Map {
         console.log("Master update map: ", goal, pos);
         let path = findPath_BFS_notMe(goal.x, goal.y, pos.x, pos.y);
         console.log("Path: ", path);
-        this.map = ithis.resetMap(val=-2) 
+        this.map = this.resetMap(val=-2) 
 
         for (let p of path){
             this.updateMap(p.x, p.y, -2);
