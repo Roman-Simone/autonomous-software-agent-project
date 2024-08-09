@@ -40,8 +40,6 @@ function findBestOption(options, id = "undefined") {
 
 function computeBestOption() {
 
-    const REWARD_PENALTY_DIVIDER = 0.6
-
     // console.log("MyMap.map in computeBestOption(): ", MyMap.map)
 
     for (let s_elem of CollaboratorData.options) {
@@ -53,11 +51,9 @@ function computeBestOption() {
         }
         if (!found && s_elem[0] == "go_pick_up") {
             let parcel = CollaboratorData.getParcelById(s_elem[3]);
-            parcel.reward *= REWARD_PENALTY_DIVIDER;
             MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
         }
     }
-    
     for (let m_elem of MyData.options) {
         let found = false;
         for (let s_elem of CollaboratorData.options) {
@@ -68,7 +64,6 @@ function computeBestOption() {
         if (!found && m_elem[0] == "go_pick_up") {
             let parcel = MyData.getParcelById(m_elem[3])
             // console.log("SLAVE POS: ", CollaboratorData.pos)
-            parcel.reward *= REWARD_PENALTY_DIVIDER;
             CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, CollaboratorData.pos)]);
         }
     }
@@ -107,6 +102,9 @@ function computeBestOption() {
             }
         }
     }
+
+    
+    MyMap.masterUpdateMap({x: CollaboratorData.best_option[1], y: CollaboratorData.best_option[2]}, CollaboratorData.pos)
 
     return true;
 }

@@ -61,6 +61,8 @@ class Map {
 
         for (let i = minX; i <= maxX; i++) {
             for (let j = minY; j <= maxY; j++) {
+
+                // console.log("i: ", i, " j: ", j, " this.width: ", this.width, " this.height: ", this.height)
                 if (this.map[i][j] === 3) {
                     score += 1;
                 }
@@ -110,7 +112,7 @@ class Map {
         console.log(table);
     }
 
-    printMapAsTable() {
+    printMapAsTable(val=undefined) {
         if (this.map.length === 0) {
             console.log("The matrix is empty.");
             return;
@@ -121,7 +123,7 @@ class Map {
         for (let i = 0; i < this.map[0].length; i++) {
             transposedMap[i] = [];
             for (let j = 0; j < this.map.length; j++) {
-                transposedMap[i][j] = this.map[j][i];
+                    transposedMap[i][j] = this.map[j][i];
             }
         }
 
@@ -130,14 +132,22 @@ class Map {
 
         // Create the table string
         let table = "";
-        for (const row of transposedMap) {
-            table += row.join("\t") + "\n";
+        if (val !== undefined){
+            for (const row of transposedMap) {
+                table += row.join("\t") + "\n";
+            }
+            // Print the table
+            // console.log(table);
+        } else {
+            for (let i = 0; i < transposedMap[0].length; i++) {
+                for (let j = 0; j < transposedMap.length; j++) {
+                    if(transposedMap[i][j] < val){
+                        console.log("Value ", transposedMap[i][j], " at coordinates ", i, ", ", j)
+                    }
+                }
+            }
         }
-
-        // Print the table
-        console.log(table);
     }
-
 
     printValuesOfMap(val){
         for (let i = 0; i < this.map[0].length; i++) {
@@ -179,12 +189,39 @@ class Map {
         }
     }
 
+    masterUpdateMap(goal, pos) {
+
+        this.resetMap(-2)
+
+        let path1 = findPath_BFS_notMe(goal.x, goal.y, pos.x, pos.y);
+        let path2 = findPath_BFS(MyData.best_option[1], MyData.best_option[2]);
+
+        //find common tiles
+        MyData.commonTiles = [];
+        for (let p1 of path1) {
+            for (let p2 of path2) {
+                if (p1.x === p2.x && p1.y === p2.y) {
+                    MyData.commonTiles.push(p1);
+                }
+            }
+        }
+
+        CollaboratorData.commonTiles = MyData.commonTiles;
+
+    
+        for (let p of MyData.commonTiles) {
+            this.updateMap(p.x, p.y, -2);
+        }
+
+        // this.printMapAsTable();
+    }
+
     updateBeliefset() {
         this.myBeliefset = new Beliefset();
 
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
-                if (this.map[x][y] === 0 || this.map[x][y] === -1 ) {
+                if (this.map[x][y] <= 0 ) {
                     // console.log("Tile ", x, " ", y, " skipped  (val = ", this.map[x][y], ")")
                     continue;
                 }

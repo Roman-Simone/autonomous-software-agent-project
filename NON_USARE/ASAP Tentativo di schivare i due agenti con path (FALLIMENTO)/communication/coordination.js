@@ -86,15 +86,11 @@ client.onMsg((id, name, msg, reply) => {
             // console.log("\n\n")
 
             if (CollaboratorData.adversaryAgents.length > 0) {
-
-                // here we want to update the set of adversaryAgents of MASTER with the ones of he SLAVE
-                // considering that we don't want to include MASTER (then we have problem with 
-                // beliefset and pddl COMPUTATION).
-                MyData.updateEnemies(CollaboratorData.adversaryAgents, MyData.id);
+                MyData.updateEnemies(CollaboratorData.adversaryAgents);
             }
 
             if (MyData.adversaryAgents.length > 0) {
-                CollaboratorData.updateEnemies(MyData.adversaryAgents, CollaboratorData.id);
+                CollaboratorData.updateEnemies(MyData.adversaryAgents);
             }
 
             if (computeBestOption()) {
@@ -112,7 +108,11 @@ client.onMsg((id, name, msg, reply) => {
 
             MyData.copy(msg.data);
 
+            MyMap.resetMap(-2)
             MyMap.resetMap(-1)
+            for (let p of MyData.commonTiles) {
+                MyMap.updateMap(p.x, p.y, -2);
+            }
             for (let a of MyData.adversaryAgents) {
                 MyMap.updateMap(a.x, a.y, -1);
             }

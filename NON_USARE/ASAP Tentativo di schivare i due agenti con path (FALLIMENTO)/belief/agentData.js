@@ -12,6 +12,7 @@ class AgentData {
     parcels = [];
     inmind = 0;
     options = [];
+    commonTiles = [];
     best_option = [];
     adversaryAgents = [];
     parcelsInMind = [];
@@ -23,6 +24,7 @@ class AgentData {
         this.score = 0;
         this.role = "NOTHING";
         this.parcels = [];
+        this.commonTiles = [];
         this.options = [];
         this.best_option = [];
         this.adversaryAgents = [];
@@ -36,6 +38,7 @@ class AgentData {
         this.pos = data.pos;
         this.score = data.score;
         this.role = data.role;
+        this.commonTiles = data.commonTiles;
         this.parcels = data.parcels;
         this.options = data.options;
         this.best_option = data.best_option;
@@ -45,19 +48,11 @@ class AgentData {
         // this.myBeliefset = data.myBeliefset;       // With this doesn't work
     }
 
-    // ID out is the id of the agent MASTER or SLAVE because if there isn't problem with PDDL!!!!
-    updateEnemies(otherEnemies, idout) {
-        for (let a of otherEnemies) {
-            let now = new Date().getTime();
-            
-            if(now - a.timestamp > 10000){
-                this.adversaryAgents = this.adversaryAgents.filter(agent => agent.id !== a.id);
-            } 
-            else if(a.id !== idout){
-                if (!this.adversaryAgents.some(agent => existAgentById(a.id, agent.id))) {
-                    a.direction = 'none';
-                    this.adversaryAgents.push(a)
-                }
+    updateEnemies(collaboratorEnemies) {
+        for (let a of collaboratorEnemies) {
+            if (!this.adversaryAgents.some(agent => existAgentById(a.id, agent.id))) {
+                a.direction = 'none';
+                this.adversaryAgents.push(a)
             }
         }
     }
