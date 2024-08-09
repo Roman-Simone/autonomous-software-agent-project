@@ -53,11 +53,17 @@ function computeBestOption() {
         }
         if (!found && s_elem[0] == "go_pick_up") {
             let parcel = CollaboratorData.getParcelById(s_elem[3]);
-            parcel.reward *= REWARD_PENALTY_DIVIDER;
-            MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
+            if (parcel != undefined) {
+                parcel.reward *= REWARD_PENALTY_DIVIDER;
+                MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
+            }
+            else {
+                console.log("ERROR: parcel is undefined (computeBestOption utilsbelief)")
+            }
         }
     }
-    
+
+
     for (let m_elem of MyData.options) {
         let found = false;
         for (let s_elem of CollaboratorData.options) {
@@ -67,9 +73,15 @@ function computeBestOption() {
         }
         if (!found && m_elem[0] == "go_pick_up") {
             let parcel = MyData.getParcelById(m_elem[3])
-            // console.log("SLAVE POS: ", CollaboratorData.pos)
-            parcel.reward *= REWARD_PENALTY_DIVIDER;
-            CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, CollaboratorData.pos)]);
+
+            if (parcel != undefined) {
+                parcel.reward *= REWARD_PENALTY_DIVIDER;
+                CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, CollaboratorData.pos)]);
+            }
+            else {
+                console.log("ERROR: parcel is undefined (computeBestOption utilsbelief)")
+            }
+
         }
     }
 
@@ -110,6 +122,7 @@ function computeBestOption() {
 
     return true;
 }
+
 
 function calculate_pickup_utility(parcel, slavePos = null) {
     let scoreParcel = parcel.reward;

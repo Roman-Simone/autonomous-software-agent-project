@@ -86,7 +86,7 @@ class AgentData {
                 return parcel;
             }
         }
-        return false;
+        return undefined;
     }
 
     getParcelsInMindIds() {
