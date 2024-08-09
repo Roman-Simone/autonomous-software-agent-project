@@ -19,3 +19,5 @@ myAgent.intentionLoop();
 
 // Call agentLoop every 1 second
 setInterval(optionsLoop, 1000);
+
+

@@ -124,14 +124,7 @@ function find_nearest_delivery(ignoreCoordinates = undefined) {
     for (var i = 0; i < MyMap.deliveryCoordinates.length; i++) {
         if (distanceBFS(MyMap.deliveryCoordinates[i]) < min_distance) {
 
-            let del_x = MyMap.deliveryCoordinates[i].x;
-            let del_y = MyMap.deliveryCoordinates[i].y;
-
-            if (ignoreCoordinates != undefined && del_x == ignoreCoordinates.x && del_y == ignoreCoordinates.y) continue;
-
-            if (MyMap.map[del_x][del_y] != 2 ) continue;            // this is the second check over the validity of the delivery tile 
-                                                                    // because if the best_option has changed, the MASTER can't know if 
-                                                                    // an adversary (or the SLAVE) is over it 
+            if (ignoreCoordinates != undefined && MyMap.deliveryCoordinates[i].x == ignoreCoordinates.x && MyMap.deliveryCoordinates[i].y == ignoreCoordinates.y) continue;
 
             min_distance = distanceBFS(MyMap.deliveryCoordinates[i]);
             nearest_delivery = MyMap.deliveryCoordinates[i];

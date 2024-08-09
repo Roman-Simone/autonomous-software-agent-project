@@ -59,9 +59,6 @@ class PddlMove extends Plan {
         // Define the PDDL goal
         let goal = 'at t' + x + '_' + y;
 
-        MyMap.updateBeliefset();
-        MyMap.printValuesOfMap(-1);
-
         // Create the PDDL problem
         var pddlProblem = new PddlProblem(
             'deliveroo',
@@ -71,8 +68,6 @@ class PddlMove extends Plan {
         );
 
         let problem = pddlProblem.toPddlString();
-        // console.log("Problem: ", problem);
-
 
         // Get the plan from the online solver
         var plan = await onlineSolver(domain, problem);
@@ -91,12 +86,8 @@ class PddlMove extends Plan {
         // console.log("\n\nPath: ", path.length, "\n\n");
 
         // console.log("\n\nPath: ", path, "\n\n");
-        if (MyData.role == "MASTER") {
-            var countStacked = 12
-        }
-        else{
-            var countStacked = 1
-        }
+
+        let countStacked = 1
 
         let deliveriesOnPath = [];
 
@@ -119,13 +110,16 @@ class PddlMove extends Plan {
             }
         }
 
-        // for (let p of path) {
-        //     console.log("Path: ", p)
-        // }
-
 
         while (MyData.pos.x != x || MyData.pos.y != y) {
 
+            // console.log("PASSO EFFETTUATO")
+
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
+            // await client.putdown()
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
+            // await client.pickup()
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
 
             if (deliveriesOnPath.some(del => positionsEqual(del, MyData.pos))) {
                 if (this.stopped) throw ['stopped']; // if stopped then quit
@@ -134,8 +128,8 @@ class PddlMove extends Plan {
             }
 
             if (parcelsOnPath.some(par => positionsEqual(par, MyData.pos))) {
-
                 if (this.stopped) throw ['stopped']; // if stopped then quit
+
                 // Pickup the parcel
                 await client.pickup();
                 if (this.stopped) throw ['stopped']; // if stopped then quit
@@ -187,7 +181,7 @@ class PddlMove extends Plan {
             if (!status_x && !status_y) {
                 this.log('stucked ', countStacked);
                 //await this.subIntention( 'go_to', {x: x, y: y} );
-                await timeout(500)
+                await timeout(1000)
                 if (countStacked <= 0) {
                     throw 'stopped';
                 } else {

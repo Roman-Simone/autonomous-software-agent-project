@@ -2,7 +2,7 @@ import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "../planne
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 import { positionsEqual } from "../planners/utils_planner.js";
 
-export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, computeBestOption, findBestOption };
+export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, computeBestOption, findBestOption};
 
 // Function to update the configuration of elements
 //!CONFIGURATION
@@ -40,10 +40,6 @@ function findBestOption(options, id = "undefined") {
 
 function computeBestOption() {
 
-    const REWARD_PENALTY_DIVIDER = 0.6
-
-    // console.log("MyMap.map in computeBestOption(): ", MyMap.map)
-
     for (let s_elem of CollaboratorData.options) {
         let found = false;
         for (let m_elem of MyData.options) {
@@ -53,11 +49,9 @@ function computeBestOption() {
         }
         if (!found && s_elem[0] == "go_pick_up") {
             let parcel = CollaboratorData.getParcelById(s_elem[3]);
-            parcel.reward *= REWARD_PENALTY_DIVIDER;
             MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel)]);
         }
     }
-    
     for (let m_elem of MyData.options) {
         let found = false;
         for (let s_elem of CollaboratorData.options) {
@@ -67,21 +61,13 @@ function computeBestOption() {
         }
         if (!found && m_elem[0] == "go_pick_up") {
             let parcel = MyData.getParcelById(m_elem[3])
-            // console.log("SLAVE POS: ", CollaboratorData.pos)
-            parcel.reward *= REWARD_PENALTY_DIVIDER;
             CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, calculate_pickup_utility(parcel, CollaboratorData.pos)]);
         }
     }
 
-    // console.log("\n\nMASTER: ", MyData.options, "\n\n")
-    // console.log("\n\nSLAVE: ", CollaboratorData.options, "\n\n")
-
     MyData.best_option = findBestOption(MyData.options)
 
     CollaboratorData.best_option = findBestOption(CollaboratorData.options)
-
-    // console.log("\n\nMASTER best_option: ", MyData.best_option, "\n\n")
-    // console.log("\n\nSLAVE best_option: ", CollaboratorData.best_option, "\n\n")
 
     if (MyData.best_option[0] == "go_random_delivery" || CollaboratorData.best_option[0] == "go_random_delivery") { }
 
@@ -113,20 +99,7 @@ function computeBestOption() {
 
 function calculate_pickup_utility(parcel, slavePos = null) {
     let scoreParcel = parcel.reward;
-
-    if (slavePos == null) {
-        var numParcelInMind = MyData.parcelsInMind.length
-        var parcelsInMind = MyData.parcelsInMind;
-        var scoreInMind = MyData.get_inmind_score();
-        var adversaryAgents = MyData.adversaryAgents;
-    } else {
-        var numParcelInMind = CollaboratorData.parcelsInMind.length
-        var parcelsInMind = CollaboratorData.parcelsInMind
-        var scoreInMind = CollaboratorData.get_inmind_score();
-        var adversaryAgents = CollaboratorData.adversaryAgents
-
-        // console.log("\n\nINFO: ", numParcelInMind, parcelsInMind, scoreInMind, adversaryAgents)
-    }
+    let numParcelInMind = MyData.parcelsInMind.length
 
     // let distance_parcel = 0;
     if (slavePos == null) {
@@ -137,7 +110,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
 
     let distance_delivery = distanceBFS_notMe(parcel, find_nearest_delivery());
 
-    for (let parcelInMind of parcelsInMind) {
+    for (let parcelInMind of MyData.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - MyMap.decade_frequency * (distance_parcel + distance_delivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
@@ -145,13 +118,13 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     }
 
     let RewardParcel = scoreParcel - MyMap.decade_frequency * distance_parcel;
-    let RewardInMind = scoreInMind - ((MyMap.decade_frequency * distance_parcel) * numParcelInMind);
+    let RewardInMind = MyData.scoreInMind - ((MyMap.decade_frequency * distance_parcel) * numParcelInMind);
     let utility = (RewardParcel + RewardInMind) - (MyMap.decade_frequency * distance_delivery) * (numParcelInMind + 1);
 
 
     let min_distance_parcel_agent = Number.MAX_VALUE;
     let nearest_agent = "";
-    for (let a of adversaryAgents) {
+    for (let a of MyData.adversaryAgents) {
         if (distanceBFS_notMe(parcel, a) < min_distance_parcel_agent) {
             min_distance_parcel_agent = distanceBFS_notMe(parcel, a);
             nearest_agent = a.name;
@@ -162,6 +135,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
 
     if (min_distance_parcel_agent < distance_parcel) {
         utility -= mult_malus * (distance_parcel - min_distance_parcel_agent);
+
     }
 
     return utility;
@@ -169,7 +143,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
 
 
 function calculate_putdown_utility() {
-
+    
     let nearest_delivery = find_nearest_delivery()
     let distanceDelivery = distanceBFS(nearest_delivery);
     let numParcelInMind = MyData.parcelsInMind.length
@@ -177,7 +151,7 @@ function calculate_putdown_utility() {
     let valueInMind = MyData.get_inmind_score();
 
     let mult = 0.5 * (valueInMind)
-
+    
 
     for (let parcelInMind of MyData.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - (MyMap.decade_frequency * distanceDelivery);
@@ -190,7 +164,7 @@ function calculate_putdown_utility() {
     utility = utility + mult;
     // console.log("PUTDOWN WITH MULT -> ", utility, "\n\n")
 
-
+    
     return [nearest_delivery, utility];
 }
 
@@ -198,7 +172,7 @@ function calculate_putdown_utility() {
 function find_random_deliveryFarFromOther() {
 
     let random_pos = { x: -1, y: -1 };
-
+    
     // console.log("\nI'm a ", MyData.role, " and I'm going to find a random delivery far from the other agent\n");
 
     if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
@@ -206,15 +180,15 @@ function find_random_deliveryFarFromOther() {
         let spawning_pos = MyMap.getBestSpawningCoordinates();
         random_pos = { x: spawning_pos.x, y: spawning_pos.y };
 
-        if (positionsEqual(spawning_pos, MyData.pos)) {
-            random_pos = find_nearest_delivery();
+        if (positionsEqual(spawning_pos, MyData.pos)){
+            random_pos = find_nearest_delivery(); 
         }
         // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", delivery_pos);
-    } else {
-
+    } else {   
+        
         // Initially no information about the best option
         if (CollaboratorData.best_option.length == 0) {
-            random_pos = find_nearest_delivery();
+            random_pos = find_nearest_delivery(); 
             return random_pos;
         }
 
@@ -225,10 +199,10 @@ function find_random_deliveryFarFromOther() {
             return distanceB - distanceA;
         });
 
-        if (positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
-            random_pos = { x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
+        if(positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)){
+            random_pos = {x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
         } else {
-            random_pos = { x: MyMap.spawningCoordinates[0].x, y: MyMap.spawningCoordinates[0].y };
+            random_pos = {x: MyMap.spawningCoordinates[0].x, y: MyMap.spawningCoordinates[0].y };
         }
     }
 

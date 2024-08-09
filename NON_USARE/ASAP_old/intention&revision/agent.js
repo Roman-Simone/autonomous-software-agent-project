@@ -109,6 +109,7 @@ class Agent {
     checkSwitch(last) {
 
         let ret = false
+        // console.log("last --> " + last);
 
         if (last) {
             if (this.createString(last.predicate) != this.createString(this.intention_queue[0].predicate)) {

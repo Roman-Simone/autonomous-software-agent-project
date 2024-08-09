@@ -52,8 +52,7 @@ class AgentData {
             
             if(now - a.timestamp > 10000){
                 this.adversaryAgents = this.adversaryAgents.filter(agent => agent.id !== a.id);
-            } 
-            else if(a.id !== idout){
+            } else if(a.id !== idout){
                 if (!this.adversaryAgents.some(agent => existAgentById(a.id, agent.id))) {
                     a.direction = 'none';
                     this.adversaryAgents.push(a)

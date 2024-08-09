@@ -1,6 +1,6 @@
 import { client, friend_name } from "../socketConnection.js";
 import { computeBestOption } from "../intention&revision/utilsOptions.js"
-import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
+import { CollaboratorData, MyData } from "../belief/belief.js";
 
 function getMessage(client) {
     return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ async function handshake() {
 
 
 
-async function sendMessage(data, common = []) {
+async function sendMessage(data) {
     await client.say(CollaboratorData.id, {
         hello: "[INFORM]",
         data: data,
@@ -80,42 +80,15 @@ client.onMsg((id, name, msg, reply) => {
 
         if (MyData.role == "MASTER") {
 
-            // console.log("\n\nMESSAGE DATA: ")
             CollaboratorData.copy(msg.data);
-            // CollaboratorData.print();
-            // console.log("\n\n")
-
-            if (CollaboratorData.adversaryAgents.length > 0) {
-
-                // here we want to update the set of adversaryAgents of MASTER with the ones of he SLAVE
-                // considering that we don't want to include MASTER (then we have problem with 
-                // beliefset and pddl COMPUTATION).
-                MyData.updateEnemies(CollaboratorData.adversaryAgents, MyData.id);
-            }
-
-            if (MyData.adversaryAgents.length > 0) {
-                CollaboratorData.updateEnemies(MyData.adversaryAgents, CollaboratorData.id);
-            }
-
             if (computeBestOption()) {
                 sendMessage(CollaboratorData);
             }
-
-            MyMap.resetMap(-1)
-
-            for (let a of MyData.adversaryAgents) {
-                MyMap.updateMap(a.x, a.y, -1);
-            }
-
+            
         }
         else if (MyData.role == "SLAVE") {
 
             MyData.copy(msg.data);
-
-            MyMap.resetMap(-1)
-            for (let a of MyData.adversaryAgents) {
-                MyMap.updateMap(a.x, a.y, -1);
-            }
 
         }
     }
