@@ -61,8 +61,9 @@ async function optionsLoop() {
 
     var end = new Date().getTime();
 
-    console.log("[", MyData.role, "] ", "Best option: ", MyData.best_option, " in time : ", end - begin, " \n")
+    // console.log("[", MyData.role, "] ", "Best option: ", MyData.best_option, " in time : ", end - begin, " \n")
 
+    // console.log("Score in mind: ", MyData.get_inmind_score())
     myAgent.push(MyData.best_option);
 }
 

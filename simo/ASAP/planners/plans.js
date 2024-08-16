@@ -114,7 +114,7 @@ class PddlMove extends Plan {
             for (let p of path) {
                 if (par.x == p.x && par.y == p.y && (p.x != x && p.y != y)) {
                     parcelsOnPath.push(par);
-                    console.log("Parcel on path: ", par)
+                    // console.log("Parcel on path: ", par)
                 }
             }
         }

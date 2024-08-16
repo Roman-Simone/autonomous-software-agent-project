@@ -36,6 +36,12 @@ class Agent {
                         MyData.parcelsInMind.push(entry);
                     }
                     else if (intention.predicate[0] == "go_put_down") {
+                        console.log("PUT DOWN")
+                        for (let parcel of MyData.parcelsInMind) {
+                            // remove parcel from MyData.parcels
+                            MyData.parcels = MyData.parcels.filter(p => p.id != parcel);
+                        }
+
                         MyData.parcelsInMind = [];
                     }
                 }

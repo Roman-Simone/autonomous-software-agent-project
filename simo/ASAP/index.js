@@ -5,6 +5,8 @@ import { optionsLoop } from './intention&revision/options.js'
 import { mode } from "./socketConnection.js";
 export { myAgent }
 
+
+// If mode is TWO, wait for the other agent to connect
 if( mode == 'TWO'){
     console.log("[INFO] ", "Waiting other agents to connect...\n")
     if (await handshake()) {
@@ -14,8 +16,9 @@ if( mode == 'TWO'){
 
 // Create an instance of Agent
 const myAgent = new Agent();
+
 // Function to trigger agentLoop when parcels are sensed
 myAgent.intentionLoop();
 
-// Call agentLoop every 1 second
+// Call optionLoop every 1 second
 setInterval(optionsLoop, 1000);

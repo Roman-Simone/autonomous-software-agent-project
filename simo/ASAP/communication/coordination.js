@@ -90,11 +90,11 @@ client.onMsg((id, name, msg, reply) => {
                 // here we want to update the set of adversaryAgents of MASTER with the ones of he SLAVE
                 // considering that we don't want to include MASTER (then we have problem with 
                 // beliefset and pddl COMPUTATION).
-                MyData.updateEnemies(CollaboratorData.adversaryAgents, MyData.id);
+                MyData.updateEnemies(CollaboratorData.adversaryAgents);
             }
 
             if (MyData.adversaryAgents.length > 0) {
-                CollaboratorData.updateEnemies(MyData.adversaryAgents, CollaboratorData.id);
+                CollaboratorData.updateEnemies(MyData.adversaryAgents);
             }
 
             if (computeBestOption()) {
