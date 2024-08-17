@@ -13,7 +13,7 @@
 This project is part of the "Autonomous Software Agents" master course. The goal is to develop an autonomous agent using the Belief-Desire-Intention (BDI) architecture, capable of playing a game that involves picking up and delivering parcels. The agent interacts with the game environment via the API provided by the [Deliveroo.js](https://github.com/unitn-ASA/DeliverooAgent.js) project.
 
 <p align="center">
-  <img src="deliveroo.png" alt="Alt text" style="display: block; margin: 0 auto; width:500">
+  <img src="img_repo/deliveroo.png" alt="Alt text" style="display: block; margin: 0 auto; width:500">
 </p>
 
 ## Project Layout
