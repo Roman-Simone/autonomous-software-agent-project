@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[10pt]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage{geometry}
@@ -25,18 +25,22 @@
 \maketitle
 
 \begin{abstract}
-    This project develops an autonomous software agent designed to play a game, aiming to maximize points by collecting and delivering parcels. Utilizing a Belief-Desire-Intention (BDI) architecture, the agent senses the environment, manages beliefs, activates goals, selects plans, and executes actions to achieve its objectives. Initially focusing on a single agent's capabilities, including automated planning and belief revision, the project later extends to include a second agent, enabling communication and cooperative strategies. The system's performance is validated through simulation runs at d, demonstrating its efficiency in task completion through advanced AI techniques and multi-agent collaboration.
+    This project develops an autonomous software agent designed to play a game, aiming to maximize points by collecting and delivering parcels. Utilizing a Belief-Desire-Intention (BDI) architecture, the agent senses the environment, manages beliefs, activates goals, selects plans, and executes actions to achieve its objectives. Initially focusing on a single agent's capabilities, including automated planning and belief revision, the project later extends to include a second agent, enabling communication and cooperative strategies.
 \end{abstract}
 
 \section{Introduction}
+In this report, we present the key components of our autonomous agent, designed to play the Deliveroo game. The objective of the game is to earn points by collecting and delivering parcels to designated "delivery tiles". To achieve this, we've implemented a Belief-Desire-Intention (BDI) architecture, which allows the agent to perceive the environment, establish goals, select the best plans from a set of predefined options, and execute actions. This architecture also enables the agent to continuously update and refine its plans to successfully accomplish its objectives.
 
-The main goal of this project is to create an autonomous software agent that can play a game for the user. The game involves earning points by collecting and delivering parcels to a specific zone (the so called "\textit{delivery tiles}"). To do this, we're using a Belief-Desire-Intention (BDI) architecture. This architecture helps the agent understand its environment, decide on its goals, choose the best plans from a set of predefined options, and execute actions. It also allows the agent to continually update and adjust its plans to meet its objectives.
+The project is divided into two main parts:
+\begin{itemize}
+    \item \textit{Single Agent}: The first phase focuses on building a single autonomous agent capable of understanding and processing information from its environment. The agent updates its beliefs, sets goals, forms intentions, and takes actions accordingly. 
+    \item \textit{Multi-Agent}: In the second phase, we extend the project to include a second autonomous agent. This extension enables the agents to share information about their environment, exchange goals, and coordinate their actions. We have implemented a \textit{MASTER-SLAVE} model, where the \textit{MASTER} agent is responsible for selecting the best actions not only for itself but also for the \textit{SLAVE} agent.
+\end{itemize}
 
-The project is split into two key parts. The first part focuses on building a single autonomous agent. This agent is designed to understand and manage information from its surroundings, adjust its beliefs, set goals, form intentions, and take actions. The agent has automated planning capabilities, meaning it can generate action plans when it identifies a new goal. We evaluate and validate the agent's performance by conducting a series of simulations across various levels, each with unique characteristics and challenges.
+We evaluate and validate the performance of the agents by conducting a series of simulations across different levels, each presenting unique challenges and characteristics.
 
-In the second part, we expand the project to include a second autonomous agent, enabling communication and cooperation between the two. This addition allows the agents to share information about their environment, exchange their goals, and coordinate their actions. In particular, we opt for a \texttt{MASTER-SLAVE} implementation where the \texttt{MASTER} is responsible for both the \texttt{best\_action} choiche of the himself and of the \texttt{SLAVE}. Again, we test and validate the performance of this multi-agent system through simulations.
+In this report, we will thoroughly discuss the logic, strategies, and structure behind the development of both the single-agent and multi-agent systems.
 
-By using advanced strategies and cooperative dynamics between multiple agents, this project aims to create a smart, efficient system that can effectively complete the game's objectives. Through the development and testing stages, the system shows its capability to maximize performance by managing tasks and coordinating actions between the agents.
 
 \section{Belief}
 
