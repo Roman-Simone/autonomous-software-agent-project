@@ -174,7 +174,6 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     for (let a of adversaryAgents) {
         if (distanceBFS_notMe(parcel, a) < min_distance_parcel_agent) {
             min_distance_parcel_agent = distanceBFS_notMe(parcel, a);
-            nearest_agent = a.name;
         }
     }
 

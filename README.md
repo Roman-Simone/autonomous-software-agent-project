@@ -1,86 +1,91 @@
-# Autonomous Software Agents
+# ASAP
 
-This project is based on [Deliveroo.js](https://deliveroojs.onrender.com/) which is a minimalistic parcels delivering web-based game developed specifically for this course and for educational purposes. 
+## Table of contents
+- [ASAP](#asap)
+  - [Table of contents](#table-of-contents)
+  - [Project Overview](#project-overview)
+  - [Project Layout](#project-layout)
+  - [Installation](#installation)
+  - [Running the Project](#running-the-project)
+- [Contacts](#contacts)
+
+## Project Overview
+This project is part of the "Autonomous Software Agents" master course. The goal is to develop an autonomous agent using the Belief-Desire-Intention (BDI) architecture, capable of playing a game that involves picking up and delivering parcels. The agent interacts with the game environment via the API provided by the [Deliveroo.js](https://github.com/unitn-ASA/DeliverooAgent.js) project.
 
 <p align="center">
-  <img src="deliveroo.png" alt="Alt text" style="display: block; margin: 0 auto;">
+  <img src="deliveroo.png" alt="Alt text" style="display: block; margin: 0 auto; width:500">
 </p>
 
+## Project Layout
 
-The objective of the project is to develop an autonomous software that will play on your behalf, the main goal of the game is earning points by collecting as many parcels as possible and delivering them in the delivery zone.
+```plaintext
+ASAP/
+├── belief/
+│   ├── agentData.js           # To store information about agent(s)
+│   ├── belief.js              # General beliefs management
+│   ├── map.js                 # To store information about the map
+│   ├── utilsBelief.js         # All functions utils for belief
+|
+├── coordination/
+│   ├── coordination.js        # Handles messages with other agents 
+|
+├── intention&revision/
+│   ├── agent.js               # Handle agent loop intention
+│   ├── intention.js           # Handle intention execution
+│   ├── options.js             # Handle optionsLoop to choose best option
+│   ├── utilsOptions.js        # All functions utils to choose best option and calculate utilities
+|
+├── planner/
+│   ├── domain.pddl/           # Domain for PDDL
+│   ├── plans.js               # All possible plans
+│   ├── utils_planner.js       # All function utils for plans (ex. BFS)
+|
+├── config.js                  # Configuration parameters
+├── index.js                   # For running the agent
+└── socketConnection.js        # Create client instantation
+```
 
-We want to use a BDI architecture:
-<ul>
-  <li>Sensing the environment and managing Beliefs</li>
-  <li>Deliberating Intentions</li>
-  <li>Select plans from a library</li>
-  <li>Using an external planner component</li>
-  <li>Execute a plan (actions)</li>
-  <li>Defining strategies and behaviours</li>
-  <li>Replanning and redeliberating</li>
-</ul>
+## Installation
 
-The project is divided into two main parts.
+1. **Clone the repository:**
+   ```
+   git clone https://github.com/Roman-Simone/ASA_Project.git
+   ```
 
-## First Part
-<ul>
-    <li>Develop an autonomous agent to act on behalf of the user.</li>
-    <li>Implement functionality to represent and manage beliefs from sensing data, including belief revision.</li>
-    <li>Enable activation of goals/intentions and actions on the environment, including intention revision.</li>
-    <li>Utilize predefined plans to achieve goals/intentions (parcels are known from the beginning).</li>
-    <li>Extend the software with automated planning.</li>
-    <li>Once an intention is activated, call the planner to generate the plan to execute.</li>
-    <li>Validate and test the system with predefined simulation runs.</li>
-</ul>
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
 
-## Second Part
-<ul>
-    <li>Extend the software to include a second autonomous software agent.</li>
-    <li>Enable communication between the two agents.</li>
-    <li>Allow the exchange of beliefs (e.g., beliefs about the environment that the other cannot see, beliefs about
-        committed intentions, etc.).</li>
-    <li>Implement coordination between agents (e.g., the closest agent will commit to pick up a new parcel).</li>
-    <li>Enable negotiation between agents (e.g., one agent offers to deliver a parcel in exchange for the other
-        agent picking up a new parcel).</li>
-    <li>Validate and test the system with predefined simulation runs.</li>
-</ul>
+3. **Set up Docker environment for PDDL:**
+   In case you want to have PDDL solution locally follow the instructions in the [Planutils Server Environment](https://github.com/AI-Planning/planutils/tree/main/environments/server) to set up the Docker environment required for the PDDL planners (otherwise don't do anything).
 
-## Utility Functions
+   Then, you need to go to ```node_modules/@unitn-asa/pddl-client/src/PddlOnlineSolver.js```. Here you are going to change the parameters to the following:
+    
+    ```bash
+    const HOST = "http://localhost:5001"
+    const PATH = "/package/dual-bfws-ffparser/solve"
+    ```
 
-### go_put_down
+## Running the Project
 
-We use the following utility function for the go_put_down intention:
+The program have two modalities:
+1. SingleAgent where there is only one agent in game, in order to launch this modalities run:
 
-$$
-    utility = scoreInMind - f * dist(me, nearestDelivery) * nParcelsInMind;
-$$
+    ```bash
+    node index.js ONE agent_1
+    ```
+2. MultiAgents where there is two agents in game (one MASTER and one SLAVE), in order to launch this modalities run:
 
-where $scoreInMind$ is the total reward the agent is carrying in his head (he has picked up), $f = \frac{movementDuration}{parcelDecayingInterval}$ which is a ratio that determines how much a parcel's score decays at each step of our agent. Clearly, at each timestep, the total $scoreInMind$ decays by one unit for each parcel he's carrying.
+    ```bash
+    node index.js TWO agent_1
+    node index.js TWO agent_2
+    ```
 
-### go_pick_up
+# Contacts
 
-The go_pick_up utility is more complicated:
+Simone Roman - [simone.roman@studenti.unitn.it](mailto:simone.roman@studenti.unitn.it)
 
-$$
-    utility = RewardParcel + RewardInMind - f * dist(me, delivery) * (numParcelInMind + 1);
-$$
+Stefano Bonetto - [stefano.bonetto@studenti.unitn.it](mailto:stefano.bonetto@studenti.unitn.it)
 
-where:
-
-$$
-    RewardInMind = scoreInMind - f * dist(me, parcel) * numParcelInMind;
-$$
-
-and 
-
-$$
-    RewardParcel = scoreParcel - f * dist(me, parcel)
-$$
-
-We also introduce a penalty if the distance between me and parcel A is greater than the distance between the nearest agent and parcel A. This penalty is added to the utility function as follows:
-
-$$
-    utility = utility - malus * (distance(me, parcel) - dist(nearestAgent, parcel))
-$$
-
-where $malus$ is the penalty factor applied to the difference between the distance from me to the parcel and the distance from the nearest agent to the parcel. 
+<a href="https://www.unitn.it/"><img src="https://ing-gest.disi.unitn.it/wp-content/uploads/2022/11/marchio_disi_bianco_vert_eng-1024x295.png" width="300px"></a>
