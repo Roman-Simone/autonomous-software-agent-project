@@ -43,8 +43,7 @@ In this report, we will thoroughly discuss the logic, strategies, and structure 
 
 
 \section{Belief}
-
-The beliefs of our agent essentially form its understanding of the environment in which it operates. These beliefs are shaped by the agent's perceptions and are constantly updated as it encounters new stimuli. This ongoing process ensures that the agent's view of the world remains current and responsive to changes, allowing it to make informed decisions as it navigates its tasks.
+An agent’s understanding of its environment is fundamentally shaped by its beliefs, which are formed through its perceptions. These beliefs are not static; they are asynchronously refined and updated as the agent encounters new stimuli. This dynamic process ensures that the agent’s view of the world remains up-to-date and adaptable, enabling it to make informed decisions and effectively navigate its tasks.
 
 The key perceptions that our agent is capable of detecting include:
 
@@ -58,22 +57,7 @@ Based on Deliveroo's current level's parameters, our agent has a field of view t
 
 \subsection{Map sensing}
 
-At the start of each game, the map is perceived by the agent. The tiles on the map can be of four different types:
-
-\begin{itemize}
-    \item Blocked tiles (empty or not\_tile)
-    \item Walkable spawning tiles (where parcels can spawn)
-    \item Walkable non-spawning tiles
-    \item Delivery tiles
-\end{itemize}
-
-The server sends each agent a JSON file containing an entry for each non-empty tile in the following format:
-
-\begin{center}
-    \texttt{\{ x: 0, y: 0, delivery: true, parcelSpawner: false \}}
-\end{center}
-
-This JSON file is used to create a matrix that represents the map more effectively, with the following values for each type of tile:
+At the beginning of each game, the agent receives a JSON file from the server, which includes information about each non-empty tile on the map. This file is used to construct a matrix that represents the map more effectively. Each tile in the matrix is assigned one of the following values:
 
 \begin{table}[h]
     \centering
@@ -93,8 +77,8 @@ This JSON file is used to create a matrix that represents the map more effective
 
 To store the data we create a class \texttt{Map}.
 
-\subsubsection{MyMap}
-This instantiation of the \texttt{Map} class helps us to retain all the data related to the map, including:
+\subsubsection{Map}
+This class is necessary to store the information of the map and update the 
 
 \begin{itemize}
     \item \texttt{original\_map}: the initial map sent by the server.
