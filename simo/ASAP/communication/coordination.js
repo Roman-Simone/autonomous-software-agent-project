@@ -1,7 +1,8 @@
 import { client, friend_name } from "../socketConnection.js";
-import { computeBestOption } from "../intention&revision/utilsOptions.js"
+import { findBestOptionMasterAndSLave } from "../intention&revision/utilsOptions.js"
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 
+// Function to get the message from the other agent used in handshake
 function getMessage(client) {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
@@ -10,12 +11,13 @@ function getMessage(client) {
     });
 }
 
+// Function to perform the handshake between the two agents
 async function handshake() {
 
     // Wait 500ms for synchronization
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Send message in broadcast (just the first agent will receive it)
+    // Send message in broadcast (just the second agent will receive it)
     client.shout({
         hello: '[HANDSHAKE] ' + client.name + ' firstMessage',
         iam: client.name,
@@ -64,9 +66,8 @@ async function handshake() {
     return true
 }
 
-
-
-
+// Function to send a message to the other agent
+// used to send the data of the agent to the other agent
 async function sendMessage(data, common = []) {
     await client.say(CollaboratorData.id, {
         hello: "[INFORM]",
@@ -78,94 +79,46 @@ async function sendMessage(data, common = []) {
 client.onMsg((id, name, msg, reply) => {
     if (msg.hello == "[INFORM]" && msg.data != undefined) {
 
+        // MASTER-SIDE
         if (MyData.role == "MASTER") {
-
-            // console.log("\n\nMESSAGE DATA: ")
+            // Receive data from the SLAVE
             CollaboratorData.copy(msg.data);
-            // CollaboratorData.print();
-            // console.log("\n\n")
 
             if (CollaboratorData.adversaryAgents.length > 0) {
-
-                // here we want to update the set of adversaryAgents of MASTER with the ones of he SLAVE
-                // considering that we don't want to include MASTER (then we have problem with 
-                // beliefset and pddl COMPUTATION).
+                // Update the map with the new position of the adversary agents (union of the two lists)
                 MyData.updateEnemies(CollaboratorData.adversaryAgents);
             }
 
             if (MyData.adversaryAgents.length > 0) {
+                // Update the map with the new position of the adversary agents (union of the two lists)
                 CollaboratorData.updateEnemies(MyData.adversaryAgents);
             }
 
-            if (computeBestOption()) {
+            // Compute the best option for the two agents and send the message with the best option and information to the SLAVE
+            if (findBestOptionMasterAndSLave()) {
                 sendMessage(CollaboratorData);
             }
 
+            // Reset the map with the original values and set the adversary agents as walls
             MyMap.resetMap(-1)
-
             for (let a of MyData.adversaryAgents) {
                 MyMap.updateMap(a.x, a.y, -1);
             }
 
         }
+        // SLAVE-SIDE
         else if (MyData.role == "SLAVE") {
 
+            // Take the message from the MASTER with the best option and the information
             MyData.copy(msg.data);
 
+            // Update the map with the new position of the adversary agents (union of the two lists)
             MyMap.resetMap(-1)
             for (let a of MyData.adversaryAgents) {
                 MyMap.updateMap(a.x, a.y, -1);
             }
-
         }
     }
 });
-
-
-// // SLAVE manda options e attende un ordine dal master
-// async function slaveStateMessage() {
-
-//     // MyData.printParcels();
-//     let reply = await client.ask(CollaboratorData.id, {
-//         hello: "[INFORM]",
-//         data: MyData,
-//         time: Date.now()
-//     });
-
-//     MyData.copy(reply);
-
-//     return reply;
-// }
-
-
-
-// // MASTER riceve options e manda ordine allo slave
-// function masterRevision() {
-//     return new Promise((resolve, reject) => {
-//         client.onMsg((id, name, msg, reply) => {
-//             try {
-
-//                 console.log("[", MyData.role, "] ", "Received message from ", name, " at ", msg.time, "\n");
-
-//                 if (msg.data != undefined) {
-//                     CollaboratorData.copy(msg.data);
-//                 }
-//                 if (computeBestOption())
-//                     if (reply) {
-//                         reply(CollaboratorData);
-//                     }
-//                 resolve(true); // Resolve the promise with the answer
-//             } catch (error) {
-//                 console.error(error);
-
-//                 if (reply) {
-//                     reply(msg.data);            // to mantain sync, if error is catch we simply return the same state we received (arrangiati SLAVE)
-//                 }
-
-//                 reject(error); // Reject the promise if there's an error
-//             }
-//         });
-//     });
-// }
 
 export { handshake, sendMessage };

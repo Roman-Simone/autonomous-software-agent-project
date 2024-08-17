@@ -1,5 +1,6 @@
-export { from_json_to_matrix, existAgentById };
+// Desc: This file contains the functions that are used to convert the json map to a matrix and to check if an agent exists in the list of agents
 
+// Function to convert the json map to a matrix
 function from_json_to_matrix(width, height, tiles) {
     var map = [];
     for (let i = 0; i < width; i++) {
@@ -21,3 +22,5 @@ function from_json_to_matrix(width, height, tiles) {
 function existAgentById(id1, id2) {
     return id1 === id2
 }
+
+export { from_json_to_matrix, existAgentById };

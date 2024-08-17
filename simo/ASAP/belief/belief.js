@@ -10,7 +10,6 @@ var MyMap = new Map();        // Instance of Map for the agent itself
 var movement_duration;      // Movement duration of the agent used only in belief.js
 var parcel_decading_interval;   // Parcel decading interval of the agent used only in belief.js
 const start = Date.now();   // Start time of the agent used only in belief.js
-var malus; // Malus used only in belief.js
 
 // Update the position of the agent
 client.onYou(({ id, name, x, y, score }) => {
@@ -27,36 +26,32 @@ client.onYou(({ id, name, x, y, score }) => {
 // Update the parcels perceived by the agent
 client.onParcelsSensing((perceived_parcels) => {
 
-    let UpdateParcel = [];
-    let now = Date.now();
+    let UpdateParcel = [];  // Array to store the updated parcels
+    let now = Date.now();   // Get the current time
 
-    // Aggiorna i pacchi percepiti con il timestamp attuale
+    // Take the perceived parcels 
     for (let perceived_parcel of perceived_parcels) {
         perceived_parcel.timestamp = now;
         UpdateParcel.push(perceived_parcel);
-        // console.log(perceived_parcel)
     }
 
-    // Aggiorna i pacchi esistenti e calcola il nuovo reward
+    // Update the parcels seen in the past and now not seen (due to distance)
     for (let parcel of MyData.parcels) {
         if (!UpdateParcel.some(p => p.id == parcel.id)) {
 
             let diff_time = now - parcel.timestamp;
-            parcel.reward = parcel.reward - Math.floor(diff_time / parcel_decading_interval - malus);
+            parcel.reward = parcel.reward - (diff_time / parcel_decading_interval);
 
-            if (parcel.reward >= 2 && diff_time < 15 * 1000) {
+            if (parcel.reward >= 2 && diff_time < (15 * 1000)) {
                 parcel.timestamp = now;
                 UpdateParcel.push(parcel);
-                console.log("My POS: ", MyData.pos)
-                console.log("Parcel POS: ", parcel.x," ", parcel.y, " ", parcel.reward)
             }
         }
     }
 
+    // Reset and update the parcels array
     MyData.parcels = []
-    // Copia i nuovi pacchi nei pacchi dell'agente
     MyData.parcels = JSON.parse(JSON.stringify(UpdateParcel));
-    console.log(MyData.parcels.length)
 });
 
 // Update the original map and the map perceived by the agent ONLY FIRST TIME
@@ -79,10 +74,14 @@ client.onConfig((config) => {
 
     movement_duration = config.MOVEMENT_DURATION;
 
-    MyMap.parcel_observation_distance = config.PARCELS_OBSERVATION_DISTANCE;
+    if (config.PARCEL_DECADING_INTERVAL == "infinite") {
+        MyMap.parcel_observation_distance = Number.MAX_VALUE;
+    }
+    else {
+        MyMap.parcel_observation_distance = config.PARCELS_OBSERVATION_DISTANCE;
+    }
 
     MyMap.parcel_reward_avg = config.PARCEL_REWARD_AVG;
-    malus = MyMap.parcel_reward_avg / 7
 
     if (parcel_decading_interval == "infinite") {
         parcel_decading_interval = Number.MAX_VALUE;
@@ -90,26 +89,29 @@ client.onConfig((config) => {
         parcel_decading_interval = parseInt(parcel_decading_interval.slice(0, -1)) * 1000;
     }
 
+    // Calculate the frequency of the parcels decading for the agent (movement/decading_interval)
     MyMap.decade_frequency = movement_duration / parcel_decading_interval;
 
 });
 
-
+// Update the adversary agents
 client.onAgentsSensing((agents) => {
 
+    // Reset the map with the original values
     MyMap.resetMap(-1);
 
     let timestamp = Date.now() - start;
 
     for (let a of agents) {
         a.timestamp = timestamp
-        MyMap.updateMap(a.x, a.y, -1);
+        // MyMap.updateMap(a.x, a.y, -1);  // NOt necessary We'll do it later
 
         if (!MyData.adversaryAgents.some(agent => existAgentById(a.id, agent.id))) {
             a.direction = 'none';
             MyData.adversaryAgents.push(a)
         }
         else {
+            //Calculate the direction of the adversary agent and set the first tile in direction as wall
             let previousIndex = MyData.adversaryAgents.findIndex(agent => existAgentById(a.id, agent.id));
             let previous = MyData.adversaryAgents[previousIndex];
 
@@ -134,7 +136,7 @@ client.onAgentsSensing((agents) => {
         }
     }
     for (let a of MyData.adversaryAgents) {
-        MyMap.updateMap(a.x, a.y, -1);
+        MyMap.updateMap(a.x, a.y, -1);      // Set the adversary agent position on the map as wall
     }
 })
 

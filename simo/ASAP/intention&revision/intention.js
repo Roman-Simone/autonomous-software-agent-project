@@ -1,6 +1,5 @@
 
 import { plans } from '../planners/plans.js';
-export { Intention };
 
 /**
  * Intention
@@ -93,3 +92,5 @@ class Intention {
     }
 
 }
+
+export { Intention };

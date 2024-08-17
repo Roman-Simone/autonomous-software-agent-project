@@ -1,36 +1,32 @@
 import { Beliefset } from "@unitn-asa/pddl-client";
-import { findPath_BFS_notMe, findPath_BFS } from "../planners/utils_planner.js"
-import { MyData, CollaboratorData } from "./belief.js";
-
-export { Map }
 
 class Map {
-    map = [];
-    original_map = [];
-    deliveryCoordinates = [];
-    spawningCoordinates = [];
-    myBeliefset = new Beliefset();
-    width = 0;
-    height = 0;
-    parcel_reward_avg = 0;
-    parcel_observation_distance;
-    decade_frequency;
+    map = [];        // map updated 0 = free, 1 = wall, 2 = parcel, 3 = delivery
+    original_map = [];      // original map used to reset the map
+    deliveryCoordinates = [];       // delivery coordinates in the map used for go put down
+    spawningCoordinates = [];       // spawning coordinates in the map used for go pick up
+    myBeliefset = new Beliefset();  // beliefset used for the planner
+    width = 0;       // width of the map
+    height = 0;     // height of the map
+    parcel_reward_avg = 0;       // average reward of the parcels
+    parcel_observation_distance;         // distance to observe parcels
+    decade_frequency;       // frequency of the parcels decading for the agent
 
     constructor() {
-        this.map = []
-        this.original_map = []
-        this.deliveryCoordinates = []
-        this.myBeliefset = new Beliefset()
-        this.width = 0
-        this.height = 0
-        this.parcel_reward_avg = 0
-        this.parcel_observation_distance = 0
-        this.decade_frequency = 0
+        this.map = []      
+        this.original_map = []  
+        this.deliveryCoordinates = []   
+        this.spawningCoordinates = []   
+        this.myBeliefset = new Beliefset()      
+        this.width = 0     
+        this.height = 0     
+        this.parcel_reward_avg = 0     
+        this.parcel_observation_distance = 0   
+        this.decade_frequency = 0       
     }
 
+    // function to adjust the corner of compute spawning score
     validateAndAdjustCorner(corner) {
-
-
         if (corner.x <= 0) corner.x = 0;
         if (corner.y <= 0) corner.y = 0;
         if (corner.x >= this.width) corner.x = this.width - 1;
@@ -39,11 +35,14 @@ class Map {
         return corner;
     }
 
+    // function to compute the spawning score for random delivery 
     computeSpawningScore(x, y) {
-        let score = 0;
-        this.width = this.original_map.length;
-        this.height = this.original_map[0].length;
 
+        let score = 0;      // score of the spawning coordinates
+        this.width = this.original_map.length;     // width of the map
+        this.height = this.original_map[0].length;      // height of the map
+
+        // corners of the window to observ the best spawning coordinates
         let left_upper_corner = { x: x - this.parcel_observation_distance, y: y + this.parcel_observation_distance };
         let right_upper_corner = { x: x + this.parcel_observation_distance, y: y + this.parcel_observation_distance };
         let left_lower_corner = { x: x - this.parcel_observation_distance, y: y - this.parcel_observation_distance };
@@ -59,6 +58,8 @@ class Map {
         let minY = Math.min(left_lower_corner.y, right_lower_corner.y);
         let maxY = Math.max(left_upper_corner.y, right_upper_corner.y);
 
+
+        // Find the score of the spawning coordinates (the nmber of spawning coordinates in the window)
         for (let i = minX; i <= maxX; i++) {
             for (let j = minY; j <= maxY; j++) {
                 if (this.map[i][j] === 3) {
@@ -70,7 +71,7 @@ class Map {
         return score;
     }
 
-
+    // function to get the best spawning coordinates
     getBestSpawningCoordinates() {
         let best = { x: 0, y: 0, score: 0 };
         for (let c of this.spawningCoordinates) {
@@ -82,6 +83,7 @@ class Map {
         return best;
     }
 
+    // function util to print the map as table
     printOriginalMapAsTable() {
         if (this.original_map.length === 0) {
             console.log("The matrix is empty.");
@@ -110,6 +112,7 @@ class Map {
         console.log(table);
     }
 
+    // function util to print the map as table
     printMapAsTable() {
         if (this.map.length === 0) {
             console.log("The matrix is empty.");
@@ -139,6 +142,7 @@ class Map {
     }
 
 
+    // function util to print specific position in the map 
     printValuesOfMap(val){
         for (let i = 0; i < this.map[0].length; i++) {
             for (let j = 0; j < this.map.length; j++) {
@@ -149,12 +153,12 @@ class Map {
         }
     }
 
+    // function to reset the map with original map
     resetMap(val) {
         let copy = [];
         for (let i = 0; i < this.original_map.length; i++) {
             copy[i] = [];
             for (let j = 0; j < this.original_map[i].length; j++) {
-                // console.log("SONO QUI")
                 if (this.map[i][j] == val) {
                     copy[i][j] = this.original_map[i][j];
                 } else {
@@ -165,12 +169,13 @@ class Map {
         this.map = copy;
     }
 
+    // function to  update the map with a specific value and position
     updateMap(x, y, value) {
         let rows = this.map.length;
         let columns = this.map[0].length;
         x = Math.round(x);
         y = Math.round(y);
-        // console.log("--------------------------------------> Trying to update ", x, y, " with value ", value, " in map of size ", rows, columns, "\n")
+        
         if (x >= 0 && x < rows && y >= 0 && y < columns) {
             this.map[x][y] = value;
         } else {
@@ -179,7 +184,10 @@ class Map {
         }
     }
 
+    // function to update the beliefset used in planning
+    // this function use the map to find the tiles and their neighbors 
     updateBeliefset() {
+
         this.myBeliefset = new Beliefset();
 
         for (let x = 0; x < this.width; x++) {
@@ -210,9 +218,8 @@ class Map {
                 }
             }
         }
-
     }
 }
 
 
-
+export { Map }

@@ -1,8 +1,6 @@
 import { Intention } from './intention.js';
 import { MyData } from "../belief/belief.js";
-export { Agent };
 
-//try
 
 /**
  * Intention execution loop
@@ -21,25 +19,25 @@ class Agent {
 
                 // Start achieving intention
                 let ret = await intention.achieve()
-
                     // Catch eventual error and continue
                     .catch(error => {
-
                         // console.log( 'Failed intention', ...intention.predicate);
                         this.remove(intention.predicate);
 
                     });
 
+                // If intention is achieved
                 if (ret == true) {
+                    // Add parcel taken to MyData.parcelsInMind
                     if (intention.predicate[0] == "go_pick_up") {
                         let entry = intention.predicate[3]
                         MyData.parcelsInMind.push(entry);
                     }
+                    // Reset parcelsInMind if intention is go_put_down
                     else if (intention.predicate[0] == "go_put_down") {
-                        console.log("PUT DOWN")
                         for (let parcel of MyData.parcelsInMind) {
-                            // remove parcel from MyData.parcels
-                            MyData.parcels = MyData.parcels.filter(p => p.id != parcel);
+                            // remove parcels in mind from MyData.parcels
+                            MyData.parcels = MyData.parcels.filter(p => p.id != parcel.id);
                         }
 
                         MyData.parcelsInMind = [];
@@ -54,7 +52,7 @@ class Agent {
     }
 
     async remove(predicate) {
-        
+
         for (let i = 0; i < this.intention_queue.length; i++) {
             if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
                 this.intention_queue.splice(i, 1);
@@ -67,42 +65,44 @@ class Agent {
 
     async push(predicate) {
 
+        // Take the last intention in the queue
         const last = this.intention_queue[0];
 
         let update = false;
-        //Check if the intention is already in the queue and in case upadate it
+
+        //Check if the intention is already in the queue and in case update it
         for (let i = 0; i < this.intention_queue.length; i++) {
-            // console.log("comparing " + this.createString(predicate) + " with " + this.createString(this.intention_queue[i].predicate));
             if (this.createString(predicate) == this.createString(this.intention_queue[i].predicate)) {
                 this.intention_queue[i].predicate[4] = predicate[4];
                 update = true;
             }
         }
 
+        // If the intention is not in the queue, add it
         if (!update) {
             // console.log("[INFO] ", "NEW intention ->", predicate)
             const current = new Intention(this, predicate)
             this.intention_queue.push(current);
         }
 
+        // Sort the queue in base of the utility value
         this.intention_queue = this.bubbleSort(this.intention_queue);
 
-        // this.printQueue("push");
-
+        // If I have better intentions in the queue, stop the last one and start the new one
         if (this.checkSwitch(last)) {
             console.log("[INFO] ", "Switching from " + this.createString(last.predicate) + " to " + this.createString(this.intention_queue[0].predicate));
             last.stop();
         }
     }
 
+    // Stop all intentions in the queue
     async stop() {
-        // console.log( 'stop agent queued intentions');
         for (const intention of this.intention_queue) {
             intention.stop();
         }
     }
 
-
+    // Create a string from the predicate useful to compare intentions
     createString(predicate) {
         if (predicate[0] == "go_pick_up") {
             return predicate[0] + predicate[3];
@@ -112,6 +112,7 @@ class Agent {
         }
     }
 
+    // Check if the last intention in the queue is different from the first in the queue (the new best intention)
     checkSwitch(last) {
 
         let ret = false
@@ -124,6 +125,7 @@ class Agent {
         return ret;
     }
 
+    // Bubble sort algorithm to sort the queue in base of the utility value
     bubbleSort(arr) {
         const n = arr.length;
         let swapped;
@@ -143,6 +145,7 @@ class Agent {
         return arr;
     }
 
+    // Print the queue  (useful for debugging)
     printQueue(zone = "") {
         console.log('\n[START QUEUE] called from ' + zone);
         for (let i = 0; i < this.intention_queue.length; i++) {
@@ -151,3 +154,5 @@ class Agent {
         console.log('[END QUEUE]\n')
     }
 }
+
+export { Agent };
