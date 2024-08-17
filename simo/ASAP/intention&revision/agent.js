@@ -3,7 +3,7 @@ import { MyData } from "../belief/belief.js";
 
 
 /**
- * Intention execution loop
+ * Agent class
  */
 class Agent {
 
@@ -51,6 +51,11 @@ class Agent {
         }
     }
 
+    /**
+     * Remove an intention from the queue
+     * @param {Array} predicate
+     * @returns {Boolean} true if the intention is removed, false otherwise
+    */
     async remove(predicate) {
 
         for (let i = 0; i < this.intention_queue.length; i++) {
@@ -59,10 +64,14 @@ class Agent {
                 return true;
             }
         }
-        // console.log("Predicate not found in queue", predicate);
+
         return false;
     }
 
+    /**
+     * Push an intention in the queue and check if it is better than the last one
+     * @param {Array} predicate
+    */
     async push(predicate) {
 
         // Take the last intention in the queue
@@ -95,14 +104,20 @@ class Agent {
         }
     }
 
-    // Stop all intentions in the queue
+    /**
+     * Stop all intentions in the queue
+     */
     async stop() {
         for (const intention of this.intention_queue) {
             intention.stop();
         }
     }
 
-    // Create a string from the predicate useful to compare intentions
+    /**
+     * Create a string from the predicate useful to compare intentions
+     * @param {Array} predicate
+     * @returns {String} the string created
+    */
     createString(predicate) {
         if (predicate[0] == "go_pick_up") {
             return predicate[0] + predicate[3];
@@ -112,7 +127,12 @@ class Agent {
         }
     }
 
-    // Check if the last intention in the queue is different from the first in the queue (the new best intention)
+    /**
+     * Check if the last intention in the queue is different from the first in the queue (the new best intention)
+     * 
+     * @param {Intention} last
+     * @returns {Boolean} true if the intentions are different, false otherwise
+    */
     checkSwitch(last) {
 
         let ret = false
@@ -125,7 +145,11 @@ class Agent {
         return ret;
     }
 
-    // Bubble sort algorithm to sort the queue in base of the utility value
+    /**
+     *  Bubble sort algorithm to sort the queue in base of the utility value
+     * @param {Array} arr
+     * @returns {Array} the sorted array
+    */
     bubbleSort(arr) {
         const n = arr.length;
         let swapped;
@@ -145,7 +169,10 @@ class Agent {
         return arr;
     }
 
-    // Print the queue  (useful for debugging)
+    /**
+     * Print the queue  (useful for debugging)
+     * @param {String} zone
+    */
     printQueue(zone = "") {
         console.log('\n[START QUEUE] called from ' + zone);
         for (let i = 0; i < this.intention_queue.length; i++) {

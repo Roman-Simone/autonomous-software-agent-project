@@ -11,7 +11,9 @@ var movement_duration;      // Movement duration of the agent used only in belie
 var parcel_decading_interval;   // Parcel decading interval of the agent used only in belief.js
 const start = Date.now();   // Start time of the agent used only in belief.js
 
-// Update the position of the agent
+/**
+ * Update the position of the agent
+*/
 client.onYou(({ id, name, x, y, score }) => {
 
     // if first time, set the id and name
@@ -23,7 +25,9 @@ client.onYou(({ id, name, x, y, score }) => {
     MyData.pos.y = Math.round(y);
 })
 
-// Update the parcels perceived by the agent
+/**
+ * Update the parcels perceived by the agent
+*/
 client.onParcelsSensing((perceived_parcels) => {
 
     let UpdateParcel = [];  // Array to store the updated parcels
@@ -54,7 +58,9 @@ client.onParcelsSensing((perceived_parcels) => {
     MyData.parcels = JSON.parse(JSON.stringify(UpdateParcel));
 });
 
-// Update the original map and the map perceived by the agent ONLY FIRST TIME
+/**
+ * Update the original map and the map perceived by the agent ONLY FIRST TIME
+*/
 client.onMap((width, height, tiles) => {
 
     MyMap.original_map = from_json_to_matrix(width, height, tiles);
@@ -67,7 +73,9 @@ client.onMap((width, height, tiles) => {
 
 });
 
-// Take the information about the level configuration
+/**
+ * Take the information about the level configuration
+*/
 client.onConfig((config) => {
 
     parcel_decading_interval = config.PARCEL_DECADING_INTERVAL;
@@ -94,7 +102,9 @@ client.onConfig((config) => {
 
 });
 
-// Update the adversary agents
+/**
+ * Update the adversary agents
+*/
 client.onAgentsSensing((agents) => {
 
     // Reset the map with the original values
@@ -139,6 +149,5 @@ client.onAgentsSensing((agents) => {
         MyMap.updateMap(a.x, a.y, -1);      // Set the adversary agent position on the map as wall
     }
 })
-
 
 export { CollaboratorData, MyData, MyMap };

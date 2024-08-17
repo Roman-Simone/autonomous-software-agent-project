@@ -2,7 +2,11 @@ import { client, friend_name } from "../socketConnection.js";
 import { findBestOptionMasterAndSLave } from "../intention&revision/utilsOptions.js"
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 
-// Function to get the message from the other agent used in handshake
+/**
+ * Function to get the message from the other agent used in handshake
+ * @param {Object} client
+ * @returns {Promise} Promise with the message
+*/
 function getMessage(client) {
     return new Promise((resolve, reject) => {
         client.onMsg((id, name, msg, reply) => {
@@ -11,7 +15,9 @@ function getMessage(client) {
     });
 }
 
-// Function to perform the handshake between the two agents
+/**
+ * Function to perform the handshake between the two agents
+*/
 async function handshake() {
 
     // Wait 500ms for synchronization
@@ -66,9 +72,13 @@ async function handshake() {
     return true
 }
 
-// Function to send a message to the other agent
-// used to send the data of the agent to the other agent
-async function sendMessage(data, common = []) {
+/**
+ * Function to send a message to the other agent
+ * used to send the data of the agent to the other agent
+ * @param {object} data 
+ */
+
+async function sendMessage(data) {
     await client.say(CollaboratorData.id, {
         hello: "[INFORM]",
         data: data,
@@ -76,6 +86,9 @@ async function sendMessage(data, common = []) {
     });
 }
 
+/**
+ * Function to get the message from the other agent
+ */
 client.onMsg((id, name, msg, reply) => {
     if (msg.hello == "[INFORM]" && msg.data != undefined) {
 

@@ -1,5 +1,5 @@
-import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
 import { default as config } from "./config.js";
+import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
 
 function getToken(my_name) {
     

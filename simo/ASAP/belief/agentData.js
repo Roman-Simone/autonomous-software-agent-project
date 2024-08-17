@@ -1,5 +1,8 @@
 import { existAgentById } from "./utilsBelief.js"; 
 
+/**
+ * AgentData class
+ */
 class AgentData {
 
     // INFORMATION ABOUT THE AGENT
@@ -26,8 +29,13 @@ class AgentData {
         this.parcelsInMind = [];
     }
 
-    // Copy the data from another agent
-    // This method is used to clone or synchronize the data of another agent
+    /**
+     * Copy the data from another agent
+     * This method is used to clone or synchronize the data of another agent
+     * 
+     * @param {object} data - The data to copy
+     */
+    
     copy(data) {
         this.name = data.name;            
         this.id = data.id;                
@@ -39,7 +47,11 @@ class AgentData {
         this.parcelsInMind = data.parcelsInMind;     
     }
 
-    // Update the adversary agents list with the enemies from another agent
+    /**
+     * Update the adversary agents list with the enemies from another agent
+     * 
+     * @param {Array} otherEnemies - The list of enemies from another agent
+    */
     updateEnemies(otherEnemies) {
         
         for (let a of otherEnemies) {
@@ -59,7 +71,11 @@ class AgentData {
         }
     }
 
-    // Calculate the score for parcels in mind
+    /**
+     * Calculate the score for parcels in mind
+     * 
+     * @returns {number} - The total score of parcels in mind
+    */
     get_inmind_score() {
         let tot_score = 0; // Initialize total score
         for (let parcelInMind of this.parcelsInMind) { // Iterate over parcels in mind
@@ -78,7 +94,12 @@ class AgentData {
         return tot_score; // Return the total score
     }
 
-    // Search for a parcel by its ID
+    /**
+     * Search for a parcel by its ID
+     * 
+     * @param {string} idToFind - The ID of the parcel to find
+     * @returns {Parcel} - The parcel with the given ID
+    */
     getParcelById(idToFind) {
         for (let parcel of this.parcels) { // Iterate over all parcels
             if (idToFind == parcel.id) { // If the parcel ID matches the one we're looking for
@@ -88,7 +109,11 @@ class AgentData {
         return undefined; // If not found, return undefined
     }
 
-    // Get the IDs of parcels that are in the agent's mind
+    /**
+     * Get the IDs of parcels that are in the agent's mind
+     * 
+     * @returns {Array} - The list of parcel IDs in the agent's mind
+    */
     getParcelsInMindIds() {
         var ids = []; // Initialize an empty array to store IDs
 
@@ -104,14 +129,18 @@ class AgentData {
         return ids; // Return the list of parcel IDs
     }
 
-    // Print all the parcels known by the agent
+    /**
+     * Print all the parcels known by the agent
+    */
     printParcels() {
         for (let elem of this.parcels) { // Iterate over all parcels
             console.log(elem); // Print each parcel
         }
     }
 
-    // Print all the data related to the agent
+    /**
+     * Print all the data related to the agent
+    */
     print() {
         console.log("name: ", this.name);          
         console.log("id: ", this.id);               
@@ -121,6 +150,5 @@ class AgentData {
         console.log(""); // Empty console log to add a line break
     }
 }
-
 
 export { AgentData }

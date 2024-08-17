@@ -1,9 +1,10 @@
+import { MyData } from "./belief/belief.js";
+import { mode } from "./socketConnection.js";
 import { Agent } from './intention&revision/agent.js';
 import { handshake } from "./communication/coordination.js";
-import { MyData } from "./belief/belief.js";
 import { optionsLoop } from './intention&revision/options.js'
-import { mode } from "./socketConnection.js";
-export { myAgent }
+
+
 
 
 // If mode is TWO, wait for the other agent to connect
@@ -22,3 +23,5 @@ myAgent.intentionLoop();
 
 // Call optionLoop every 1 second
 setInterval(optionsLoop, 1000);
+
+export { myAgent }

@@ -2,8 +2,14 @@ import { positionsEqual } from "../planners/utils_planner.js";
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "../planners/utils_planner.js";
 
-
-// Function to find the best option in the options array, the best option is the one with the highest utility
+/**
+ * Identifies the best option based on utility from a set of given options.
+ * The best option is the one with the highest utility.
+ * 
+ * @param {Array} options - Array of options to evaluate.
+ * @param {string} id - (Optional) The ID is used in case of Multiagent when SLAVE and MASTER have the same bestOptions.
+ * @returns {Array} The best option based on utility.
+ */
 function findBestOption(options, id = "undefined") {
     let bestUtility = -1.0;
     let best_option = [];
@@ -20,7 +26,11 @@ function findBestOption(options, id = "undefined") {
 }
 
 
-// Function to find the best option for the MASTER and the SLAVE given the options of the two agents
+/**
+ * Function to find the best option for the MASTER and the SLAVE given the options of the two agents
+ * 
+ * @returns {boolean} True. 
+ */
 function findBestOptionMasterAndSLave() {
 
     // Reward penalty divider used to penalize the parcels that are seen by the other agent (to incourage the agent to stay away from the other agent)
@@ -107,12 +117,19 @@ function findBestOptionMasterAndSLave() {
     return true;
 }
 
-// Function to calculate the utility of pick up a parcel 
-// the main idea is to calculate the reward if we pick up the parcel and after that we deliver and the reward if we don't pick up the parcel and we go directly to the delivery
-// if there is slavePos we are in MultiAgent mode if is null we are in SingleAgent mode
+
+/**
+ * Function to calculate the utility of pick up a parcel 
+ * the main idea is to calculate the reward if we pick up the parcel and after that we deliver and the reward if we don't pick up the parcel and we go directly to the delivery
+ * if there is slavePos we are in MultiAgent mode if is null we are in SingleAgent mode
+ * 
+ * @param {[ { id:string, x:number, y:number, carriedBy:string, reward:number } ]} parcel 
+ * @param {{ x:number, y:number }} slavePos 
+ * @returns {number} - The utility value of picking up the parcel.
+ */
 function calculate_pickup_utility(parcel, slavePos = null) {
-    
-    
+
+
     let scoreParcel = parcel.reward;
 
     // If no slavePos we take the information from MyData otherwise from CollaboratorData (SLAVE)
@@ -147,7 +164,7 @@ function calculate_pickup_utility(parcel, slavePos = null) {
             scoreInMind = scoreInMind - parcelInMind.reward;
         }
     }
-    
+
     let RewardParcel = scoreParcel - MyMap.decade_frequency * distance_parcel;
     let RewardInMind = scoreInMind - ((MyMap.decade_frequency * distance_parcel) * numParcelInMind);
     let utility = (RewardParcel + RewardInMind) - (MyMap.decade_frequency * distance_delivery) * (numParcelInMind + 1);
@@ -170,48 +187,62 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     return utility;
 }
 
-// Function to calculate the utility of put down the parcels
-// the main idea is to calculate the reward if we put down the parcels in the nearest delivery point
+
+/**
+ * Function to calculate the utility of put down the parcels
+ * the main idea is to calculate the reward if we put down the parcels in the nearest delivery point
+ * 
+ * @returns {[ { x:number, y:number }, number ]} - The nearest delivery point and the utility value of putting down the parcels.
+ */
 function calculate_putdown_utility() {
 
     let nearest_delivery = find_nearest_delivery()      // find the nearest delivery point
     let distanceDelivery = distanceBFS(nearest_delivery);   // calculate the distance from the agent to the nearest delivery point
     let numParcelInMind = MyData.parcelsInMind.length   // number of parcels in mind
 
-    let valueInMind = MyData.get_inmind_score();       // value in mind
+    let scoreInMind = MyData.get_inmind_score();       // value in mind
 
-    let mult = 0.5 * (valueInMind)  // multiplier to penalize the utility if the agent has a lot of parcels in mind
+    let utilityBoost = 0.5 * (scoreInMind)  // multiplier to increase the utility and incourage the agent to deliver the parcels
 
-
+    // Calculate the reward at the end of the delivery
     for (let parcelInMind of MyData.parcelsInMind) {
         let rewardAtEnd = parcelInMind.reward - (MyMap.decade_frequency * distanceDelivery);
         if (rewardAtEnd <= 0) {
             numParcelInMind = numParcelInMind - 1;
+            scoreInMind = scoreInMind - parcelInMind.reward;
         }
     }
-    var utility = valueInMind - ((MyMap.decade_frequency * distanceDelivery) * numParcelInMind);
 
-    utility = utility + mult;
+    // Calculate the utility of the put down
+    let utility = scoreInMind - ((MyMap.decade_frequency * distanceDelivery) * numParcelInMind);
+    utility = utility + utilityBoost;
 
     return [nearest_delivery, utility];
+
 }
 
+/**
+ * Function to find a random delivery point
+ * The main idea is in case of singleAgent mode the agent goes to the best spawning point (if it is already in the best spawning point it goes to the nearest delivery point), 
+ * in case of multiagent mode the SLAVE goes to the best spawning point and the MASTER goes to the farthest spawning point from the SLAVE
+
+ * @returns {{ x:number, y:number }} - The random delivery point.
+ */
 
 function find_random_deliveryFarFromOther() {
 
     let random_pos = { x: -1, y: -1 };
-
-    // console.log("\nI'm a ", MyData.role, " and I'm going to find a random delivery far from the other agent\n");
 
     if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
 
         let spawning_pos = MyMap.getBestSpawningCoordinates();
         random_pos = { x: spawning_pos.x, y: spawning_pos.y };
 
+        // If the agent is already in the best spawning point it goes to the nearest delivery point
         if (positionsEqual(spawning_pos, MyData.pos)) {
             random_pos = find_nearest_delivery();
         }
-        // console.log("\nI'm a SLAVE, I'm going to a random delivery: ", delivery_pos);
+
     } else {
 
         // Initially no information about the best option
@@ -220,13 +251,14 @@ function find_random_deliveryFarFromOther() {
             return random_pos;
         }
 
-        // MASTER va nella cella di spawn piu' lontana dallo SLAVE
+        // Sort the spawning points by distance from the best option of the SLAVE
         MyMap.spawningCoordinates.sort((a, b) => {
             const distanceA = distanceBFS_notMe(a, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
             const distanceB = distanceBFS_notMe(b, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
             return distanceB - distanceA;
         });
 
+        // If the agent is already in the best spawning point it goes in the second farthest spawning point
         if (positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
             random_pos = { x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
         } else {

@@ -1,6 +1,11 @@
-// Desc: This file contains the functions that are used to convert the json map to a matrix and to check if an agent exists in the list of agents
-
-// Function to convert the json map to a matrix
+/** 
+ * Function to convert the json map to a matrix
+ * 
+ * @param {number} width - The width of the map
+ * @param {number} height - The height of the map
+ * @param {Array} tiles - The tiles of the map
+ * @returns {Array} map - The map represented as a matrix
+*/
 function from_json_to_matrix(width, height, tiles) {
     var map = [];
     for (let i = 0; i < width; i++) {

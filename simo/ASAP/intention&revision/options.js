@@ -5,8 +5,6 @@ import { sendMessage } from "../communication/coordination.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOption } from "./utilsOptions.js";
 
 
-
-
 const MULTIPLIER_THRESH_GO_PUT_DOWN = 10;                 // when it reach this inmind score, it goes to put down the parcels anyway
 const MIN_VAL_DECADE_FREQ = 5.562684646268004e-300;     // minimum value of the parcel_decading_interval
 
@@ -68,6 +66,5 @@ async function optionsLoop() {
     // Push the best option in the agent's stack
     myAgent.push(MyData.best_option);
 }
-
 
 export { optionsLoop };

@@ -1,5 +1,8 @@
 import { Beliefset } from "@unitn-asa/pddl-client";
 
+/**
+ * Map class
+ */
 class Map {
     map = [];        // map updated 0 = free, 1 = wall, 2 = parcel, 3 = delivery
     original_map = [];      // original map used to reset the map
@@ -25,7 +28,12 @@ class Map {
         this.decade_frequency = 0       
     }
 
-    // function to adjust the corner of compute spawning score
+    /**
+     * Adjust the corner of compute spawning score
+     * 
+     * @param {{x:number, y:number}} corner - The corner to adjust
+     * @returns {{x:number, y:number}} - The adjusted corner
+    */
     validateAndAdjustCorner(corner) {
         if (corner.x <= 0) corner.x = 0;
         if (corner.y <= 0) corner.y = 0;
@@ -35,7 +43,13 @@ class Map {
         return corner;
     }
 
-    // function to compute the spawning score for random delivery 
+    /**
+     * Compute the spawning score for random delivery 
+     * 
+     * @param {number} x - The x coordinate
+     * @param {number} y - The y coordinate
+     * @returns {number} - The score of the spawning coordinates
+    */
     computeSpawningScore(x, y) {
 
         let score = 0;      // score of the spawning coordinates
@@ -71,7 +85,9 @@ class Map {
         return score;
     }
 
-    // function to get the best spawning coordinates
+    /**
+     *  Get the best spawning coordinates
+    */ 
     getBestSpawningCoordinates() {
         let best = { x: 0, y: 0, score: 0 };
         for (let c of this.spawningCoordinates) {
@@ -83,7 +99,9 @@ class Map {
         return best;
     }
 
-    // function util to print the map as table
+    /**
+     * Print the map as table
+    */
     printOriginalMapAsTable() {
         if (this.original_map.length === 0) {
             console.log("The matrix is empty.");
@@ -112,7 +130,9 @@ class Map {
         console.log(table);
     }
 
-    // function util to print the map as table
+    /**
+     * Print the map as table
+    */
     printMapAsTable() {
         if (this.map.length === 0) {
             console.log("The matrix is empty.");
@@ -142,7 +162,9 @@ class Map {
     }
 
 
-    // function util to print specific position in the map 
+    /**
+     * Print specific position in the map 
+    */
     printValuesOfMap(val){
         for (let i = 0; i < this.map[0].length; i++) {
             for (let j = 0; j < this.map.length; j++) {
@@ -153,7 +175,11 @@ class Map {
         }
     }
 
-    // function to reset the map with original map
+    /**
+     * Reset the map with original map
+     * 
+     * @param {number} val - The value to reset
+    */
     resetMap(val) {
         let copy = [];
         for (let i = 0; i < this.original_map.length; i++) {
@@ -169,7 +195,13 @@ class Map {
         this.map = copy;
     }
 
-    // function to  update the map with a specific value and position
+    /**
+     * Update the map with a specific value and position
+     * 
+     * @param {number} x - The x coordinate
+     * @param {number} y - The y coordinate
+     * @param {number} value - The value to set
+    */
     updateMap(x, y, value) {
         let rows = this.map.length;
         let columns = this.map[0].length;
@@ -184,8 +216,10 @@ class Map {
         }
     }
 
-    // function to update the beliefset used in planning
-    // this function use the map to find the tiles and their neighbors 
+    /**
+     * function to update the beliefset used in planning
+     * this function use the map to find the tiles and their neighbors 
+     */
     updateBeliefset() {
 
         this.myBeliefset = new Beliefset();
@@ -220,6 +254,5 @@ class Map {
         }
     }
 }
-
 
 export { Map }
