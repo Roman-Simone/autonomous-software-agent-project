@@ -16,16 +16,16 @@ class Map {
     decade_frequency;       // frequency of the parcels decading for the agent
 
     constructor() {
-        this.map = []      
-        this.original_map = []  
-        this.deliveryCoordinates = []   
-        this.spawningCoordinates = []   
-        this.myBeliefset = new Beliefset()      
-        this.width = 0     
-        this.height = 0     
-        this.parcel_reward_avg = 0     
-        this.parcel_observation_distance = 0   
-        this.decade_frequency = 0       
+        this.map = []
+        this.original_map = []
+        this.deliveryCoordinates = []
+        this.spawningCoordinates = []
+        this.myBeliefset = new Beliefset()
+        this.width = 0
+        this.height = 0
+        this.parcel_reward_avg = 0
+        this.parcel_observation_distance = 0
+        this.decade_frequency = 0
     }
 
     /**
@@ -87,7 +87,7 @@ class Map {
 
     /**
      *  Get the best spawning coordinates
-    */ 
+    */
     getBestSpawningCoordinates() {
         let best = { x: 0, y: 0, score: 0 };
         for (let c of this.spawningCoordinates) {
@@ -97,6 +97,103 @@ class Map {
         }
 
         return best;
+    }
+
+    /**
+     * Fill the spawning coordinates and assign the score to each spawning coordinates
+     * 
+     * @param {Array} tiles - The tiles of the map
+    */
+    fillSpawningCoordinates(tiles) {
+        this.spawningCoordinates = tiles.filter(t => t.parcelSpawner).map(t => ({ x: t.x, y: t.y, score: this.computeSpawningScore(t.x, t.y) }));  // Spawning coordinates
+    }
+
+    /**
+     * Fill the delivery coordinates
+     * 
+     * @param {Array} tiles - The tiles of the map
+    */
+    fillDeliveryCoordinates(tiles) {
+        this.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));   // Delivery coordinates
+    }
+    
+    /**
+     * Reset the map with original map
+     * 
+     * @param {number} val - The value to reset
+    */
+    resetMap(val) {
+        let copy = [];
+        for (let i = 0; i < this.original_map.length; i++) {
+            copy[i] = [];
+            for (let j = 0; j < this.original_map[i].length; j++) {
+                if (this.map[i][j] == val) {
+                    copy[i][j] = this.original_map[i][j];
+                } else {
+                    copy[i][j] = this.map[i][j];
+                }
+            }
+        }
+        this.map = copy;
+    }
+
+    /**
+     * Update the map with a specific value and position
+     * 
+     * @param {number} x - The x coordinate
+     * @param {number} y - The y coordinate
+     * @param {number} value - The value to set
+    */
+    updateMap(x, y, value) {
+        let rows = this.map.length;
+        let columns = this.map[0].length;
+        x = Math.round(x);
+        y = Math.round(y);
+
+        if (x >= 0 && x < rows && y >= 0 && y < columns) {
+            this.map[x][y] = value;
+        } else {
+            //if agent is going in the direction of bound, this part is triggered
+            console.log('Error: trying to set value out of bounds: (', x, ', ', y, ") while rows and columns: ", this.map.length, ', ', this.map[0].length);
+        }
+    }
+
+    /**
+     * function to update the beliefset used in planning
+     * this function use the map to find the tiles and their neighbors 
+     */
+    updateBeliefset() {
+
+        this.myBeliefset = new Beliefset();
+
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                if (this.map[x][y] === 0 || this.map[x][y] === -1) {
+                    // console.log("Tile ", x, " ", y, " skipped  (val = ", this.map[x][y], ")")
+                    continue;
+                }
+
+                // Find the tile to the right
+                if ((x + 1) < this.width && this.map[x + 1][y] > 0) {
+                    this.myBeliefset.declare('right t' + x + '_' + y + ' t' + (x + 1) + '_' + y);
+                }
+
+                // Find the tile to the left
+                if ((x - 1) >= 0 && this.map[x - 1][y] > 0) {
+                    this.myBeliefset.declare('left t' + x + '_' + y + ' t' + (x - 1) + '_' + y);
+                }
+
+                // Find the tile above
+                if ((y + 1) < this.height && this.map[x][y + 1] > 0) {
+                    this.myBeliefset.declare('up t' + x + '_' + y + ' t' + x + '_' + (y + 1));
+                }
+
+                // Find the tile below
+                if ((y - 1) >= 0 && this.map[x][y - 1] > 0) {
+                    this.myBeliefset.declare('down t' + x + '_' + y + ' t' + x + '_' + (y - 1));
+                }
+            }
+        }
     }
 
     /**
@@ -161,94 +258,14 @@ class Map {
         console.log(table);
     }
 
-
     /**
      * Print specific position in the map 
     */
-    printValuesOfMap(val){
+    printValuesOfMap(val) {
         for (let i = 0; i < this.map[0].length; i++) {
             for (let j = 0; j < this.map.length; j++) {
-                if(this.map[i][j] <= val){
+                if (this.map[i][j] <= val) {
                     console.log("Value ", this.map[i][j], " at coordinates ", i, ", ", j)
-                }
-            }
-        }
-    }
-
-    /**
-     * Reset the map with original map
-     * 
-     * @param {number} val - The value to reset
-    */
-    resetMap(val) {
-        let copy = [];
-        for (let i = 0; i < this.original_map.length; i++) {
-            copy[i] = [];
-            for (let j = 0; j < this.original_map[i].length; j++) {
-                if (this.map[i][j] == val) {
-                    copy[i][j] = this.original_map[i][j];
-                } else {
-                    copy[i][j] = this.map[i][j];
-                }
-            }
-        }
-        this.map = copy;
-    }
-
-    /**
-     * Update the map with a specific value and position
-     * 
-     * @param {number} x - The x coordinate
-     * @param {number} y - The y coordinate
-     * @param {number} value - The value to set
-    */
-    updateMap(x, y, value) {
-        let rows = this.map.length;
-        let columns = this.map[0].length;
-        x = Math.round(x);
-        y = Math.round(y);
-        
-        if (x >= 0 && x < rows && y >= 0 && y < columns) {
-            this.map[x][y] = value;
-        } else {
-            //if agent is going in the direction of bound, this part is triggered
-            console.log('Error: trying to set value out of bounds: (', x, ', ', y, ") while rows and columns: ", this.map.length, ', ', this.map[0].length);
-        }
-    }
-
-    /**
-     * function to update the beliefset used in planning
-     * this function use the map to find the tiles and their neighbors 
-     */
-    updateBeliefset() {
-
-        this.myBeliefset = new Beliefset();
-
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                if (this.map[x][y] === 0 || this.map[x][y] === -1 ) {
-                    // console.log("Tile ", x, " ", y, " skipped  (val = ", this.map[x][y], ")")
-                    continue;
-                }
-
-                // Find the tile to the right
-                if ((x + 1) < this.width && this.map[x + 1][y] > 0) {
-                    this.myBeliefset.declare('right t' + x + '_' + y + ' t' + (x + 1) + '_' + y);
-                }
-
-                // Find the tile to the left
-                if ((x - 1) >= 0 && this.map[x - 1][y] > 0) {
-                    this.myBeliefset.declare('left t' + x + '_' + y + ' t' + (x - 1) + '_' + y);
-                }
-
-                // Find the tile above
-                if ((y + 1) < this.height && this.map[x][y + 1] > 0) {
-                    this.myBeliefset.declare('up t' + x + '_' + y + ' t' + x + '_' + (y + 1));
-                }
-
-                // Find the tile below
-                if ((y - 1) >= 0 && this.map[x][y - 1] > 0) {
-                    this.myBeliefset.declare('down t' + x + '_' + y + ' t' + x + '_' + (y - 1));
                 }
             }
         }

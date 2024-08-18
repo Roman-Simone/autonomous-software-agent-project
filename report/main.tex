@@ -78,19 +78,17 @@ At the beginning of each game, the agent receives a JSON file from the server, w
 To store the data we create a class \texttt{Map}.
 
 \subsubsection{Map}
-This class is necessary to store the information of the map and update the 
+This class is essential for managing and updating map information. This knowledge is vital for making informed decisions during gameplay.
 
 \begin{itemize}
-    \item \texttt{original\_map}: the initial map sent by the server.
-    \item \texttt{map}: the map used by the agent to plan its behavior, which includes some extra values for agents sensed (see section \ref{agents} for more details).
-    \item \texttt{deliveryCoordinates}: the coordinates of each delivery tile.
-    \item \texttt{spawningCoordinates}: the coordinates of each spawning tile.
-    \item \texttt{width} and \texttt{height}: the dimensions of the map.
-    \item \texttt{parcel\_reward\_avg}, \texttt{parcel\_observation\_distance} and \texttt{decade\_frequency} : some configuration parameters depending on the level we're playing, including the average reward of the parcels, the maximum distance from which we can sense a parcel and the decade frequency (see better at paragraph \ref{config_params}) .
-    \item \texttt{myBeliefset}: updated based on the current state of the map (with \texttt{updateBeliefset()} method), it stores information about the existence and relationships of tiles. This is used for the formulation of the PDDL problem.
+    \item \texttt{original\_map}: The initial map provided by the server remains unchanged throughout the program and serves as a reference for restoring the map's original state when needed.
+    \item \texttt{map}: The map used by the agent to plan its behavior. This version of the map includes additional data, such as information about sensed agents (see Section \ref{agents} for more details). The class provides methods to reset the map to its original state (\texttt{resetMap()}) and to update specific values on the map (\texttt{updateMap(x, y, value)}).
+    \item \texttt{parcel\_reward\_avg}, \texttt{parcel\_observation\_distance}, and \texttt{decade\_frequency}: Configuration parameters that depend on the level being played. These include the average reward of parcels, the maximum distance within which the agent can sense a parcel, and the frequency of decades (see Paragraph \ref{config_params} for more details).
+    \item \texttt{deliveryCoordinates}: The coordinates of each delivery tile. This array is populated with all delivery coordinates at the start and is never modified during the program.
+    \item \texttt{spawningCoordinates}: The coordinates of each spawning tile guide the agent's movements during random actions. For each spawning coordinate, an additional metric called the \textit{score} is calculated. This score is determined by creating a window centered on the spawning coordinate, with a size equal to \texttt{parcel\_observation\_distance}. The score is calculated by counting the number of spawning tiles within this window. A higher score indicates a more favorable spawning coordinate.
+    \item \texttt{width} and \texttt{height}: The dimensions of the map, used in various calculations.
+    \item \texttt{myBeliefset}: Updated based on the current state of the map (via the \texttt{updateBeliefset()} method). It stores information about the existence and relationships between tiles (e.g., from a given tile, which adjacent tiles are immediately reachable). This information is used for formulating the PDDL problem (see Section \ref{planning} for more details).
 \end{itemize}
-
-Finally the \texttt{updateMap(x, y, value)} method is used to update the value of a given tile when an agent is sensed (see section \ref{agents} for more details).
 
 \subsection{Parcels' sensing}
 
@@ -242,6 +240,7 @@ The term $\text{malus}$ represents the penalty factor, which is applied to the d
 \subsection{Intention revision}
 
 \section{Planning}
+\label{planning}
 
 One of the most crucial aspects of our agent's functionality is the action planning process, which involves determining the optimal path to reach a given goal. 
 

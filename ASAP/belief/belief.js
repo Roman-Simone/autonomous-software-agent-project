@@ -67,9 +67,9 @@ client.onMap((width, height, tiles) => {
 
     MyMap.map = from_json_to_matrix(width, height, tiles);
 
-    MyMap.deliveryCoordinates = tiles.filter(t => t.delivery).map(t => ({ x: t.x, y: t.y }));   // Delivery coordinates
+    MyMap.fillDeliveryCoordinates(tiles);   // Fill the delivery coordinates
 
-    MyMap.spawningCoordinates = tiles.filter(t => t.parcelSpawner).map(t => ({ x: t.x, y: t.y, score: MyMap.computeSpawningScore(t.x, t.y) }));  // Spawning coordinates
+    MyMap.fillSpawningCoordinates(tiles);   // Fill the spawning coordinates
 
 });
 
