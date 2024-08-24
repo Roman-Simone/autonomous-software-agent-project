@@ -164,7 +164,6 @@ class PddlMove extends Plan {
                 y: parseInt(end[1])
             });
         });
-        console.log('Path: ', path)
 
         // Set the countStacked to 1 if the agent is a SLAVE, otherwise to 12
         // We use two different stucked because if the MASTER Stuck the SLAVE the SLAVE escape before the MASTER 
