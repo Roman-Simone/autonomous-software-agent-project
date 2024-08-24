@@ -1,12 +1,15 @@
 import { client } from "../socketConnection.js"
+import { findPath_BFS } from "./utils_planner.js";
 import { MyData, MyMap } from "../belief/belief.js";
 import { positionsEqual, readFile } from "./utils_planner.js";
 import { Intention } from '../intention&revision/intention.js';
 import { PddlProblem, onlineSolver } from "@unitn-asa/pddl-client";
 
+
 // Read the domain file for the PDDL planner
 let domain = await readFile('./planners/domain.pddl');
-
+// flag to use PDDL planner or not
+let usePDDL = true;
 
 /**
  * Plan class
@@ -55,6 +58,75 @@ class Plan {
 }
 
 /**
+ * GoToBFS class that extends Plan, used to move the agent to a specific position using the BFS algorithm
+ * This class is used when the PDDL planner is not used
+*/
+class GoToBFS extends Plan {
+    static isApplicableTo(go_to_BFS, x, y, id, utility) {
+        return go_to_BFS == 'go_to';
+    }
+
+    async execute(go_to_BFS, x, y) {
+
+        var path = findPath_BFS(x, y);
+
+        // Start moving the agent to the target position
+        while (MyData.pos.x != x || MyData.pos.y != y) {
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+            await client.pickup();
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            // Get the next coordinate to move to
+            let coordinate = path.shift()
+            let status_x = false;
+            let status_y = false;
+
+            if (coordinate.x == MyData.pos.x && coordinate.y == MyData.pos.y) {
+                continue;
+            }
+
+            if (coordinate.x > MyData.pos.x)
+                status_x = await client.move('right')
+            else if (coordinate.x < MyData.pos.x)
+                status_x = await client.move('left')
+
+            if (status_x) {
+                MyData.pos.x = status_x.x;
+                MyData.pos.y = status_x.y;
+            }
+
+            if (this.stopped) throw ['stopped']; // if stopped then quit
+
+            if (coordinate.y > MyData.pos.y)
+                status_y = await client.move('up')
+            else if (coordinate.y < MyData.pos.y)
+                status_y = await client.move('down')
+
+            if (status_y) {
+                MyData.pos.x = status_y.x;
+                MyData.pos.y = status_y.y;
+            }
+
+            // If the agent is stucked, wait for 500ms and try again
+            if (!status_x && !status_y) {
+                this.log('stucked ', countStacked);
+                await timeout(500)
+                if (countStacked <= 0) {
+                    throw 'stopped';
+                } else {
+                    countStacked -= 1;
+                }
+
+            } else if (MyData.pos.x == x && MyData.pos.y == y) {
+                // this.log('target reached');
+            }
+        }
+        return true;
+    }
+}
+
+/**
  * PddlMove class that extends Plan, used to move the agent to a specific position
  */
 class PddlMove extends Plan {
@@ -66,7 +138,7 @@ class PddlMove extends Plan {
     async execute(go_to, x, y) {
         // Define the PDDL goal
         let goal = 'at t' + x + '_' + y;
-        
+
         // Update the beliefset with the map updated with position of enemies and others...
         MyMap.updateBeliefset();
 
@@ -92,16 +164,17 @@ class PddlMove extends Plan {
                 y: parseInt(end[1])
             });
         });
+        console.log('Path: ', path)
 
         // Set the countStacked to 1 if the agent is a SLAVE, otherwise to 12
         // We use two different stucked because if the MASTER Stuck the SLAVE the SLAVE escape before the MASTER 
         if (MyData.role == "MASTER") {
             var countStacked = 12
         }
-        else{
+        else {
             var countStacked = 2
         }
-        
+
         // Get the deliveries and parcels on the path to pick up or put down is pass through them
         let deliveriesOnPath = [];
         let parcelsOnPath = [];
@@ -118,7 +191,6 @@ class PddlMove extends Plan {
             for (let p of path) {
                 if (par.x == p.x && par.y == p.y && (p.x != x && p.y != y)) {
                     parcelsOnPath.push(par);
-                    // console.log("Parcel on path: ", par)
                 }
             }
         }
@@ -253,7 +325,7 @@ class PddlPutDown extends Plan {
         if (this.stopped) throw ['stopped']; // if stopped then quit
         await client.putdown()
         if (this.stopped) throw ['stopped']; // if stopped then quit
-        
+
         return true;
     }
 }
@@ -287,7 +359,13 @@ function timeout(mseconds) {
 // Array of plans
 const plans = [];
 
-plans.push(PddlMove)
+if (usePDDL) {
+    plans.push(PddlMove)
+}
+else {
+    plans.push(GoToBFS)
+}
+
 plans.push(PddlPickUp)
 plans.push(PddlPutDown)
 plans.push(GoRandomDelivery)
