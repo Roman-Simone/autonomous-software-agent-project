@@ -35,7 +35,6 @@ class AgentData {
      * 
      * @param {object} data - The data to copy
      */
-    
     copy(data) {
         this.name = data.name;            
         this.id = data.id;                

@@ -200,7 +200,6 @@ function find_nearest_delivery(ignoreCoordinates = undefined) {
  * @param {{x:number, y:number}} - The target position
  * @returns {number} - The distance from the agent's current position to the target position
  */
-
 function distanceBFS({ x: x, y: y }) {
     return findPath_BFS(x, y).length;
 }

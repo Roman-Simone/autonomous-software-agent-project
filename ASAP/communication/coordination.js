@@ -77,7 +77,6 @@ async function handshake() {
  * used to send the data of the agent to the other agent
  * @param {object} data 
  */
-
 async function sendMessage(data) {
     await client.say(CollaboratorData.id, {
         hello: "[INFORM]",

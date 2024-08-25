@@ -25,7 +25,6 @@ function findBestOption(options, id = "undefined") {
     return best_option;
 }
 
-
 /**
  * Function to find the best option for the MASTER and the SLAVE given the options of the two agents
  * 
@@ -117,7 +116,6 @@ function findBestOptionMasterAndSLave() {
     return true;
 }
 
-
 /**
  * Function to calculate the utility of pick up a parcel 
  * the main idea is to calculate the reward if we pick up the parcel and after that we deliver and the reward if we don't pick up the parcel and we go directly to the delivery
@@ -186,7 +184,6 @@ function calculate_pickup_utility(parcel, slavePos = null) {
     return utility;
 }
 
-
 /**
  * Function to calculate the utility of put down the parcels
  * the main idea is to calculate the reward if we put down the parcels in the nearest delivery point
@@ -227,7 +224,6 @@ function calculate_putdown_utility() {
 
  * @returns {{ x:number, y:number }} - The random delivery point.
  */
-
 function find_random_deliveryFarFromOther() {
 
     let random_pos = { x: -1, y: -1 };

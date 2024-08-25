@@ -24,6 +24,9 @@ function from_json_to_matrix(width, height, tiles) {
     return map;
 }
 
+/**
+ * Function to check if an agent with id1 exists
+*/
 function existAgentById(id1, id2) {
     return id1 === id2
 }

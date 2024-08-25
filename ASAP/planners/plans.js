@@ -32,7 +32,6 @@ class Plan {
     /**
      * #parent refers to caller
      */
-
     #parent;
 
     constructor(parent) {
@@ -368,6 +367,5 @@ else {
 plans.push(PddlPickUp)
 plans.push(PddlPutDown)
 plans.push(GoRandomDelivery)
-
 
 export { plans };
