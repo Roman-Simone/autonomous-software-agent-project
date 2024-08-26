@@ -214,7 +214,6 @@ function calculate_putdown_utility() {
     utility = utility + utilityBoost;
 
     return [nearest_delivery, utility];
-
 }
 
 /**
