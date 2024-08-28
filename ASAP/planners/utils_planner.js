@@ -197,6 +197,38 @@ function find_nearest_delivery(ignoreCoordinates = undefined) {
 }
 
 /**
+ * Find the furthest delivery point from the agent's current position.
+ * ignoreCoordinates is used in case of Multi-Agent System to prevent the agent from going to the same delivery point as the other agent.
+ * 
+ * @param {{x:number, y:number}} ignoreCoordinates 
+ * @returns {{x:number, y:number}} The furthest delivery point   
+ */
+function find_furthest_delivery(ignoreCoordinates = undefined) {
+
+    let max_distance = -1;
+    let furthest_delivery = { x: -1, y: -1 };
+    for (var i = 0; i < MyMap.deliveryCoordinates.length; i++) {
+        let current_distance = distanceBFS(MyMap.deliveryCoordinates[i]);
+
+        if (current_distance > max_distance) {
+
+            let del_x = MyMap.deliveryCoordinates[i].x;
+            let del_y = MyMap.deliveryCoordinates[i].y;
+
+            if (ignoreCoordinates != undefined && del_x == ignoreCoordinates.x && del_y == ignoreCoordinates.y) continue;
+
+            if (MyMap.map[del_x][del_y] != 2) continue;  // Ensure the delivery tile is valid
+
+            max_distance = current_distance;
+            furthest_delivery = MyMap.deliveryCoordinates[i];
+        }
+    }
+
+    return furthest_delivery;
+}
+
+
+/**
  * @param {{x:number, y:number}} - The target position
  * @returns {number} - The distance from the agent's current position to the target position
  */
@@ -212,4 +244,4 @@ function distanceBFS_notMe({ x: startX, y: startY }, { x: endX, y: endY }) {
     return findPath_BFS_notMe(startX, startY, endX, endY).length;
 }
 
-export { positionsEqual, readFile, findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, distanceBFS, distanceBFS_notMe };
+export { positionsEqual, readFile, findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, find_furthest_delivery, distanceBFS, distanceBFS_notMe };

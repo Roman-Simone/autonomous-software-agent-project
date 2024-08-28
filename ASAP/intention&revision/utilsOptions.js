@@ -1,6 +1,6 @@
 import { positionsEqual } from "../planners/utils_planner.js";
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
-import { distanceBFS, distanceBFS_notMe, find_nearest_delivery } from "../planners/utils_planner.js";
+import { distanceBFS, distanceBFS_notMe, find_nearest_delivery, find_furthest_delivery } from "../planners/utils_planner.js";
 
 /**
  * Identifies the best option based on utility from a set of given options.
@@ -234,7 +234,7 @@ function find_random_deliveryFarFromOther() {
 
         // If the agent is already in the best spawning point it goes to the nearest delivery point
         if (positionsEqual(spawning_pos, MyData.pos)) {
-            random_pos = find_nearest_delivery();
+            random_pos = find_furthest_delivery();
         }
 
     } else {
