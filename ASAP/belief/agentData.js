@@ -37,7 +37,8 @@ class AgentData {
      */
     copy(data) {
         this.name = data.name;            
-        this.id = data.id;                
+        this.id = data.id;   
+        this.pos = data.pos;             
         this.role = data.role;             
         this.parcels = data.parcels;       
         this.options = data.options;      

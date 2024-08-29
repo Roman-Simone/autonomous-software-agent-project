@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { MyData, MyMap } from "../belief/belief.js";
+import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 
 
 /**
@@ -256,4 +256,8 @@ function isReachable(x, y) {
     return findPath_BFS(x, y).length != 0 || positionsEqual(MyData.pos, { x: x, y: y });
 }
 
-export { positionsEqual, readFile, findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, find_furthest_delivery, distanceBFS, distanceBFS_notMe, isReachable };
+function isReachableCollaborator(x, y) {
+    return findPath_BFS_notMe(CollaboratorData.pos.x, CollaboratorData.pos.y, x, y).length != 0 || positionsEqual(CollaboratorData.pos, { x: x, y: y });
+}
+
+export { positionsEqual, readFile, findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, find_furthest_delivery, distanceBFS, distanceBFS_notMe, isReachable, isReachableCollaborator };

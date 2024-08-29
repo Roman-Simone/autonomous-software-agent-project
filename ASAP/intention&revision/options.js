@@ -20,7 +20,7 @@ async function optionsLoop() {
     for (let parcel of MyData.parcels) {
 
         if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0 && isReachable(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
-
+            
             let util = calculate_pickup_utility(parcel);           // if == 0 intrinsic_score < 0 --> not worth to pick up
 
             if (util > 0) {
