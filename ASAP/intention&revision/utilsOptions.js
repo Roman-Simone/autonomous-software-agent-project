@@ -203,12 +203,16 @@ function oneTake_oneDeliver() {
             CollaboratorData.best_option = findBestOption(CollaboratorData.options)
 
             if (CollaboratorData.best_option.length == 0) {
-                CollaboratorData.best_option = ["go_random_delivery", CollaboratorData.pos.x, 0, "", 2]
+                for (let option of CollaboratorData.options) {
+                    if (option[0] == "go_random_delivery") {
+                        CollaboratorData.best_option = option
+                    }
+                }
             }
         }
 
         if (MyData.get_inmind_score() > 0) {
-            MyData.best_option = ['go_put_down', MyData.pos.x, 19, "", 1]
+            MyData.best_option = ['go_put_down', find_nearest_delivery().x, find_nearest_delivery().y, "", 1]
         }
         else {
             // Iterate through available parcels
@@ -216,7 +220,7 @@ function oneTake_oneDeliver() {
 
                 if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0 && isReachable(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
 
-                    if (parcel.y == 5) {
+                    if (parcel.x == posTaker.x && parcel.y == posTaker.y) {
                         MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, 5]);   // add the option to pick up the parcel
                     }
                 }
@@ -224,7 +228,7 @@ function oneTake_oneDeliver() {
             MyData.best_option = findBestOption(MyData.options)
 
             if (MyData.best_option.length == 0) {
-                MyData.best_option = ["go_random_delivery", MyData.pos.x, 7, "", 2]
+                MyData.best_option = ["go_random_delivery",     .x, posDeliver.y, "", 2]
             }
         }
     }
