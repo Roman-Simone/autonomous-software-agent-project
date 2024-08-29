@@ -119,31 +119,57 @@ function findBestOptionMasterAndSLave() {
     }
 }
 
-
+/**
+ * Function to manage the case of one agent that takes the parcel and the other agent that delivers the parcel (map 24c2_8)
+*/
 function oneTake_oneDeliver() {
+
+    // reset option and best_option
     MyData.options = []
     MyData.best_option = []
-    CollaboratorData.options = []
     CollaboratorData.best_option = []
 
+    // we need to mantain these options based on case because we don't know the map of the other agent (collaborator)
+    if (find_nearest_delivery().x == -1) {
+        for (let option of CollaboratorData.options) {
+            if (option[0] == "go_put_down") {
+                var optionSave = option
+            }
+        }
+        CollaboratorData.options = []
+        CollaboratorData.options.push(optionSave)
+    }
+    else if (MyMap.getBestSpawningCoordinates().x == -1) {
+        for (let option of CollaboratorData.options) {
+            if (option[0] == "go_random_delivery") {
+                var optionSave = option
+            }
+        }
+        CollaboratorData.options = []
+        CollaboratorData.options.push(optionSave)
+    }
+
+    // Take the position of the first meet between agents
     if (posTaker.x == -1) {           // check who is the taker and who is the deliver
+        console.log("son dentro ", posTaker)
         if (find_nearest_delivery().x == -1) {
-            posTaker = MyData.pos
+            posTaker = { x: MyData.pos.x, y: MyData.pos.y }
             posDeliver = CollaboratorData.pos
         }
         else {
             posTaker = CollaboratorData.pos
-            posDeliver = MyData.pos
+            posDeliver = { x: MyData.pos.x, y: MyData.pos.y }
         }
     }
 
+    // Case in which Master has to take the parcel and Slave has to deliver
     if (find_nearest_delivery().x == -1) {
 
+        //MASTER OPTION
         if (MyData.get_inmind_score() > 0) {
             MyData.best_option = ['go_put_down', posTaker.x, posTaker.y, "", 1]
         }
         else {
-            // Iterate through available parcels
             for (let parcel of MyData.parcels) {
 
                 if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0 && isReachable(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
@@ -155,21 +181,21 @@ function oneTake_oneDeliver() {
             }
             MyData.best_option = findBestOption(MyData.options)
 
+            // If there are no parcels to pick up go to the spawning tile and attend new parcel
             if (MyData.best_option.length == 0) {
                 MyData.best_option = ["go_random_delivery", MyMap.getBestSpawningCoordinates().x, MyMap.getBestSpawningCoordinates().y, "", 2]
             }
         }
 
+        //SLAVE OPTION
         if (CollaboratorData.get_inmind_score() > 0) {
             for (let option of CollaboratorData.options) {
                 if (option[0] == "go_put_down") {
                     CollaboratorData.best_option = option
                 }
             }
-            // CollaboratorData.best_option = findBestOption(CollaboratorData.options) //['go_put_down', MyData.pos.x, 19, "", 1]
         }
         else {
-            // Iterate through available parcels
             for (let parcel of MyData.parcels) {
 
                 if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0) {  // Not consider parcels with reward < 3 and already picked up by someone
@@ -181,27 +207,35 @@ function oneTake_oneDeliver() {
             }
             CollaboratorData.best_option = findBestOption(CollaboratorData.options)
 
+            // If there are no parcels to pick up go to intermidiate tile and attend other agent that delivers intermediate step
             if (CollaboratorData.best_option.length == 0) {
                 CollaboratorData.best_option = ["go_random_delivery", posDeliver.x, posDeliver.y, "", 2]
             }
         }
     }
 
+    // Case in which Master has to deliver the parcel and Slave has to take
     else if (MyMap.getBestSpawningCoordinates().x == -1) {
+
+        // SLAVE OPTION
         if (CollaboratorData.get_inmind_score() > 0) {
             CollaboratorData.best_option = ['go_put_down', posTaker.x, posTaker.y, "", 1]
         }
         else {
-            // Iterate through available parcels
+
             for (let parcel of CollaboratorData.parcels) {
                 if (parcel.carriedBy === null && parcel.reward > 3 && isReachableCollaborator(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
-                    if (parcel.x != posTaker.x && parcel.y != posTaker.y) {
+
+                    if ((parcel.x != posTaker.x && parcel.y != posTaker.y) || parcel.x != posTaker.x || parcel.y != posTaker.y) {
                         CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, 5]);   // add the option to pick up the parcel
                     }
+
                 }
             }
+
             CollaboratorData.best_option = findBestOption(CollaboratorData.options)
 
+            // If there are no parcels to pick up go to the spawning tile and attend new parcel
             if (CollaboratorData.best_option.length == 0) {
                 for (let option of CollaboratorData.options) {
                     if (option[0] == "go_random_delivery") {
@@ -211,11 +245,11 @@ function oneTake_oneDeliver() {
             }
         }
 
+        // MASTER OPTION
         if (MyData.get_inmind_score() > 0) {
             MyData.best_option = ['go_put_down', find_nearest_delivery().x, find_nearest_delivery().y, "", 1]
         }
         else {
-            // Iterate through available parcels
             for (let parcel of MyData.parcels) {
 
                 if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0 && isReachable(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
@@ -227,8 +261,9 @@ function oneTake_oneDeliver() {
             }
             MyData.best_option = findBestOption(MyData.options)
 
+            // If there are no parcels to pick up go to intermidiate tile and attend other agent that delivers intermediate step
             if (MyData.best_option.length == 0) {
-                MyData.best_option = ["go_random_delivery",     .x, posDeliver.y, "", 2]
+                MyData.best_option = ["go_random_delivery", posDeliver.x, posDeliver.y, "", 2]
             }
         }
     }
@@ -370,19 +405,15 @@ function find_random_deliveryFarFromOther() {
             return distanceB - distanceA;
         });
 
-        for (let i = 0; i < MyMap.spawningCoordinates.length; i++) {
+        for (let i = MyMap.spawningCoordinates.length - 1; i > 0; i--) {
             if (isReachable(MyMap.spawningCoordinates[i].x, MyMap.spawningCoordinates[i].y) && !positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
                 random_pos = { x: MyMap.spawningCoordinates[i].x, y: MyMap.spawningCoordinates[i].y };
                 return random_pos;
             }
         }
-
-        // // If the agent is already in the best spawning point it goes in the second farthest spawning point
-        // if (positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
-        //     random_pos = { x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
-        // } else {
-        //     random_pos = { x: MyMap.spawningCoordinates[0].x, y: MyMap.spawningCoordinates[0].y };
-        // }
+        if (random_pos.x == -1 && random_pos.y == -1) {
+            random_pos = find_nearest_delivery();
+        }
     }
 
     return random_pos;

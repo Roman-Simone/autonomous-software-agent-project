@@ -108,20 +108,16 @@ client.onMsg((id, name, msg, reply) => {
                 CollaboratorData.updateEnemies(MyData.adversaryAgents);
             }
 
-            // This is the check for map 24c2_8 where one agent has to deliver and one agent has to pick up the parcel
+            // Here we menaged the case in which one agent has no delivery point and the other has no spawning point so they have to do one take and one deliver
             if (find_nearest_delivery().x == -1 || MyMap.getBestSpawningCoordinates().x == -1) {
-
                 oneTake_oneDeliver()
             }
             else {
                 // Compute the best option for the two agents and send the message with the best option and information to the SLAVE
-                console.log("[INFO] ", "Computing best option for the two agents...\n")
                 findBestOptionMasterAndSLave()
             }
 
-
             sendMessage(CollaboratorData);
-
 
             // Reset the map with the original values and set the adversary agents as walls
             MyMap.resetMap(-1)

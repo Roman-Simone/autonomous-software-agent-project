@@ -9,7 +9,7 @@ import { PddlProblem, onlineSolver } from "@unitn-asa/pddl-client";
 // Read the domain file for the PDDL planner
 let domain = await readFile('./planners/domain.pddl');
 // flag to use PDDL planner or not
-let usePDDL = false;
+let usePDDL = true;
 
 /**
  * Plan class
