@@ -72,9 +72,9 @@ class GoToBFS extends Plan {
         // Start moving the agent to the target position
         while (MyData.pos.x != x || MyData.pos.y != y) {
 
-            if (this.stopped) throw ['stopped']; // if stopped then quit
-            await client.pickup();
-            if (this.stopped) throw ['stopped']; // if stopped then quit
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
+            // await client.pickup();
+            // if (this.stopped) throw ['stopped']; // if stopped then quit
 
             // Get the next coordinate to move to
             let coordinate = path.shift()

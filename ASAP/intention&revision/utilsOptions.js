@@ -1,4 +1,4 @@
-import { positionsEqual } from "../planners/utils_planner.js";
+import { isReachable, positionsEqual } from "../planners/utils_planner.js";
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery, find_furthest_delivery } from "../planners/utils_planner.js";
 
@@ -112,8 +112,11 @@ function findBestOptionMasterAndSLave() {
             }
         }
     }
+}
 
-    return true;
+
+function oneTake_oneDeliver() {
+    
 }
 
 /**
@@ -252,15 +255,22 @@ function find_random_deliveryFarFromOther() {
             return distanceB - distanceA;
         });
 
-        // If the agent is already in the best spawning point it goes in the second farthest spawning point
-        if (positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
-            random_pos = { x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
-        } else {
-            random_pos = { x: MyMap.spawningCoordinates[0].x, y: MyMap.spawningCoordinates[0].y };
+        for (let i = 0; i < MyMap.spawningCoordinates.length; i++) {
+            if (isReachable(MyMap.spawningCoordinates[i].x, MyMap.spawningCoordinates[i].y) && !positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
+                random_pos = { x: MyMap.spawningCoordinates[i].x, y: MyMap.spawningCoordinates[i].y };
+                return random_pos;
+            }
         }
+
+        // // If the agent is already in the best spawning point it goes in the second farthest spawning point
+        // if (positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
+        //     random_pos = { x: MyMap.spawningCoordinates[1].x, y: MyMap.spawningCoordinates[1].y };
+        // } else {
+        //     random_pos = { x: MyMap.spawningCoordinates[0].x, y: MyMap.spawningCoordinates[0].y };
+        // }
     }
 
     return random_pos;
 }
 
-export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOptionMasterAndSLave, findBestOption };
+export { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOptionMasterAndSLave, findBestOption, oneTake_oneDeliver };

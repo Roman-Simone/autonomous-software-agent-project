@@ -1,4 +1,5 @@
 import { Beliefset } from "@unitn-asa/pddl-client";
+import { isReachable } from "../planners/utils_planner.js";
 
 /**
  * Map class
@@ -89,9 +90,9 @@ class Map {
      *  Get the best spawning coordinates
     */
     getBestSpawningCoordinates() {
-        let best = { x: 0, y: 0, score: 0 };
+        let best = { x: -1, y: -1, score: 0 };
         for (let c of this.spawningCoordinates) {
-            if (c.score > best.score) {
+            if (c.score > best.score && isReachable(c.x, c.y)) {
                 best = c;
             }
         }

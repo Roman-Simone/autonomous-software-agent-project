@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { MyData, MyMap } from "../belief/belief.js";
 
+
 /**
  * Read the content of a file
  * 
@@ -177,7 +178,7 @@ function find_nearest_delivery(ignoreCoordinates = undefined) {
     let min_distance = Number.MAX_VALUE;
     let nearest_delivery = { x: -1, y: -1 };
     for (var i = 0; i < MyMap.deliveryCoordinates.length; i++) {
-        if (distanceBFS(MyMap.deliveryCoordinates[i]) < min_distance) {
+        if (distanceBFS(MyMap.deliveryCoordinates[i]) < min_distance && isReachable(MyMap.deliveryCoordinates[i].x, MyMap.deliveryCoordinates[i].y)) {
 
             let del_x = MyMap.deliveryCoordinates[i].x;
             let del_y = MyMap.deliveryCoordinates[i].y;
@@ -208,9 +209,10 @@ function find_furthest_delivery(ignoreCoordinates = undefined) {
     let max_distance = -1;
     let furthest_delivery = { x: -1, y: -1 };
     for (var i = 0; i < MyMap.deliveryCoordinates.length; i++) {
+
         let current_distance = distanceBFS(MyMap.deliveryCoordinates[i]);
 
-        if (current_distance > max_distance) {
+        if (current_distance > max_distance && isReachable(MyMap.deliveryCoordinates[i].x, MyMap.deliveryCoordinates[i].y)) {
 
             let del_x = MyMap.deliveryCoordinates[i].x;
             let del_y = MyMap.deliveryCoordinates[i].y;
@@ -226,7 +228,6 @@ function find_furthest_delivery(ignoreCoordinates = undefined) {
 
     return furthest_delivery;
 }
-
 
 /**
  * @param {{x:number, y:number}} - The target position
@@ -244,4 +245,15 @@ function distanceBFS_notMe({ x: startX, y: startY }, { x: endX, y: endY }) {
     return findPath_BFS_notMe(startX, startY, endX, endY).length;
 }
 
-export { positionsEqual, readFile, findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, find_furthest_delivery, distanceBFS, distanceBFS_notMe };
+/**
+ * function to check if a target position is reachable
+ * 
+ * @param {number} x 
+ * @param {number} y 
+ * @returns {boolean} - True if the target position is reachable, false otherwise
+ */
+function isReachable(x, y) {
+    return findPath_BFS(x, y).length != 0 || positionsEqual(MyData.pos, { x: x, y: y });
+}
+
+export { positionsEqual, readFile, findPath_BFS, findPath_BFS_notMe, find_nearest_delivery, find_furthest_delivery, distanceBFS, distanceBFS_notMe, isReachable };

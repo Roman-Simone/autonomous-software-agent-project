@@ -1,6 +1,7 @@
 import { myAgent } from "../index.js";
 import { mode } from "../socketConnection.js";
 import { MyData, MyMap } from "../belief/belief.js";
+import { isReachable } from "../planners/utils_planner.js";
 import { sendMessage } from "../communication/coordination.js";
 import { calculate_pickup_utility, calculate_putdown_utility, find_random_deliveryFarFromOther, findBestOption } from "./utilsOptions.js";
 
@@ -18,7 +19,7 @@ async function optionsLoop() {
     // Iterate through available parcels
     for (let parcel of MyData.parcels) {
 
-        if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0) {  // Not consider parcels with reward < 3 and already picked up by someone
+        if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0 && isReachable(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
 
             let util = calculate_pickup_utility(parcel);           // if == 0 intrinsic_score < 0 --> not worth to pick up
 
@@ -31,7 +32,6 @@ async function optionsLoop() {
     // Calculate the utility of put down the parcels Always add the option to put down the parcels
     // if parcel_decading_interval is infinite decade_frequency is equal to 5.562684646268004e-307 and we don't consider this option here
     if (MyMap.decade_frequency > MIN_VAL_DECADE_FREQ) {
-        console.log("Decade frequency != infinite")
         let putDownInfo = calculate_putdown_utility()   // calculate the utility of put down the parcels with also the best position to put down
         MyData.options.push(['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]])
     }
@@ -55,12 +55,7 @@ async function optionsLoop() {
 
     // WE want that the agent put down the parcel every a certain amount of parcels (10*avg_reward)
 
-    console.log("Inmind score: ", MyData.get_inmind_score(), " (", MyMap.parcel_reward_avg * MULTIPLIER_THRESH_GO_PUT_DOWN, ")")
-
     if (MyData.get_inmind_score() > MyMap.parcel_reward_avg * MULTIPLIER_THRESH_GO_PUT_DOWN) {
-
-        console.log("\n\n\ngo put down the parcels\n\n\n")
-
         let putDownInfo = calculate_putdown_utility()
         MyData.best_option = ['go_put_down', putDownInfo[0].x, putDownInfo[0].y, "", putDownInfo[1]]
     }
