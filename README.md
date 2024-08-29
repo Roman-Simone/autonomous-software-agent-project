@@ -78,7 +78,7 @@ The program supports two modes:
     ```bash
     node index.js ONE agent_1
     ```
-Multi-Agent Mode: Run two agents (one MASTER and one SLAVE) in the game.
+2. Multi-Agent Mode: Run two agents (one MASTER and one SLAVE) in the game.
 
     ```bash
     node index.js TWO agent_1
