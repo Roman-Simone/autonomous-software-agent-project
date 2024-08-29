@@ -2,6 +2,11 @@ import { isReachable, isReachableCollaborator, positionsEqual } from "../planner
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery, find_furthest_delivery } from "../planners/utils_planner.js";
 
+
+var posTaker = { x: -1, y: -1 }
+var posDeliver = { x: -1, y: -1 }
+
+
 /**
  * Identifies the best option based on utility from a set of given options.
  * The best option is the one with the highest utility.
@@ -121,21 +126,21 @@ function oneTake_oneDeliver() {
     CollaboratorData.options = []
     CollaboratorData.best_option = []
 
-    let posTaker = { x: 0, y: 0 }
-    let posDeliver = { x: 0, y: 0 }
-
-    if (MyData.pos.y != CollaboratorData.pos.y) {
-        if (MyData.pos.y > CollaboratorData.pos.y) {
+    if (posTaker.x == -1) {           // check who is the taker and who is the deliver
+        if (find_nearest_delivery().x == -1) {
+            posTaker = MyData.pos
+            posDeliver = CollaboratorData.pos
         }
         else {
+            posTaker = CollaboratorData.pos
+            posDeliver = MyData.pos
         }
     }
-
 
     if (find_nearest_delivery().x == -1) {
 
         if (MyData.get_inmind_score() > 0) {
-            MyData.best_option = ['go_put_down', MyData.pos.x, 5, "", 1]
+            MyData.best_option = ['go_put_down', posTaker.x, posTaker.y, "", 1]
         }
         else {
             // Iterate through available parcels
@@ -143,7 +148,7 @@ function oneTake_oneDeliver() {
 
                 if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0 && isReachable(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
 
-                    if (parcel.y == 0) {
+                    if (parcel.x == MyMap.getBestSpawningCoordinates().x && parcel.y == MyMap.getBestSpawningCoordinates().y) {
                         MyData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, 5]);   // add the option to pick up the parcel
                     }
                 }
@@ -151,12 +156,17 @@ function oneTake_oneDeliver() {
             MyData.best_option = findBestOption(MyData.options)
 
             if (MyData.best_option.length == 0) {
-                MyData.best_option = ["go_random_delivery", MyData.pos.x, 0, "", 2]
+                MyData.best_option = ["go_random_delivery", MyMap.getBestSpawningCoordinates().x, MyMap.getBestSpawningCoordinates().y, "", 2]
             }
         }
 
         if (CollaboratorData.get_inmind_score() > 0) {
-            CollaboratorData.best_option = ['go_put_down', MyData.pos.x, 19, "", 1]
+            for (let option of CollaboratorData.options) {
+                if (option[0] == "go_put_down") {
+                    CollaboratorData.best_option = option
+                }
+            }
+            // CollaboratorData.best_option = findBestOption(CollaboratorData.options) //['go_put_down', MyData.pos.x, 19, "", 1]
         }
         else {
             // Iterate through available parcels
@@ -164,7 +174,7 @@ function oneTake_oneDeliver() {
 
                 if (parcel.carriedBy === null && parcel.reward > 3 && MyMap.map[parcel.x][parcel.y] > 0) {  // Not consider parcels with reward < 3 and already picked up by someone
 
-                    if (parcel.y == 5) {
+                    if (parcel.x == posTaker.x && parcel.y == posTaker.y) {
                         CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, 5]);   // add the option to pick up the parcel
                     }
                 }
@@ -172,25 +182,20 @@ function oneTake_oneDeliver() {
             CollaboratorData.best_option = findBestOption(CollaboratorData.options)
 
             if (CollaboratorData.best_option.length == 0) {
-                CollaboratorData.best_option = ["go_random_delivery", MyData.pos.x, 7, "", 2]
+                CollaboratorData.best_option = ["go_random_delivery", posDeliver.x, posDeliver.y, "", 2]
             }
         }
     }
 
     else if (MyMap.getBestSpawningCoordinates().x == -1) {
         if (CollaboratorData.get_inmind_score() > 0) {
-            CollaboratorData.best_option = ['go_put_down', MyData.pos.x, 5, "", 1]
+            CollaboratorData.best_option = ['go_put_down', posTaker.x, posTaker.y, "", 1]
         }
         else {
             // Iterate through available parcels
             for (let parcel of CollaboratorData.parcels) {
-                console.log("reach ",isReachableCollaborator(parcel.x, parcel.y), " ", parcel.x, " ", parcel.y)
-                console.log("reward ",parcel.reward)
-                console.log(parcel.carriedBy)
-                console.log(MyMap.map[parcel.x][parcel.y])
                 if (parcel.carriedBy === null && parcel.reward > 3 && isReachableCollaborator(parcel.x, parcel.y)) {  // Not consider parcels with reward < 3 and already picked up by someone
-                    console.log("sium")
-                    if (parcel.y == 0) {
+                    if (parcel.x != posTaker.x && parcel.y != posTaker.y) {
                         CollaboratorData.options.push(['go_pick_up', parcel.x, parcel.y, parcel.id, 5]);   // add the option to pick up the parcel
                     }
                 }
