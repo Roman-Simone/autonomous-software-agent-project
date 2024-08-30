@@ -1,5 +1,5 @@
-import { isReachable, isReachableCollaborator, positionsEqual } from "../planners/utils_planner.js";
 import { CollaboratorData, MyData, MyMap } from "../belief/belief.js";
+import { isReachable, isReachableCollaborator, positionsEqual } from "../planners/utils_planner.js";
 import { distanceBFS, distanceBFS_notMe, find_nearest_delivery, find_furthest_delivery } from "../planners/utils_planner.js";
 
 
@@ -32,8 +32,6 @@ function findBestOption(options, id = "undefined") {
 
 /**
  * Function to find the best option for the MASTER and the SLAVE given the options of the two agents
- * 
- * @returns {boolean} True. 
  */
 function findBestOptionMasterAndSLave() {
 
