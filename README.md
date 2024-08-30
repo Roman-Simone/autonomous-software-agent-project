@@ -95,7 +95,7 @@ For any inquiries, feel free to contact:
 
 <br>
 
-<div align="center">
+<div>
     <a href="https://www.unitn.it/">
         <img src="https://ing-gest.disi.unitn.it/wp-content/uploads/2022/11/marchio_disi_bianco_vert_eng-1024x295.png" width="400px">
     </a>
