@@ -380,40 +380,37 @@ function find_random_deliveryFarFromOther() {
 
     let random_pos = { x: -1, y: -1 };
 
-    if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {       // SLAVE fa quello che vuole, va in una random a caso
-
+    if (MyData.role == "SLAVE" || MyData.role == "NOTHING") {
         let spawning_pos = MyMap.getBestSpawningCoordinates();
         random_pos = { x: spawning_pos.x, y: spawning_pos.y };
 
-        // If the agent is already in the best spawning point it goes to the nearest delivery point
+        // If the agent is already in the best spawning point, go to the furthest delivery point
         if (positionsEqual(spawning_pos, MyData.pos)) {
             random_pos = find_furthest_delivery();
         }
 
     } else {
 
-        // Initially no information about the best option
         if (CollaboratorData.best_option.length == 0) {
-            random_pos = find_nearest_delivery();
-            return random_pos;
+            return find_nearest_delivery();
         }
 
-        // Sort the spawning points by distance from the best option of the SLAVE
+        // Sort spawning points by distance from the SLAVE's best option
         MyMap.spawningCoordinates.sort((a, b) => {
-            const distanceA = distanceBFS_notMe(a, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
-            const distanceB = distanceBFS_notMe(b, (CollaboratorData.best_option[1], CollaboratorData.best_option[2]));
+            const distanceA = distanceBFS_notMe(a, CollaboratorData.best_option.slice(1));
+            const distanceB = distanceBFS_notMe(b, CollaboratorData.best_option.slice(1));
             return distanceB - distanceA;
         });
 
-        for (let i = MyMap.spawningCoordinates.length - 1; i > 0; i--) {
-            if (isReachable(MyMap.spawningCoordinates[i].x, MyMap.spawningCoordinates[i].y) && !positionsEqual(MyMap.spawningCoordinates[0], MyData.pos)) {
+        for (let i = MyMap.spawningCoordinates.length - 1; i >= 0; i--) {
+            if (isReachable(MyMap.spawningCoordinates[i].x, MyMap.spawningCoordinates[i].y)) {
                 random_pos = { x: MyMap.spawningCoordinates[i].x, y: MyMap.spawningCoordinates[i].y };
                 return random_pos;
             }
         }
-        if (random_pos.x == -1 && random_pos.y == -1) {
-            random_pos = find_nearest_delivery();
-        }
+
+        // Fallback if no suitable spawning point was found
+        random_pos = find_furthest_delivery();
     }
 
     return random_pos;
