@@ -47,6 +47,7 @@ client.onParcelsSensing((perceived_parcels) => {
             parcel.reward = parcel.reward - (diff_time / parcel_decading_interval);
 
             if (parcel.reward >= 2 && diff_time < (15 * 1000)) {
+                parcel.reward = parcel.reward / 1.4;
                 parcel.timestamp = now;
                 UpdateParcel.push(parcel);
             }
