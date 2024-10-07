@@ -1,15 +1,14 @@
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
-<p align='center'>
-    <h1 align="center">NLU tasks</h1>
-    <p align="center">
-    Project for NLU at the University of Trento A.Y.2023/2024
-    </p>
-    <p align='center'>
-    Developed by:<br>
-    De Martini Davide <br>
-    </p>   
+
+<h1 align="center">Advanced NLU Tasks Project</h1>
+<p align="center">University of Trento (A.Y. 2023/2024)</p>
+
+<p align="center">
+  Developed by:<br>
+  <strong>De Martini Davide</strong><br>
 </p>
+
 
 # ASAP
 
