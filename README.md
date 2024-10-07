@@ -1,16 +1,12 @@
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
-
-<h1 align="center">Advanced NLU Tasks Project</h1>
+<h1 align="center">Autonomous Software Agent Project</h1>
 <p align="center">University of Trento (A.Y. 2023/2024)</p>
 
 <p align="center">
   Developed by:<br>
-  <strong>De Martini Davide</strong><br>
+  <strong>Roman Simone & Bonetto Stefano</strong><br>
+  ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+  ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 </p>
-
-
-# ASAP
 
 ## Table of Contents
 
