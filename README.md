@@ -1,19 +1,18 @@
-<h1 align="center">Autonomous Software Agent Project</h1>
-<p align="center">University of Trento (A.Y. 2023/2024)</p>
-
-<p align="center">
-  Developed by:<br>
-  <strong>Roman Simone & Bonetto Stefano</strong><br>
-</p>
+<div align="center">
+  <h1 style="border-bottom: none;">Autonomous Software Agent Project</h1>
+  <img src="https://img.shields.io/badge/node.js-339933?style=flat&logo=nodedotjs&logoColor=white" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/javascript-F7DF1E?style=flat&logo=javascript&logoColor=black" alt="JavaScript"/>
+  <img src="https://img.shields.io/badge/pddl-3670A0?style=flat&logoColor=white" alt="PDDL"/>
+</div>
 
 ## Table of Contents
 
-- [ASAP](#asap)
-  - [Table of Contents](#table-of-contents)
-  - [Project Overview](#project-overview)
-  - [Project Structure](#project-structure)
-  - [Installation](#installation)
-  - [Running the Project](#running-the-project)
+
+- [Table of Contents](#table-of-contents)
+- [Project Overview](#project-overview)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Running the Project](#running-the-project)
 - [Contacts](#contacts)
 
 ## Project Overview
